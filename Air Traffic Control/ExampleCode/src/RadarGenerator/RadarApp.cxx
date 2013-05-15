@@ -1,0 +1,143 @@
+/* 
+
+This application simulates a radar sensor. 
+       
+modification history
+------------ -------       
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+
+#ifdef WIN32
+#include <direct.h>
+#endif 
+
+#include "RadarInterface.h"
+//#include "GeneratorAdapter.h"
+#include "TrackGenerator.h"
+#include "RadarApp.h"
+
+using namespace DDS;
+using namespace std;
+using namespace com::rti::atc::generated;
+
+// ------------------------------------------------------------------------- //
+//
+// Radar Generator Application:
+// This application is composed of two main parts:
+// 1. The radar generator, which provides example (fake) track data to the 
+//    application, and can be given flight plans that it will "correlate" 
+//    with individual tracks
+// 2. The network interface which:
+//    2.1 receives flight plan information and 
+//    2.2 sends the track data 
+//
+//  This application can be started with several parameters to indicate:
+//  1. The ID of the radar, which becomes a part of the data, and in the real
+//     world would allow receiving applications to correlate the data between
+//     multiple sensors.  If unspecified, this is 0
+//  2. The maximum number of tracks this application can use at once.  If 
+//     unspecified, this is 64.
+//  3. The sample rate for how fast this should publish tracks, in 
+//     milliseconds.  Default is 100.
+//
+// ------------------------------------------------------------------------- //
+
+int main(int argc, char *argv[])	
+{
+    int radarId = 0;
+	int sec = 0;
+	int millisec = 1;
+	int maxTracks = 64;
+    Duration_t expre = {4,0};
+
+    if (argc >= 2) {
+        radarId = atoi(argv[1]);
+    }
+	// How many tracks can I handle?  Increasing this number will allow the 
+	// generator and the middleware to process more tracks.
+	if (argc >= 3) {
+		maxTracks = atoi(argv[2]);
+	}
+	if (argc >= 4) {
+		millisec = atoi(argv[3]);
+	}
+
+	long nanosec = millisec * 1000000;
+
+	// Tune the radar for low latency.  The two QoS profiles are 
+	// defined in USER_QOS_PROFILES.xml
+	vector<string> xmlFiles;
+
+	// Adding the XML files that contain profiles used by this application
+	xmlFiles.push_back("file://../src/Config/multicast_base_profile.xml");
+	xmlFiles.push_back("file://../src/Config/radar_profiles_multicast.xml");
+	xmlFiles.push_back(
+		"file://../src/Config/flight_plan_profiles_multicast.xml");
+
+	TrackGenerator *trackGenerator = NULL;
+	try { 
+
+		// This sets up the data interface for the radar - what data it sends
+		// and receives over the network, along with the quality of service
+		RadarInterface radarNetInterface(radarId, maxTracks,
+								LOW_LATENCY, xmlFiles);
+
+
+		// What is the maximum number of tracks you want to generate?  At what 
+		trackGenerator = new TrackGenerator(radarId, maxTracks, nanosec);
+
+		// Create a listener that will react when the track generator gives us
+		// track data. In this case, the listener will use the radar writer to
+		// write data when track data becomes available.
+		DDSRadarListener *radarListener = new DDSRadarListener(
+			radarNetInterface.GetRadarWriter(),radarId);
+
+		// Adding a listener to the "track generator" that gets updates about 
+		// tracks being generated
+		trackGenerator->AddListener(radarListener);
+
+		// Start generating tracks
+		trackGenerator->Start();
+
+		while (1) {
+
+			// Listen for updates to flight plans, and add them to the track 
+			// generator as they arrive
+			vector<com::rti::atc::generated::FlightPlan *> flightPlans;
+			radarNetInterface.
+				GetFlightPlanReader()->WaitForFlightPlans(&flightPlans);
+
+			for (vector<FlightPlan *>::iterator it = flightPlans.begin(); 
+				it != flightPlans.end(); it++) {
+
+				// Get flight plan data, and add it to the 
+				GeneratorFlightPlan flightPlan;
+
+				// Adapt between the network format of data and the generator
+				// format for flight plan data (in this example, we use only
+				// the flight ID from the flight plan)
+				RadarAdapter::AdaptToGeneratorFlightPlan(flightPlan, *(*it));
+
+				// Tell the track generator that this flight plan exists
+				trackGenerator->AddFlightPlan(&flightPlan);
+			}
+		}
+
+		trackGenerator->RemoveListener(radarListener);
+		trackGenerator->Shutdown();
+		delete trackGenerator;
+
+	}
+	catch (string message) 
+	{
+		cout << "Application exception" << message << endl;
+	}
+
+
+	return 0;
+}
+
+

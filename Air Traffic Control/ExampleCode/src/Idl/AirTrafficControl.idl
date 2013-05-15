@@ -1,0 +1,123 @@
+
+module com {
+module rti {
+module atc {
+module generated {
+
+const string AIR_TRACK_TOPIC = "AirTrack";
+
+// String lengths include one null terminator
+const short FLIGHT_ID_LENGTH = 8;
+const short AERODROME_ID_LENGTH = 5;
+
+// Maximum number of alternate aerodromes allowed
+const short ALTERNATE_AERODROME_NUM = 2;
+
+// A string of length 7 + a null terminator
+typedef string<FLIGHT_ID_LENGTH> FlightId;
+
+// This is the dynamic information that is coming from a radar for air traffic control, such as
+// a STARS radar system
+
+struct Track {
+	// This is the identifier of the radar that originates the track.  By marking
+	// the radarId as a key field in DDS, we are treating each radar/track combination
+	// as an "instance" or unique object within DDS.  This allows us to do interesting
+	// things like keep a fixed amount of reliable data (history) from each radar.
+
+	// If this is a 
+	long radarId; //@key
+	long trackId; //@key
+
+	// Not a key field of this data, because the flight ID may not be available,
+	// or may not be part of the track initially.  Also, the radar and track 
+	// IDs make unique IDs
+	FlightId flightId; 
+
+	double latitude;
+	double longitude;
+	double altitude;
+
+	// Additional info might be here, such as barometric pressure, weather data, etc.
+};
+
+
+// This is the static information that may be available about an aircraft from a 
+// secondary surveillance radar for air traffic control.  
+
+// If this were not an aircraft, but instead tracking of ground vehicles such 
+// as emergency vehicles, this might include other information about the 
+// vehicle such as the licence plate information, what equipment the vechicle
+// is equipped with, etc.
+const string AIRCRAFT_FLIGHT_PLAN_TOPIC = "FlightPlan";
+
+// Note: In C and C++, these enumeration values are declared in the top-level
+// scope of the module.  So if this were not nested in com::rti::atc::generated
+// there would be a concern that they would be global.  This is usually only
+// a problem if you define enumerations like OFF and ON or TRUE and FALSE.
+enum FlightRulesKind {
+	IFR,
+	VFR,
+	IFR_THEN_CHANGE,
+	VFR_THEN_CHANGE
+};
+
+enum FlightTypeKind {
+	SCHEDULED_AIR_SERVICE,
+	NON_SCHEDULED_AIR_TRANSPORT,
+	GENERAL_AVIATION,
+	MILITARY
+};
+
+// In real life there are many more options for types of equipment, and this is 
+// a type that changes with new equipment kinds.
+enum EquipmentKind {
+	NO_COMMS,
+	STANDARD_COMMS
+};
+
+
+struct FlightPlan {
+
+	// Up to seven characters that represent the unique flight ID
+	FlightId flightId; //@key  	
+
+	// flight rules (enumeration -> IFR, VFR, initially IFR followed by changes, initially VFR followed by changes
+	FlightRulesKind flightRules;
+
+	// type of flight (enumeration -> scheduled air service, non-scheduled air transport, general aviation, military, etc.)
+	FlightTypeKind flightType;
+
+	// equipment and capabilities (enumeration -> NO_COMMS, STANDARD_COMMS, etc.)
+	EquipmentKind equipmentType;
+
+	// Departure aerodrome (4 characters)
+	string<AERODROME_ID_LENGTH> departureAerodrome;
+
+	// Departure time 
+	// this is a shortcut - this should really be a separate time structure with hours and minutes
+	// should also add range checking for this eventually
+	short departureHour;
+	short departureMin;
+
+	// Route - leaving this out to simplify the example
+
+	// Destination aerodrome (4 characters)
+	string<AERODROME_ID_LENGTH> destinationAerodrome;
+
+	// total estimated elapsed time
+	short estimatedHours;
+	short estimatedMinutes;
+
+	// Destination alternate aerodromes
+	// A sequence with a maximum of two alternate aerodromes described by four 
+	// characters each
+	sequence <string<AERODROME_ID_LENGTH>,ALTERNATE_AERODROME_NUM> alternateAerodromes;
+
+
+};
+
+};
+};
+};
+};	
