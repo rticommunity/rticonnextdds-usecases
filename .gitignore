@@ -1,6 +1,5 @@
 # Folders #
 ###########
-lib/
 obj/
 objs/
 
@@ -9,12 +8,7 @@ objs/
 *.com
 *.class
 *.dll
-*.lib
-*.exe
 *.o
-*.so
-*.dylib
-*.a
 *.html
 
 # Packages #
