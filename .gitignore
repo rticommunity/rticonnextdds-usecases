@@ -1,0 +1,40 @@
+# Folders #
+###########
+lib/
+obj/
+objs/
+
+# Compiled source #
+###################
+*.com
+*.class
+*.dll
+*.lib
+*.exe
+*.o
+*.so
+*.dylib
+*.a
+*.html
+
+# Packages #
+############
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
