@@ -52,17 +52,33 @@ int main(int argc, char *argv[])
 	int millisec = 1;
 	int maxTracks = 64;
     Duration_t expre = {4,0};
+	string setting;
+	RadarProfile profileToUse = LOW_LATENCY;
 
-    if (argc >= 2) {
-        radarId = atoi(argv[1]);
-    }
-	// How many tracks can I handle?  Increasing this number will allow the 
-	// generator and the middleware to process more tracks.
-	if (argc >= 3) {
-		maxTracks = atoi(argv[2]);
-	}
-	if (argc >= 4) {
-		millisec = atoi(argv[3]);
+	for (int i = 0; i < argc; i++)
+	{
+		if (0 == strcmp(argv[i], "--high-throughput"))
+		{
+			profileToUse = HIGH_THROUGHPUT;
+		} else if (0 == strcmp(argv[i], "--low-latency"))
+		{
+			profileToUse = LOW_LATENCY;
+		} else if (0 == strcmp(argv[i], "--radar-id"))
+		{
+			++i;
+			radarId = atoi(argv[i]);
+		} else if (0 == strcmp(argv[i], "--max-tracks"))
+		{
+			// How many tracks can I handle?  Increasing this number will allow the 
+			// generator and the middleware to process more tracks.
+			++i;
+			maxTracks = atoi(argv[i]);
+		} else if (0 == strcmp(argv[i], "--sample-rate"))
+		{
+			++i;
+			millisec = atoi(argv[i]);
+		}
+
 	}
 
 	long nanosec = millisec * 1000000;
@@ -83,7 +99,7 @@ int main(int argc, char *argv[])
 		// This sets up the data interface for the radar - what data it sends
 		// and receives over the network, along with the quality of service
 		RadarInterface radarNetInterface(radarId, maxTracks,
-								LOW_LATENCY, xmlFiles);
+								profileToUse, xmlFiles);
 
 
 		// What is the maximum number of tracks you want to generate?  At what 

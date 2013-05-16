@@ -13,6 +13,7 @@ NDDS_QOS_PROFILES is defined and points to this file.
 For more information about XML QoS Profiles see Chapter 15 in the 
 RTI Connext user manual.
 -->
+<!-- TODO:  update this for 64 k sizes -->
 <dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xsi:noNamespaceSchemaLocation="C:/Program Files/RTI/5.0.0/ndds.5.0.0/scripts/../resource/rtiddsgen/../qos_profiles_5.0.0/schema/rti_dds_qos_profiles.xsd"
      version="5.0.0">

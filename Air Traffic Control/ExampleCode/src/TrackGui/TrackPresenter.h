@@ -13,7 +13,7 @@
 // ------------------------------------------------------------------------- //
 
 
-class MyApp;
+class TrackApp;
 class OSMutex;
 
 // ------------------------------------------------------------------------- //
@@ -44,7 +44,7 @@ public:
 class FlightInfoNetworkReceiver 
 {
 public:
-	FlightInfoNetworkReceiver(MyApp *parent); 
+	FlightInfoNetworkReceiver(TrackApp *parent); 
 	~FlightInfoNetworkReceiver();
 
 	static void ReceiveTracks(void *param);
@@ -62,7 +62,7 @@ public:
 
 private:
 	bool _shuttingDown;
-	MyApp* _app;
+	TrackApp* _app;
 	std::vector<FlightInfoListener *> _listeners;
 
 	// Control access to listeners that may be

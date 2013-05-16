@@ -126,7 +126,7 @@ class AppFrame : public wxFrame
 {
 public:
 
-	AppFrame(MyApp *app, 
+	AppFrame(TrackApp *app, 
 		const wxString& title, 
 		const wxPoint& pos, 
 		const wxSize& size,
@@ -140,7 +140,7 @@ public:
 	{
 		return _tablePanel; 
 	}
-	MyApp *GetApp()
+	TrackApp *GetApp()
 	{ 
 		return _app;
 	}
@@ -150,7 +150,7 @@ public:
 private:
 	TrackPanel *_panel;
 	TablePanel *_tablePanel;
-	MyApp *_app;
+	TrackApp *_app;
 
 	DECLARE_EVENT_TABLE()
 

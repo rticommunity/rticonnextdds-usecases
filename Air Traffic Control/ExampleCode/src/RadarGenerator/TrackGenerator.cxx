@@ -161,7 +161,7 @@ void TrackGenerator::NotifyListenersUpdateTrack(const GeneratorTrack &track)
 
 // Calculate the bearing of the aircraft, given its current location and the
 // latitude and longitude that it is heading to.
-void CalculateBearing(double *bearing, 
+void TrackGenerator::CalculateBearing(double *bearing, 
 	LatLong initLatLong, 
 	LatLong finalLatLong)
 {
@@ -186,7 +186,7 @@ void CalculateBearing(double *bearing,
 }
 
 // Translate between knots and kilometers per hour
-double KnotsToKph(double knots)
+double TrackGenerator::KnotsToKph(double knots)
 {
 	return knots * 1.852;
 }
@@ -195,7 +195,7 @@ double KnotsToKph(double knots)
 // The flight may be in one of several states, depending on how close it is to
 // the approach.  These states represent the typical legs of the flight path
 // when approaching SFO from the north or the south.
-void UpdateTrackPositionState(FlightState *state)
+void TrackGenerator::UpdateTrackPositionState(FlightState *state)
 {
 
 	if (*state == INITIAL_NORTH) {
@@ -227,7 +227,7 @@ void UpdateTrackPositionState(FlightState *state)
 // Calculates the next latitude and longitude of the flight, given the
 // lat/long, the bearing, the amount of time that has passed since the last 
 // update.
-void CalculateNextPosition(LatLong *latLong, double bearing, 
+void TrackGenerator::CalculateNextPosition(LatLong *latLong, double bearing, 
 	double sampleMillisec, double speedInKnots)
 {
 	double kph = KnotsToKph(speedInKnots);
@@ -255,7 +255,7 @@ void CalculateNextPosition(LatLong *latLong, double bearing,
 // Since the algorithms may not be exact due to rounding errors, it is possible
 // that we will pass the intended point.  If the aircraft is about to pass the
 // point it is headed to, move to the next state.
-bool PassedPoint(LatLong origLatLong, 
+bool TrackGenerator::PassedPoint(LatLong origLatLong, 
 	LatLong newLatLong, LatLong destination,
 	FlightState state)
 {
@@ -297,7 +297,7 @@ bool PassedPoint(LatLong origLatLong,
 
 // Fly to a particular position, and check if the flight may have passed the
 // intended position.
-void FlyToPosition(LatLong *latLong, double *bearing, 
+void TrackGenerator::FlyToPosition(LatLong *latLong, double *bearing, 
 						FlightState *state, double sampleMillisec, 
 						LatLong endPositionLatLong,
 						double speed)
@@ -323,7 +323,7 @@ void FlyToPosition(LatLong *latLong, double *bearing,
 // When the flight is turning, calculate the angle that it will move in the
 // next period of time.  (Simple algorithm - not accurate for large distances 
 // on a sphere)
-void CalculateAngleToMovePerPeriod(double *angle, 
+void TrackGenerator::CalculateAngleToMovePerPeriod(double *angle, 
 	double radius,
 	double centerLat, double centerLong, double kmPerMillisec, 
 	double sampleRate)
@@ -339,7 +339,7 @@ void CalculateAngleToMovePerPeriod(double *angle,
 // When the flight is turning, calculate the angle that it will move in the
 // next period of time.  (Simple algorithm - not accurate for large distances 
 // on a sphere)
-void CalculatePosAroundCircle(LatLong *latLong, 
+void TrackGenerator::CalculatePosAroundCircle(LatLong *latLong, 
 	double radius, LatLong center, 
 	double angleToMove, FlightState *state)
 {
@@ -358,10 +358,11 @@ void CalculatePosAroundCircle(LatLong *latLong,
 }
 
 // Calculate the distances between two latitude/longitude points.
-double CalculateDistance(double lat1, double long1, double lat2, double long2)
+double TrackGenerator::CalculateDistance(LatLong latlong1, 
+	LatLong latlong2)
 {
-	double a = lat1 - lat2;
-	double b = long1 - long2;
+	double a = latlong1.latitude - latlong2.latitude;
+	double b = latlong1.longitude - latlong2.longitude;
 
 	return sqrt( pow(a, 2) + pow(b,2));
 }
@@ -369,8 +370,9 @@ double CalculateDistance(double lat1, double long1, double lat2, double long2)
 // Depending on whether the flight is arriving from the north or the south, 
 // It will take a slightly different path.  This is a simple algorithm to take
 // one of the typical flight paths to land at SFO.
-void CalculatePathToSFO(LatLong *currentLatLong, double *bearing, 
-	FlightState *state, double sampleRate)
+void TrackGenerator::CalculatePathToSFO(LatLong *currentLatLong, 
+						double *bearing, FlightState *state, 
+						double sampleRate)
 {
 	bool startTurning = true;
 	int circleSteps = 0;
@@ -447,10 +449,14 @@ void CalculatePathToSFO(LatLong *currentLatLong, double *bearing,
 	} else if (*state == TURNING_TO_APPROACH_FROM_NORTH)
 	{
 
-		turnRadius = CalculateDistance(NORTH_APPROACH_CIRCLE_CENTER_LAT,
-			NORTH_APPROACH_CIRCLE_CENTER_LON, 
-			APPROACH_BEGIN_LAT,
-			APPROACH_BEGIN_LONG) / 2;
+		LatLong circleLatLong;
+		circleLatLong.latitude = NORTH_APPROACH_CIRCLE_CENTER_LAT;
+		circleLatLong.longitude = NORTH_APPROACH_CIRCLE_CENTER_LON;
+		LatLong approachBeginLatLong;
+		approachBeginLatLong.latitude = APPROACH_BEGIN_LAT;
+		approachBeginLatLong.longitude = APPROACH_BEGIN_LONG;
+		turnRadius = CalculateDistance(circleLatLong, 
+			approachBeginLatLong) / 2;
 		double angle = *bearing - approachBearing;
 		CalculateAngleToMovePerPeriod(&angle, 
 				turnRadius, 
@@ -478,7 +484,7 @@ void CalculatePathToSFO(LatLong *currentLatLong, double *bearing,
 // Each flight will start at some random point 80 Km from SFO.  This is 
 // not the way that real flight traffic works, but it is good for an example of
 // flights near SFO.
-void CalculateRandomPoint80KmFromSFO(LatLong *latLong)
+void TrackGenerator::CalculateRandomPoint80KmFromSFO(LatLong *latLong)
 {
 	double randDegrees = rand() % 360;
 	double randRads = randDegrees * M_PI / 180;
@@ -497,7 +503,9 @@ void CalculateRandomPoint80KmFromSFO(LatLong *latLong)
 	double newLongInRads =
 		longInRads + atan2(sin(bearing)*sin(distInRads)*cos(latInRads),
 					cos(distInRads) - (sin(latInRads) * sin(newLatInRads)));
-	newLongInRads = fmod((newLongInRads + 3 * M_PI), (2 * M_PI)) - M_PI; // Normalize to -180 - 180
+
+	// Normalize to -180 - 180
+	newLongInRads = fmod((newLongInRads + 3 * M_PI), (2 * M_PI)) - M_PI; 
 
 	latLong->latitude = newLatInRads / M_PI * 180;
 	latLong->longitude = newLongInRads / M_PI * 180;
@@ -667,8 +675,9 @@ void TrackGenerator::GenerateTracks()
 
 		double timeInMs = clockUpdatePeriod.nanosec / 100000;
 
-		long trackCreationRate = 50 / timeInMs;
-// TODO:  Bug where active tracks not being decremented when they are disposed
+		long trackCreationRate = 1000 / timeInMs;
+
+// TODO: fix clock/timing issues
 		// Add a track every 1000 clock ticks
 		if (GetActiveTrackNumber() == 0  ||
 			((timeToCreateTrack > trackCreationRate ) && 
@@ -691,7 +700,7 @@ void TrackGenerator::GenerateTracks()
 			// Faster than actual speed, to make this more 
 			// interesting looking
 // TODO:  Make "how much faster than normal rate" a parameter that can be set
-			double trackUpdateRate =  clockUpdatePeriod.nanosec / 100;
+			double trackUpdateRate =  clockUpdatePeriod.nanosec / 1000;
 
 			CalculatePathToSFO(&track->latLong, &track->bearing, 
 				&track->state, trackUpdateRate);
@@ -715,7 +724,6 @@ void TrackGenerator::GenerateTracks()
 
 		}
 
-		printf("Sleeping for: %d, %d\n", clockUpdatePeriod.sec, clockUpdatePeriod.nanosec);
 		NDDSUtility::sleep(clockUpdatePeriod);
 
     }

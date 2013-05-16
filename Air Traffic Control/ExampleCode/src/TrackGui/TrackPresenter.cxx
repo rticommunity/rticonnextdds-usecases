@@ -12,7 +12,7 @@ using namespace com::rti::atc::generated;
 // Create a new network receiver class.  This class is the glue between
 // the UI and the data source - in this case, the DDS network data
 // that is arriving asynchronously.
-FlightInfoNetworkReceiver::FlightInfoNetworkReceiver(MyApp *parent)
+FlightInfoNetworkReceiver::FlightInfoNetworkReceiver(TrackApp *parent)
 	: _shuttingDown(false), 
 		_app(parent)
 {
@@ -110,7 +110,7 @@ void FlightInfoNetworkReceiver::StartReceiving()
 // Update UI when track data changes.
 void FlightInfoNetworkReceiver::ReceiveTracks(void *param)
 {
-	MyApp *app = (MyApp *)param;
+	TrackApp *app = (TrackApp *)param;
 
 	// Get access to the data reader objects that are receiving data over the 
 	// network asynchronously.

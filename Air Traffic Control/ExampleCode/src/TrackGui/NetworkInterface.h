@@ -60,6 +60,11 @@ private:
 
 };
 
+// ------------------------------------------------------------------------- //
+// A query string has two single quotes around the string to be queried.
+// In this case, our query is for a particular flight ID, so we have the 
+// length pre-defined in IDL.
+#define FLIGHT_ID_QUERY_LENGTH com::rti::atc::generated::FLIGHT_ID_LENGTH + 2
 
 // ------------------------------------------------------------------------- //
 //
@@ -96,7 +101,7 @@ private:
 	DDS::StatusCondition *_condition;
 	DDS::GuardCondition *_shutDownNotifyCondition;
 	DDS::QueryCondition *_queryForFlights;
-	char _flightIdQueried[10]; // TODO: use constant for the number
+	char _flightIdQueried[FLIGHT_ID_QUERY_LENGTH];
 	OSMutex *_mutex;
 
 };

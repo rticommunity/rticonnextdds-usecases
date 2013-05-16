@@ -5,32 +5,70 @@
 using namespace DDS;
 using namespace com::rti::atc::generated;
 
+// ----------------------------------------------------------------------------
+// This creates the NetworkInterface object.  
+
+// The NetworkInterface is comprised of:
+// 1) One DDSCommunicator object - which is responsible for creating all 
+//    objects that may be shared by multiple DataWriters and DataReaders - 
+//    essentially all the objects that are (usually) created only once, 
+//    regardless of how many data streams the application is sending or 
+//    receiving.
+//    The objects that are (usually) created once generally include:
+//      1) DomainParticipant objects.  Typically an application has only one,
+//         unless it must communicate in multiple domains.
+//      2) Publisher and/or Subscriber.  Typically an application has at most 
+//	       one of each.
+//      3) Topics.  A topic with a particular name may be created only once per
+//         DomainParticipant, and can be shared between multiple DataWriters
+//         and DataReaders.
+//      4) Types.  These must be registered and unregistered exactly once with
+//         the DomainParticipant.
+// 2) Any DataWriters and DataReaders that comprise the network interface
+//    of the application.
 NetworkInterface::NetworkInterface( 					 
 	std::vector<std::string>qosFileNames)	
 {
 
+	// Class with code for creating the basic objects for DDS communication.
 	_communicator = new DDSCommunicator();
 
-	// 2. Calling the parent class's CreateParticipant method.
+	// Calling the parent class's CreateParticipant method.
 	// This creates the DomainParticpant, the first step in creating a DDS
 	// application.  This starts the discovery process.  For more information
 	// on what the DomainParticipant is responsible for, and how to configure
 	// it, see the base class.
-	if (NULL == _communicator->CreateParticipant(0, qosFileNames, "RTIExampleQosLibrary", 
-					"HighThroughputRadar")) {
+	if (NULL == _communicator->CreateParticipant(0, qosFileNames, 
+									"RTIExampleQosLibrary", 
+									"HighThroughputRadar")) {
 		std::stringstream errss;
 		errss << "Failed to create DomainParticipant object";
 		throw errss.str();
 	}
 
 	Subscriber *sub = GetCommunicator()->CreateSubscriber();
-	_flightPlanReader = new FlightPlanReader(this, sub, "RTIExampleQosLibrary", 
-					"FlightPlanStateData");
 
-	_trackReader = new TrackReader(this, sub, "RTIExampleQosLibrary", 
-					"HighThroughputRadar");
+	// Create the DataReader that receives flight plan data.  The profiles
+	// that are passed in define how the application will receive data,
+	// and how much data will be kept by the middleware.  Look at the 
+	// associated XML files for details.
+	_flightPlanReader = new FlightPlanReader(this, sub, 
+								"RTIExampleQosLibrary",
+								"FlightPlanStateData");
+
+	// Create the DataReader that receives track data.  The profiles
+	// that are passed in define how the application will receive data,
+	// and how much data will be kept by the middleware.  Look at the 
+	// associated XML files for details.
+	_trackReader = new TrackReader(this, sub, 
+								"RTIExampleQosLibrary", 
+								"HighThroughputRadar");
 }
 
+// ----------------------------------------------------------------------------
+// Destructor for the network interface. This deletes the readers, and the 
+// communicator.  Notice that the DDS-specific cleanup code is in the 
+// destructors of the individual reader and communicator objects.
 NetworkInterface::~NetworkInterface()
 {
 	// Wake the reader up in case it is waiting for data
@@ -44,6 +82,17 @@ NetworkInterface::~NetworkInterface()
 }
 
 
+// ----------------------------------------------------------------------------
+// Creating the FlightPlanReader object.
+// This creates the DDS DataReader object that receives flight plan data over 
+// one or more transports, and makes it available to the application.  When the
+// DataReader object is first created, it starts the discovery process.  The
+// DataReader will start to receive data from DataWriters that are:
+//  1) In the same domain
+//  2) Have the same topic
+//  3) Have compatible types
+//  4) Have compatible QoS
+// as soon as the discovery process has completed.
 FlightPlanReader::FlightPlanReader(NetworkInterface *app, 
 							Subscriber *sub,			
 							char *qosLibrary, 
@@ -140,6 +189,13 @@ FlightPlanReader::FlightPlanReader(NetworkInterface *app,
 
 }
 
+// ----------------------------------------------------------------------------
+// Destroying the FlightPlanReader and the objects that are being used to 
+// access it, such as the WaitSet and conditions.  Notice that we call 
+// the DDS API delete_contained_entities() to ensure that all conditions
+// associated with the DataReader are destroyed.  Topics are not destroyed by
+// this call, because they may be shared across multiple DataReaders and
+// DataWriters.
 FlightPlanReader::~FlightPlanReader()
 {
 	_mutex->Lock();
@@ -159,6 +215,7 @@ FlightPlanReader::~FlightPlanReader()
 	sub->delete_datareader(_fpReader);
 	_fpReader = NULL;
 
+	// TODO: refactor this to the participant
 	const char *typeName = FlightPlanTypeSupport::get_type_name();
 	FlightPlanTypeSupport::unregister_type(
 			_app->GetCommunicator()->GetParticipant(), typeName);
@@ -171,8 +228,14 @@ FlightPlanReader::~FlightPlanReader()
 }
 
 
-
-// Note, due to the data model, we know only one FlightPlan will be returned.
+// ----------------------------------------------------------------------------
+// This call:
+//   1) Queries the queue for flight plan data for flights with the ID equal to
+//      flightId
+//   2) Copies the value of a single flight plan into the the object that is 
+//      passed in.  Due to the QoS settings, we know this has a history depth 
+//      of one, so only the latest flight plan information will be in the 
+//      DataReader's queue.
 void FlightPlanReader::GetFlightPlan(char *flightId, FlightPlan *plan)
 {
 	DDS_StringSeq queryParameters;
@@ -208,12 +271,27 @@ void FlightPlanReader::GetFlightPlan(char *flightId, FlightPlan *plan)
 
 }
 
+// ----------------------------------------------------------------------------
+// This wakes up the WaitSet for the FlightPlan DataReader, in case it is being
+// used to wait until data is available.  This is used when shutting down to
+// ensure that a thread that is querying data from the middleware will be woken
+// up to shut down nicely.
 void FlightPlanReader::NotifyWakeup() 
 {
 	_shutDownNotifyCondition->set_trigger_value(true);
 }
 
-
+// ----------------------------------------------------------------------------
+// Creating the TrackReader object.
+// This creates the DDS DataReader object that receives track data over one or 
+// more transports, and makes it available to the application.  When the 
+// DataReader object is first created, it starts the discovery process.  The
+// DataReader will start to receive data from DataWriters that are:
+//  1) In the same domain
+//  2) Have the same topic
+//  3) Have compatible types
+//  4) Have compatible QoS
+// as soon as the discovery process has completed.
 TrackReader::TrackReader(NetworkInterface *app, 
 						Subscriber *sub, 
 						char *qosLibrary, 
@@ -293,6 +371,13 @@ TrackReader::TrackReader(NetworkInterface *app,
 
 }
 
+// ----------------------------------------------------------------------------
+// Destroying the TrackReader and the objects that are being used to 
+// access it, such as the WaitSet and conditions.  Notice that we call 
+// the DDS API delete_contained_entities() to ensure that all conditions
+// associated with the DataReader are destroyed.  Topics are not destroyed by
+// this call, because they may be shared across multiple DataReaders and
+// DataWriters.
 TrackReader::~TrackReader()
 {
 
@@ -317,6 +402,7 @@ TrackReader::~TrackReader()
 	delete _mutex;
 }
 
+// ----------------------------------------------------------------------------
 // This example is using an application thread to be notified when tracks
 // arrive.  
 // 
@@ -352,9 +438,10 @@ void TrackReader::WaitForTracks(std::vector<Track *> *tracks) {
 
 	_mutex->Lock();
 
+	// Block this thread until track data becomes available.
 	DDS_ReturnCode_t retcode = _waitSet->wait(activeConditions, timeout);
 
-	// May be normal
+	// May be normal to time out
 	if (retcode == DDS_RETCODE_TIMEOUT) {
 		_mutex->Unlock();
 		return;
@@ -397,8 +484,9 @@ void TrackReader::WaitForTracks(std::vector<Track *> *tracks) {
 	for (int i = 0; i < trackSeq.length(); i++) {
 		if (sampleInfos[i].valid_data) {
 			SampleInfo info = sampleInfos[i];
-//Double check that we have a proper copy constructor -> Note this is doing the wrong thing, have to call FlightPlanTypeSupport::copy() on this 
-//TODO	// Making copies of this type for clean API because we do not need lowest latency for flight plan data
+
+			// Making copies of this type for clean API because we do not need 
+			//lowest latency for flight plan data
 			Track *trackReturned = TrackTypeSupport::create_data();
 			TrackTypeSupport::copy_data(trackReturned, &trackSeq[i]);
 			tracks->push_back(trackReturned);
@@ -406,13 +494,17 @@ void TrackReader::WaitForTracks(std::vector<Track *> *tracks) {
 
 	}
 
-	// 
+	// The original track sequence was loaned from the middleware to the
+	// application.  We have copied the data out of it, so we can now return
+	// the loan to the middleware.
 	_reader->return_loan(trackSeq, sampleInfos);
 	_mutex->Unlock();
 
 }
 
-// TODO:  Comment me
+// ----------------------------------------------------------------------------
+// This example is using an application thread to poll for all the existing 
+// track data inside the middleware's queue.
 void TrackReader::GetCurrentTracks(std::vector<Track *> *tracks)
 {
 	_mutex->Lock();
@@ -420,7 +512,8 @@ void TrackReader::GetCurrentTracks(std::vector<Track *> *tracks)
 	TrackSeq trackSeq;
 	SampleInfoSeq sampleInfos;
 
-
+	// This reads the data from the queue, and loans it to the application
+	// in the trackSeq sequence.  See below that you have to return the loan.
 	DDS_ReturnCode_t retcode = _reader->read(trackSeq, sampleInfos);
 
 	if (retcode != DDS_RETCODE_NO_DATA &&
@@ -440,7 +533,7 @@ void TrackReader::GetCurrentTracks(std::vector<Track *> *tracks)
 		if (sampleInfos[i].valid_data) {
 			SampleInfo info = sampleInfos[i];
 //Double check that we have a proper copy constructor -> Note this is doing the wrong thing, have to call FlightPlanTypeSupport::copy() on this 
-//TODO	// Making copies of this type for clean API because we do not need lowest latency for flight plan data
+//TODO:  Make references to this data, so we do not have to allocate & copy
 			Track *trackReturned = TrackTypeSupport::create_data();
 			TrackTypeSupport::copy_data(trackReturned, &trackSeq[i]);
 			tracks->push_back(trackReturned);
@@ -448,13 +541,19 @@ void TrackReader::GetCurrentTracks(std::vector<Track *> *tracks)
 
 	}
 
-	// 
+	// The original track sequence was loaned from the middleware to the
+	// application.  We have copied the data out of it, so we can now return
+	// the loan to the middleware.
 	_reader->return_loan(trackSeq, sampleInfos);
 	_mutex->Unlock();
 
 }
 
-// TODO:  Comment me
+// ----------------------------------------------------------------------------
+// This wakes up the WaitSet for the Track DataReader, in case it is being
+// used to wait until data is available.  This is used when shutting down to
+// ensure that a thread that is querying data from the middleware will be woken
+// up to shut down nicely.
 void TrackReader::NotifyWakeup() 
 {
 	_shutDownNotifyCondition->set_trigger_value(true);

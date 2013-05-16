@@ -7,15 +7,21 @@
 #include "TrackApp.h"
 
 using namespace std;
+
+class TrackApp;
+
 enum
 {
     ID_Quit = 1,
     ID_About,
 };
 
-class MyApp;
 
-AppFrame::AppFrame(MyApp *app, 
+#define SFO_LAT 37.6190
+#define SFO_LONG -122.3749
+
+
+AppFrame::AppFrame(TrackApp *app, 
 	const wxString& title, 
 	const wxPoint& pos, 
 	const wxSize& size, 
@@ -106,15 +112,12 @@ void TrackPanel::ClearPointsLists()
 // display
 void TrackPanel::DrawRadarCircleSFO(wxBufferedPaintDC &dc)
 {
-	// TODO:  Grab these from a common header file instead of using them here
-	double latitude = 37.6190;
-	double longitude = -122.3749;
 
 
 	double y1,x1;
 
 	// Convert the coordinates to UTM from Lat/Long
-	ConvertLatLongToUTM(&y1, &x1, latitude, longitude);
+	ConvertLatLongToUTM(&y1, &x1, SFO_LAT, SFO_LONG);
 
 	wxRealPoint coord;
 	// 
@@ -127,7 +130,7 @@ void TrackPanel::DrawRadarCircleSFO(wxBufferedPaintDC &dc)
 	double north80Km = 38.319; // TODO:  Make this a constant!
 
 	double y2,x2;
-	ConvertLatLongToUTM(&y2, &x2, north80Km, longitude);
+	ConvertLatLongToUTM(&y2, &x2, north80Km, SFO_LONG);
 
 	wxRealPoint coord2;
 
@@ -276,7 +279,11 @@ void TrackPanel::ConvertLatLongToUTM(double *northing, double *easting,
 		if (_mercatorProjection == NULL)
 		{
 			int error = pj_ctx_get_errno(pj_get_default_ctx());
-			// TODO: Throw exception
+			std::stringstream errss;
+			errss << 
+				"ConvertLatLongToUTM(): unable to create the map projection."
+				<<" Error: " << error;
+			throw errss.str();
 		}
 	}
 	if (_latlongProjection == NULL)
@@ -285,7 +292,11 @@ void TrackPanel::ConvertLatLongToUTM(double *northing, double *easting,
 		if (_latlongProjection == NULL)
 		{
 			int error = pj_ctx_get_errno(pj_get_default_ctx());
-			// TODO:  Throw exception
+			std::stringstream errss;
+			errss << 
+				"ConvertLatLongToUTM(): unable to create the map projection."
+				<<" Error: " << error;
+			throw errss.str();
 		}
 	}
 	pj_transform(_latlongProjection, _mercatorProjection, 1, 1, easting, 

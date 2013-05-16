@@ -207,6 +207,36 @@ private:
 	void NotifyListenersUpdateTrack(const GeneratorTrack &track);
 	void NotifyListenersDeleteTrack(const GeneratorTrack &track);
 	GeneratorTrack* AddTrack();
+	void CalculatePathToSFO(LatLong *currentLatLong, double *bearing, 
+							FlightState *state, double sampleRate);
+	double CalculateDistance(LatLong latlong1, LatLong latlong2);
+	void CalculatePosAroundCircle(LatLong *latLong, double radius, 
+								LatLong center, double angleToMove, 
+								FlightState *state);
+	void CalculateAngleToMovePerPeriod(double *angle, 
+								double radius, double centerLat, 
+								double centerLong, double kmPerMillisec,
+								double sampleRate);
+	void FlyToPosition(LatLong *latLong, double *bearing, 
+								FlightState *state, double sampleMillisec,
+								LatLong endPositionLatLong,
+								double speed);
+	bool PassedPoint(LatLong origLatLong, LatLong newLatLong, 
+								LatLong destination, FlightState state);
+	void CalculateNextPosition(LatLong *latLong, double bearing, 
+								double sampleMillisec, double speedInKnots);
+	void CalculateBearing(double *bearing, 
+								LatLong initLatLong, 
+								LatLong finalLatLong);
+
+	double KnotsToKph(double knots);
+	void CalculateRandomPoint80KmFromSFO(LatLong *latLong);
+
+
+	void UpdateTrackPositionState(FlightState *state);
+
+
+
 //	TODO: consts
 
 
