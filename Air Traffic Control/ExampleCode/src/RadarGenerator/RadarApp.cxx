@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 {
     int radarId = 0;
 	int sec = 0;
-	int millisec = 1;
+	int sendRate = 1;
 	int maxTracks = 64;
     Duration_t expre = {4,0};
 	string setting;
@@ -73,15 +73,14 @@ int main(int argc, char *argv[])
 			// generator and the middleware to process more tracks.
 			++i;
 			maxTracks = atoi(argv[i]);
-		} else if (0 == strcmp(argv[i], "--sample-rate"))
+		} else if (0 == strcmp(argv[i], "--send-rate"))
 		{
+			// Should I be sending these in real time, faster, or slower?
 			++i;
-			millisec = atoi(argv[i]);
+			sendRate = atoi(argv[i]);
 		}
 
 	}
-
-	long nanosec = millisec * 1000000;
 
 	// Tune the radar for low latency.  The two QoS profiles are 
 	// defined in USER_QOS_PROFILES.xml
@@ -103,13 +102,13 @@ int main(int argc, char *argv[])
 
 
 		// What is the maximum number of tracks you want to generate?  At what 
-		trackGenerator = new TrackGenerator(radarId, maxTracks, nanosec);
+		trackGenerator = new TrackGenerator(radarId, maxTracks, sendRate);
 
 		// Create a listener that will react when the track generator gives us
 		// track data. In this case, the listener will use the radar writer to
 		// write data when track data becomes available.
 		DDSRadarListener *radarListener = new DDSRadarListener(
-			radarNetInterface.GetRadarWriter(),radarId);
+			radarNetInterface.GetRadarWriter(), radarId);
 
 		// Adding a listener to the "track generator" that gets updates about 
 		// tracks being generated

@@ -2,6 +2,7 @@
 #include "../CommonInfrastructure/OSAPI.h"
 
 
+
 using namespace DDS;
 using namespace com::rti::atc::generated;
 
@@ -100,7 +101,6 @@ FlightPlanReader::FlightPlanReader(NetworkInterface *app,
 
 
 	_mutex = new OSMutex();
-	ReturnCode_t retcode;
 
 	if (app == NULL) {
 		std::stringstream errss;
@@ -110,14 +110,6 @@ FlightPlanReader::FlightPlanReader(NetworkInterface *app,
 
 	_app = app;
 
-	const char *typeName = FlightPlanTypeSupport::get_type_name();
-	retcode = FlightPlanTypeSupport::register_type(
-			_app->GetCommunicator()->GetParticipant(), typeName);
-	if (retcode != RETCODE_OK) {
-		std::stringstream errss;
-		errss << "FlightPlanReader(): failure to register type. Regisetered twice?";
-		throw errss.str();
-	}
 
 	// Creating a Topic
 	// The topic object is the description of the data that you will be 
@@ -132,15 +124,8 @@ FlightPlanReader::FlightPlanReader(NetworkInterface *app,
 	// interface of an application is all defined in one place.
 	// Generally you can register all topics and types up-front if
 	// necessary.
-	Topic *topic = _app->GetCommunicator()->GetParticipant()->create_topic(
-		AIRCRAFT_FLIGHT_PLAN_TOPIC,
-		typeName, TOPIC_QOS_DEFAULT, NULL /* listener */,
-		STATUS_MASK_NONE);
-	if (topic == NULL) {
-		std::stringstream errss;
-		errss << "FlightPlanReader(): failure to create Topic. Created twice?";
-		throw errss.str();
-	}
+	Topic *topic = _app->GetCommunicator()->CreateTopic<FlightPlan>( 
+		AIRCRAFT_FLIGHT_PLAN_TOPIC);
 
 	// Creating a DataReader
 	// This DataReader will receive the flight plan, and will store thatflight
@@ -214,11 +199,6 @@ FlightPlanReader::~FlightPlanReader()
 	Subscriber *sub = _fpReader->get_subscriber();
 	sub->delete_datareader(_fpReader);
 	_fpReader = NULL;
-
-	// TODO: refactor this to the participant
-	const char *typeName = FlightPlanTypeSupport::get_type_name();
-	FlightPlanTypeSupport::unregister_type(
-			_app->GetCommunicator()->GetParticipant(), typeName);
 
 
 	_mutex->Unlock();
@@ -330,15 +310,8 @@ TrackReader::TrackReader(NetworkInterface *app,
 	// interface of an application is all defined in one place.
 	// Generally you can register all topics and types up-front if
 	// necessary.
-	Topic *topic = _app->GetCommunicator()->GetParticipant()->create_topic(
-		AIR_TRACK_TOPIC,
-		typeName, TOPIC_QOS_DEFAULT, NULL /* listener */,
-		STATUS_MASK_NONE);
-	if (topic == NULL) {
-		std::stringstream errss;
-		errss << "FlightPlanReader(): failure to create Topic. Created twice?";
-		throw errss.str();
-	}
+	Topic *topic = _app->GetCommunicator()->CreateTopic<Track>( 
+		AIR_TRACK_TOPIC);
 
 	// Creating a DataReader
 	// This DataReader will receive the flight plan, and will store thatflight
@@ -393,9 +366,6 @@ TrackReader::~TrackReader()
 	Subscriber *sub = _reader->get_subscriber();
 	sub->delete_datareader(_reader);
 
-	const char *typeName = TrackTypeSupport::get_type_name();
-	TrackTypeSupport::unregister_type(
-			_app->GetCommunicator()->GetParticipant(), typeName);
 
 	_mutex->Unlock();
 
@@ -532,8 +502,8 @@ void TrackReader::GetCurrentTracks(std::vector<Track *> *tracks)
 	for (int i = 0; i < trackSeq.length(); i++) {
 		if (sampleInfos[i].valid_data) {
 			SampleInfo info = sampleInfos[i];
-//Double check that we have a proper copy constructor -> Note this is doing the wrong thing, have to call FlightPlanTypeSupport::copy() on this 
-//TODO:  Make references to this data, so we do not have to allocate & copy
+			// Currently we are allocating and copying the data, though in the 
+			// future, we may change to pre-allocating.
 			Track *trackReturned = TrackTypeSupport::create_data();
 			TrackTypeSupport::copy_data(trackReturned, &trackSeq[i]);
 			tracks->push_back(trackReturned);

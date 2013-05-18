@@ -165,7 +165,7 @@ public:
 	// QoS profiles specified when creating the DataReader.  The XML QoS files
 	// were previously configured when the RadarInterface's DDSCommunicator was
 	// created.
-	FlightPlanReader(RadarInterface *app, DDS::Subscriber *sub, 
+	FlightPlanReader(RadarInterface *comm, DDS::Subscriber *sub, 
 		char *qosLibrary, char *qosProfile);
 
 
@@ -184,7 +184,7 @@ public:
 
 
 private:
-	RadarInterface *_app;
+	RadarInterface *_communicator;
 	com::rti::atc::generated::FlightPlanDataReader *_reader;
 	DDS::WaitSet *_waitSet;
 	DDS::StatusCondition *_condition;
@@ -209,7 +209,7 @@ public:
 	// QoS profiles specified when creating the DataWriter.  The XML QoS files
 	// were previously configured when the RadarInterface's DDSCommunicator was
 	// created.
-	RadarWriter(RadarInterface *app, DDS::Publisher *pub, 
+	RadarWriter(RadarInterface *comm, DDS::Publisher *pub, 
 		char *qosLibrary, char *qosProfile);
 
 	// Destructor
@@ -223,7 +223,7 @@ public:
 		DdsAutoType<com::rti::atc::generated::Track> &track);
 
 private:
-	RadarInterface *_app;
+	RadarInterface *_communicator;
 	com::rti::atc::generated::TrackDataWriter *_trackWriter;
 
 

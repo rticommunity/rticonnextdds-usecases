@@ -158,10 +158,10 @@ public:
 
 	// Constructor
 	TrackGenerator(int radarID, int maxTracks, 
-					int updateRateNanosec) : _shuttingDown(false),
+					int sendRate) : _shuttingDown(false),
 				_currentTrackId(0), _maxTracks(maxTracks),
 				_radarID(radarID), _sec(0), 
-				_nanosec(updateRateNanosec)
+				_nanosec(100000000), _sendRate(sendRate)
 	{
 		_mutex = new OSMutex();
 	}
@@ -237,9 +237,6 @@ private:
 
 
 
-//	TODO: consts
-
-
 	
 	GeneratorTrack* GetTrack(int i) const 
 	{ 
@@ -290,6 +287,9 @@ private:
 	// How quickly the radar is sampling the data
 	int _sec;
 	int _nanosec;
+
+	// If you want to send faster or slower than real time
+	double _sendRate;
 
 	// Listeners that are notified of track events
 	std::vector<TrackListener *> _listeners;

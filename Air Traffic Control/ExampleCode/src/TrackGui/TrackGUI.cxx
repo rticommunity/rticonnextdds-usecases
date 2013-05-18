@@ -20,6 +20,8 @@ enum
 #define SFO_LAT 37.6190
 #define SFO_LONG -122.3749
 
+#define EARTH_MEAN_RADIUS_KM 6371
+
 
 AppFrame::AppFrame(TrackApp *app, 
 	const wxString& title, 
@@ -42,7 +44,10 @@ AppFrame::AppFrame(TrackApp *app,
 	CreateStatusBar();
 	SetStatusText( _("Track Viewer") );
 
-	// TODO: Parse shape file earlier and set the panel size based on the relative size of the geography
+	// Note: 
+	// May want to parse shape file earlier and set the panel size based on the relative 
+	// size of the geography, or change the radar circle to an ellipse to match the 
+	// view.
 
 	// Open up the panel that shows tracks, and the panel that shows a grid of
 	// flight data.
@@ -76,6 +81,8 @@ TrackPanel::TrackPanel(wxWindow *parent, wxWindowID id, const wxString& title,
 	_latlongProjection = NULL;
 	_mercatorProjection = NULL;
 
+	_mutex = new OSMutex();
+
 	SHPHandle handle = SHPOpen(filePath.c_str(), "r+b");
 	int numEntities = 0;
 	int shapeType = 0;
@@ -108,6 +115,34 @@ void TrackPanel::ClearPointsLists()
 	_pointsLists.clear();
 }
 
+void TrackPanel::Calculate80KmNorthFromSFO(wxRealPoint *latLong)
+{
+	double finalKm = 80;
+//	double degreesInRads = degrees * M_PI / 180;
+	double degreesInRads = 0;
+
+	double latInRads = SFO_LAT * M_PI / 180;
+	double longInRads = SFO_LONG * M_PI / 180;
+	double distInRads = finalKm / EARTH_MEAN_RADIUS_KM;
+	double bearing = degreesInRads;
+
+	double temp1 = sin(latInRads) * cos(distInRads);
+	double temp2 = cos(latInRads) * sin(distInRads) * cos(bearing);
+	double newLatInRads = 
+		asin (  temp1 + 
+			  temp2 );
+	double newLongInRads =
+		longInRads + atan2(sin(bearing)*sin(distInRads)*cos(latInRads),
+					cos(distInRads) - (sin(latInRads) * sin(newLatInRads)));
+
+	// Normalize to -180 - 180
+	newLongInRads = fmod((newLongInRads + 3 * M_PI), (2 * M_PI)) - M_PI; 
+
+	latLong->y = newLatInRads / M_PI * 180;
+	latLong->x = newLongInRads / M_PI * 180;
+
+
+}
 // Draw a circle centered on SFO to indicate the distance that the radar can
 // display
 void TrackPanel::DrawRadarCircleSFO(wxBufferedPaintDC &dc)
@@ -127,10 +162,11 @@ void TrackPanel::DrawRadarCircleSFO(wxBufferedPaintDC &dc)
 
 	// Radar range: estimating ~80 km - a reasonable range
 	// for surveillance radar
-	double north80Km = 38.319; // TODO:  Make this a constant!
+	wxRealPoint northLatLong;
+	Calculate80KmNorthFromSFO(&northLatLong);
 
 	double y2,x2;
-	ConvertLatLongToUTM(&y2, &x2, north80Km, SFO_LONG);
+	ConvertLatLongToUTM(&y2, &x2, northLatLong.y, northLatLong.x);
 
 	wxRealPoint coord2;
 

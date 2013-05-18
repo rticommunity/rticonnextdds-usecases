@@ -402,7 +402,7 @@ void TrackGenerator::CalculatePathToSFO(LatLong *currentLatLong,
 			southTurnLatLong.longitude = SOUTH_TURN_LONG;
 			FlyToPosition(currentLatLong, bearing,
 						state, sampleRate, 
-						southTurnLatLong, 200);
+						southTurnLatLong, 220);
 		}
 
 		// Going south
@@ -415,7 +415,7 @@ void TrackGenerator::CalculatePathToSFO(LatLong *currentLatLong,
 			northTurnLatLong.longitude = NORTH_TURN_LONG;
 			FlyToPosition(currentLatLong, bearing, 
 						state, sampleRate,
-						northTurnLatLong, 200);
+						northTurnLatLong, 220);
 		
 		}
 	} else if (*state == INITIAL_SOUTH)
@@ -425,7 +425,7 @@ void TrackGenerator::CalculatePathToSFO(LatLong *currentLatLong,
 		southTurnLatLong.longitude = SOUTH_TURN_LONG;
 		FlyToPosition(currentLatLong, bearing,
 						state, sampleRate,
-						southTurnLatLong, 200);
+						southTurnLatLong, 220);
 
 	} else if (*state == INITIAL_NORTH)
 	{
@@ -434,7 +434,7 @@ void TrackGenerator::CalculatePathToSFO(LatLong *currentLatLong,
 		northTurnLatLong.longitude = NORTH_TURN_LONG;
 		FlyToPosition(currentLatLong, bearing, 
 						state, sampleRate,
-						northTurnLatLong, 200);
+						northTurnLatLong, 220);
 	}
 	else if (*state == PATH_FROM_NORTH)
 	{
@@ -444,7 +444,7 @@ void TrackGenerator::CalculatePathToSFO(LatLong *currentLatLong,
 
 		FlyToPosition(currentLatLong, bearing, 
 					state, sampleRate,
-					northApproachTurnLatLong, 200);
+					northApproachTurnLatLong, 220);
 
 	} else if (*state == TURNING_TO_APPROACH_FROM_NORTH)
 	{
@@ -666,6 +666,10 @@ void TrackGenerator::GenerateTracks()
 	DDS::Duration_t clockUpdatePeriod = {_sec,_nanosec};
 	double timeToCreateTrack = 0;
 
+	double sendRateSec = _sec / _sendRate;
+	double sendRateNanosec = _nanosec / _sendRate;
+	DDS::Duration_t actualSleepTime = {sendRateSec,
+		sendRateNanosec};
 	int timeSinceFirstCreation = 0;
 
 
@@ -673,12 +677,11 @@ void TrackGenerator::GenerateTracks()
 	while (!IsShuttingDown())
     {
 
-		double timeInMs = clockUpdatePeriod.nanosec / 100000;
+		double timeInMs = clockUpdatePeriod.nanosec / 1000000;
 
-		long trackCreationRate = 1000 / timeInMs;
+		// Every sixty seconds of "clock time" which may be sped up
+		long trackCreationRate = 60000 / timeInMs;
 
-// TODO: fix clock/timing issues
-		// Add a track every 1000 clock ticks
 		if (GetActiveTrackNumber() == 0  ||
 			((timeToCreateTrack > trackCreationRate ) && 
 			(GetActiveTrackNumber() < GetMaxTracks() )))
@@ -699,8 +702,7 @@ void TrackGenerator::GenerateTracks()
 			
 			// Faster than actual speed, to make this more 
 			// interesting looking
-// TODO:  Make "how much faster than normal rate" a parameter that can be set
-			double trackUpdateRate =  clockUpdatePeriod.nanosec / 1000;
+			double trackUpdateRate =  clockUpdatePeriod.nanosec / 1000000;
 
 			CalculatePathToSFO(&track->latLong, &track->bearing, 
 				&track->state, trackUpdateRate);
@@ -710,7 +712,6 @@ void TrackGenerator::GenerateTracks()
 			}
 
 			// 3. Notify the listeners so they can do stuff with the track data
-			// TODO: Double check whether we want to use a track pointer at all, or whether we want to have a reference returned by GetTrack()
 			if (track->state != LANDED)
 			{
 				NotifyListenersUpdateTrack(*track);
@@ -724,7 +725,7 @@ void TrackGenerator::GenerateTracks()
 
 		}
 
-		NDDSUtility::sleep(clockUpdatePeriod);
+		NDDSUtility::sleep(actualSleepTime);
 
     }
 

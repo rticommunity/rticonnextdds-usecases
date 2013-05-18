@@ -96,6 +96,7 @@
   <ItemGroup>
     <ClCompile Include="..\src\CommonInfrastructure\DDSCommunicator.cxx" />
     <ClCompile Include="..\src\FlightPlanPublisher\FlightPlanPublisher.cxx" />
+    <ClCompile Include="..\src\FlightPlanPublisher\FlightPlanPublisherInterface.cxx" />
     <ClCompile Include="..\src\Generated\AirTrafficControl.cxx" />
     <ClCompile Include="..\src\Generated\AirTrafficControlPlugin.cxx" />
     <ClCompile Include="..\src\Generated\AirTrafficControlSupport.cxx" />

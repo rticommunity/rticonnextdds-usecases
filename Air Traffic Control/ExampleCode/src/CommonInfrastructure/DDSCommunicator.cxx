@@ -6,6 +6,16 @@ DDSCommunicator::~DDSCommunicator()
 {
 	if (_participant != NULL) {
 		_participant->delete_contained_entities();
+
+		for (std::map<std::string, 
+			UnregisterInfo>::iterator it =
+			_typeCleanupFunctions.begin();
+				it != _typeCleanupFunctions.end();  it++)
+		{
+			(*it).second.unregisterFunction(_participant, (
+				*it).first.c_str());
+		}
+
 		TheParticipantFactory->delete_participant(_participant);
 
 		// In theory, can finalize the participant factory here, but this
@@ -80,7 +90,6 @@ DomainParticipant* DDSCommunicator::CreateParticipant(long domain,
 	char *participantQosProfile) 
 {
 
-	DDS_ReturnCode_t retcode;
 	// Adding a list of explicit file names to the DomainParticipantFactory
 	// This gives the middleware a set of places to search for the files
 	// 
@@ -97,7 +106,7 @@ DomainParticipant* DDSCommunicator::CreateParticipant(long domain,
 			fileNames[i].c_str());
 	}
 
-	retcode = TheParticipantFactory->set_qos(factoryQos);
+	DDS_ReturnCode_t retcode = TheParticipantFactory->set_qos(factoryQos);
 		
 	if (retcode != DDS_RETCODE_OK) {
 		std::stringstream errss;

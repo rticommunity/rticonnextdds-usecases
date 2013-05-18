@@ -50,15 +50,21 @@ using namespace std;
 int main(int argc, char *argv[])
 {
 
-	int numFlightPlans = 1;
+	int numFlightPlans = 200;
 	int timeBetweenLandings = 5; // Five minutes
-	if (argc >= 2) {
-        numFlightPlans = atoi(argv[1]);
-    }
-	if (argc >= 3) {
-        timeBetweenLandings = atoi(argv[2]);
-    }
+	for (int i = 0; i < argc; i++)
+	{
+		if (0 == strcmp(argv[i], "--num-plans"))
+		{
+			++i;
+			numFlightPlans =  atoi(argv[i]);
+		} else if (0 == strcmp(argv[i], "--time-between"))
+		{
+			++i;
+			timeBetweenLandings =  atoi(argv[i]);
+		}  
 
+	}
 	int airlineNum = 35;
 	char *airlines[] = {
 		"SWA","VIR", "ACA","CCA","SWR",
@@ -115,7 +121,8 @@ int main(int argc, char *argv[])
 					airlines[i % airlineNum], i + 1); 
 
 				// Give it a departure aerodrome
-				sprintf(plan->departureAerodrome, "%s", departureAerodromes[i%8]);
+				sprintf(plan->departureAerodrome, "%s", 
+					departureAerodromes[i%8]);
 
 				// Destination aerodrome is always SFO
 				sprintf(plan->destinationAerodrome, "%s", "KSFO");
@@ -123,14 +130,15 @@ int main(int argc, char *argv[])
 				// Use the current time as a starting point for the expected
 				// landing time of the aircraft
 				DDS_Time_t time;
-				fpInterface.GetParticipant()->get_current_time(time);
+				fpInterface.GetCommunicator()->GetParticipant()
+											->get_current_time(time);
 				unsigned long currDay = time.sec % SECONDS_PER_DAY; 
 				short currHour = (short)(currDay / SECONDS_PER_HOUR);
 				short currMin = (short)((currDay % SECONDS_PER_HOUR) / 
 					SECONDS_PER_MIN);
 
-				// In this example, each flight lands 5 minutes after the previous
-				// flight
+				// In this example, each flight lands 5 minutes after the 
+				// previous flight
 				short minToLanding = (currMin + 
 					(timeBetweenLandings * (i + 1)));
 				plan->estimatedMinutes = minToLanding % SECONDS_PER_MIN;
@@ -139,8 +147,9 @@ int main(int argc, char *argv[])
 				hourTemp = hourTemp % HOURS_PER_DAY;
 				plan->estimatedHours = (short)hourTemp;
 
-				// Write the data to the network.  This is a thin wrapper around the 
-				// RTI Connext DDS DataWriter that writes data to the network.
+				// Write the data to the network.  This is a thin wrapper 
+				// around the RTI Connext DDS DataWriter that writes data to
+				// the network.
 				fpInterface.Write(plan);
 
 				NDDSUtility::sleep(send_period);

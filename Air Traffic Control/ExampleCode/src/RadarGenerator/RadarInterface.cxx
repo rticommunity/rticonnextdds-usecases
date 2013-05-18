@@ -150,7 +150,7 @@ RadarWriter::RadarWriter(RadarInterface *netInterface,
 
 	_trackWriter = NULL;
 
-	_app = netInterface;
+	_communicator = netInterface;
 	DomainParticipant *participant = 
 		netInterface->GetCommunicator()->GetParticipant();
 		
@@ -160,20 +160,6 @@ RadarWriter::RadarWriter(RadarInterface *netInterface,
 		throw errss.str();
 	}
 
-	// Register the data types.  This can be done at any time
-	// before creating the topics.  In some systems, this is done
-	// in a separate initialization all at once - especially in 
-	// applications that read and write the same topic
-	const char *typeName = TrackTypeSupport::get_type_name();
-	retcode = TrackTypeSupport::register_type(
-			participant, typeName);
-	if (retcode != RETCODE_OK) {
-		std::stringstream errss;
-		errss << "RadarWriter(): failure to register type. Regisetered twice?";
-		throw errss.str();
-	}
-
-	// 4. Look here at creating a Topic
 	// The topic object is the description of the data that you will be 
 	// sending. It associates a particular data type with a name that 
 	// describes the meaning of the data.  Along with the data types, and
@@ -191,15 +177,8 @@ RadarWriter::RadarWriter(RadarInterface *netInterface,
 	// DataReaders.  In some systems, this is done in a separate initialization
 	// all at once - especially in applications that read and write the same 
 	// topic
-	Topic *topic = participant->create_topic(
-		AIR_TRACK_TOPIC,
-		typeName, TOPIC_QOS_DEFAULT, NULL /* listener */,
-		STATUS_MASK_NONE);
-	if (topic == NULL) {
-		std::stringstream errss;
-		errss << "RadarWriter(): failure to create Topic. Created twice?";
-		throw errss.str();
-	}
+	Topic *topic = _communicator->GetCommunicator()->CreateTopic<Track>(
+		AIR_TRACK_TOPIC);
 
 
 	// Look here at creating a DataWriter
@@ -227,8 +206,10 @@ RadarWriter::RadarWriter(RadarInterface *netInterface,
 		errss << "RadarWriter(): failure to get writer Qos. Bad names?";
 		throw errss.str();
 	}
-	writerQos.resource_limits.max_instances = _app->GetMaxFlightsToHandle();
-	writerQos.resource_limits.max_samples = _app->GetMaxFlightsToHandle();
+	writerQos.resource_limits.max_instances = 
+		_communicator->GetMaxFlightsToHandle();
+	writerQos.resource_limits.max_samples = 
+		_communicator->GetMaxFlightsToHandle();
 
 	DataWriter *ddsWriter = 
 		pub->create_datawriter(topic, writerQos, 
@@ -319,27 +300,17 @@ void RadarWriter::DeleteTrack(DdsAutoType<Track> &track)
 
 // ------------------------------------------------------------------------- //
 // This creates the DDS DataReader that receives updates about flight plans.
-FlightPlanReader::FlightPlanReader(RadarInterface *app, Subscriber *sub, 
+FlightPlanReader::FlightPlanReader(RadarInterface *comm, Subscriber *sub, 
 										char *qosLibrary, char *qosProfile) 
 {
-	ReturnCode_t retcode;
 
-	if (app == NULL) {
+	if (comm == NULL) {
 		std::stringstream errss;
 		errss << "FlightPlanReader(): bad parameter \"app\"";
 		throw errss.str();
 	}
 
-	_app = app;
-
-	const char *typeName = FlightPlanTypeSupport::get_type_name();
-	retcode = FlightPlanTypeSupport::register_type(
-			_app->GetCommunicator()->GetParticipant(), typeName);
-	if (retcode != RETCODE_OK) {
-		std::stringstream errss;
-		errss << "FlightPlanReader(): failure to register type. Regisetered twice?";
-		throw errss.str();
-	}
+	_communicator = comm;
 
 	// Creating a Topic
 	// The topic object is the description of the data that you will be 
@@ -354,15 +325,8 @@ FlightPlanReader::FlightPlanReader(RadarInterface *app, Subscriber *sub,
 	// interface of an application is all defined in one place.
 	// Generally you can register all topics and types up-front if
 	// necessary.
-	Topic *topic = _app->GetCommunicator()->GetParticipant()->create_topic(
-		AIRCRAFT_FLIGHT_PLAN_TOPIC,
-		typeName, TOPIC_QOS_DEFAULT, NULL /* listener */,
-		STATUS_MASK_NONE);
-	if (topic == NULL) {
-		std::stringstream errss;
-		errss << "FlightPlanReader(): failure to create Topic. Created twice?";
-		throw errss.str();
-	}
+	Topic *topic = _communicator->GetCommunicator()->CreateTopic<FlightPlan>(
+										AIRCRAFT_FLIGHT_PLAN_TOPIC);
 
 	// Creating a DataReader
 	// This DataReader will receive the flight plan, and will store thatflight
@@ -473,7 +437,7 @@ void FlightPlanReader::WaitForFlightPlans(std::vector<FlightPlan *> *plans)
 
 	// This call removes the data from the middleware's queue
 	retcode = _reader->take(flightPlans, sampleInfos, 
-		_app->GetMaxFlightsToHandle());
+		_communicator->GetMaxFlightsToHandle());
 
 	if (retcode != DDS_RETCODE_OK) {
 		std::stringstream errss;
@@ -488,9 +452,9 @@ void FlightPlanReader::WaitForFlightPlans(std::vector<FlightPlan *> *plans)
 	// recent update to that flight plan in the middleware queue.
 	for (int i = 0; i < flightPlans.length(); i++) {
 		if (sampleInfos[i].valid_data) {
-//Double check that we have a proper copy constructor -> Note this is doing the wrong thing, have to call FlightPlanTypeSupport::copy() on this 
-//TODO	// Making copies of this type for clean API because we do not need lowest latency for flight plan data
-	plans->push_back(new FlightPlan(flightPlans[i]));
+
+			// Making copies of this type for clean API because we do not need lowest latency for flight plan data
+			plans->push_back(new FlightPlan(flightPlans[i]));
 		}
 
 	}

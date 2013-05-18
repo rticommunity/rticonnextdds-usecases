@@ -38,24 +38,30 @@ public:
 
 	void ClearPoints()
 	{
+		_mutex->Lock();
 		for (unsigned int i = 0; i < _trackPoints.size(); i++) 
 		{
 			delete _trackPoints[i];
 		}
 		_trackPoints.Clear();
+
+		_mutex->Unlock();
 	}
 
 	void AddPoint(wxRealPoint point)
 	{
 
+		_mutex->Lock();
 		wxRealPoint coord(0,0);
 			
 		wxRealPoint latLong(point.x, point.y);
 
 		ConvertMapCoordToWindow(&coord, latLong, _maxX, _maxY, _minX, _minY, 
 			GetClientRect().width, GetClientRect().height);
-			_trackPoints.Append(new wxPoint(coord));
+		
+		_trackPoints.Append(new wxPoint(coord));
 
+		_mutex->Unlock();
 	}
 
 	void OnPaint(wxPaintEvent& paintEvt);
@@ -79,9 +85,10 @@ public:
 		double maxY, double minX, double minY,
 		int windowSizeX, int windowSizeY);
 
+	void Calculate80KmNorthFromSFO(wxRealPoint *latLong);
 
 
-
+	OSMutex *_mutex;
 	std::vector<SHPObject *> _shapeObjects;
 	std::vector<wxPointList *> _pointsLists;
 	wxPointList _trackPoints;

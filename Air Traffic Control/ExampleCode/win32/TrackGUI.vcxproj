@@ -81,6 +81,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\src\CommonInfrastructure\DDSCommunicator.h" />
+    <ClInclude Include="..\src\CommonInfrastructure\DDSTypeWrapper.h" />
     <ClInclude Include="..\src\CommonInfrastructure\OSAPI.h" />
     <ClInclude Include="..\src\Generated\AirTrafficControl.h" />
     <ClInclude Include="..\src\Generated\AirTrafficControlPlugin.h" />

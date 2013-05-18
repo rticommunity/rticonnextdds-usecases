@@ -3,10 +3,22 @@
 
 #include <sstream>
 #include <vector>
+#include <map>
 #include "ndds/ndds_cpp.h"
 #include "ndds/ndds_namespace_cpp.h"
 
 
+// ------------------------------------------------------------------------- //
+// Function that is used to unregister types from the DomainParticipant.
+// types are automatically registered when you create the topic, and 
+// unregistered at shutdown.
+
+typedef DDS_ReturnCode_t (*unregister_fn)(DDSDomainParticipant *, const char *);
+
+struct UnregisterInfo {
+  std::string typeName;
+  unregister_fn unregisterFunction;
+};
 // ------------------------------------------------------------------------- //
 //
 // DDSCommunicator:
@@ -103,11 +115,47 @@ public:
 		return _sub;
 	}
 
+	// --- Create a Topic --- 
+	template <typename T>
+	DDS::Topic *CreateTopic(std::string topicName)
+	{
+		// Register the data type with the DomainParticipant - this
+		// allows the DomainParticipant to 
+		const char *typeName = T::TypeSupport::get_type_name();
+		
+		DDS_ReturnCode_t retcode = T::TypeSupport::register_type(
+				GetParticipant(), typeName);
+		if (retcode != DDS_RETCODE_OK) {
+			std::stringstream errss;
+			errss << "Failure to register type. Regisetered twice?";
+			throw errss.str();
+		}
+
+		DDS::Topic *topic = GetParticipant()->create_topic(
+			topicName.c_str(),
+			typeName, DDS_TOPIC_QOS_DEFAULT, NULL /* listener */,
+			DDS_STATUS_MASK_NONE);
+		if (topic == NULL) {
+			std::stringstream errss;
+			errss << "FlightPlanReader(): failure to create Topic. Created twice?";
+			throw errss.str();
+		}
+
+		UnregisterInfo unregisterInfo;
+		unregisterInfo.typeName = typeName;
+		unregisterInfo.unregisterFunction = 
+			T::TypeSupport::unregister_type;
+		_typeCleanupFunctions[typeName] = unregisterInfo;
+
+		return topic;
+	}
+
 private:
 
 	DDS::DomainParticipant* _participant;
 	DDS::Publisher* _pub;
 	DDS::Subscriber* _sub;
+	std::map<std::string, UnregisterInfo> _typeCleanupFunctions;
 
 
 };
