@@ -101,6 +101,8 @@ int main(int argc, char *argv[])
 
 		DDS_Duration_t send_period = {0,100000000};
 
+		printf("Sending flight plans over RTI Connext DDS\n");
+
 		while (1) {
 
 			list<FlightPlan *> flightPlans;
