@@ -44,6 +44,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)$(Configuration)\i86Win32VS2010\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -51,14 +52,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>NDDS_DLL_VARIABLE;WIN32;RTI_WIN32;_CRT_SECURE_NO_WARNINGS;wxUSE_GUI=1;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>Z:\code\polaris\Use Case 0 - Radar Tracks-temp\proj-4.8.0\src;$(NDDSHOME)\include;$(NDDSHOME)\include\ndds;z:\code\Polaris\shapelib-1.3.0;Z:\code\Polaris\wxWidgets-2.9.4\include;Z:\code\Polaris\wxWidgets-2.9.4\include\msvc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\thirdparty\proj-4.8.0\include;$(NDDSHOME)\include;$(NDDSHOME)\include\ndds;$(ProjectDir)\..\thirdparty\shapelib-1.3.0\include;$(ProjectDir)\..\thirdparty\wxWidgets-2.9.4\include;$(ProjectDir)\..\thirdparty\wxWidgets-2.9.4\include\msvc</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>z:\code\polaris\Use Case 0 - Radar Tracks-temp\proj-4.8.0\src\;$(NDDSHOME)\lib\i86Win32VS2010;z:\code\polaris\shapelib-1.3.0\;Z:\code\polaris\wxWidgets-2.9.4\lib\vc_lib\</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\thirdparty\proj-4.8.0\lib\i86Win32VS2010;$(NDDSHOME)\lib\i86Win32VS2010;$(ProjectDir)..\thirdparty\shapelib-1.3.0\lib\i86Win32VS2010;$(ProjectDir)..\thirdparty\wxWidgets-2.9.4\lib\vc_lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>nddscppd.lib;nddscd.lib;nddscored.lib;netapi32.lib;shapelib_i.lib;wxbase29ud.lib;wxmsw29ud_core.lib;comctl32.lib;rpcrt4.lib;winmm.lib;wsock32.lib;proj_i.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -70,13 +71,16 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>__WXMSW__;_WINDOWS;NDDS_DLL_VARIABLE;WIN32;RTI_WIN32;_CRT_SECURE_NO_WARNINGS;wxUSE_GUI=1;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\thirdparty\wxWidgets-2.9.4\lib\vc_lib\mswu;$(ProjectDir)\..\thirdparty\wxWidgets-2.9.4\include;$(ProjectDir)\..\thirdparty\shapelib-1.3.0\include;$(ProjectDir)\..\thirdparty\proj-4.8.0\include;$(NDDSHOME)\include;$(NDDSHOME)\include\ndds</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>nddscpp.lib;nddsc.lib;nddscore.lib;netapi32.lib;shapelib_i.lib;wxbase29u.lib;wxmsw29u_core.lib;wxmsw29u_adv.lib;wxpng.lib;wxzlib.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;wsock32.lib;proj_i.lib;comctl32.lib;rpcrt4.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\thirdparty\proj-4.8.0\lib\i86Win32VS2010;$(NDDSHOME)\lib\i86Win32VS2010;$(ProjectDir)..\thirdparty\shapelib-1.3.0\lib\i86Win32VS2010;$(ProjectDir)..\thirdparty\wxWidgets-2.9.4\lib\vc_lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

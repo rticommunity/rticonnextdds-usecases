@@ -4,6 +4,7 @@
 
 #include <string.h>
 #include <vector>
+#include <map>
 // Must be inclued before wxWidgets headers
 #include "../CommonInfrastructure/OSAPI.h"
 #include "NetworkInterface.h"
@@ -39,27 +40,43 @@ public:
 	void ClearPoints()
 	{
 		_mutex->Lock();
-		for (unsigned int i = 0; i < _trackPoints.size(); i++) 
-		{
-			delete _trackPoints[i];
-		}
-		_trackPoints.Clear();
+
+		_trackPoints.clear();
 
 		_mutex->Unlock();
 	}
 
-	void AddPoint(wxRealPoint point)
+	void UpdatePoint(long trackId, wxRealPoint point)
 	{
-
 		_mutex->Lock();
 		wxRealPoint coord(0,0);
+		wxRealPoint latLong(point.x, point.y);
+
+		ConvertMapCoordToWindow(&coord, latLong, _maxX, _maxY, _minX, _minY, 
+			GetClientRect().width, GetClientRect().height);
+
+		_trackPoints[trackId] = coord;
+		_mutex->Unlock();
+	}
+
+	void AddOrUpdatePoint(long trackId, wxRealPoint point)
+	{
+
+		wxRealPoint coord(0,0);
+
+		if (_trackPoints.find(trackId) != _trackPoints.end())
+		{
+			UpdatePoint(trackId, point);
+			return;
+		}
 			
+		_mutex->Lock();
 		wxRealPoint latLong(point.x, point.y);
 
 		ConvertMapCoordToWindow(&coord, latLong, _maxX, _maxY, _minX, _minY, 
 			GetClientRect().width, GetClientRect().height);
 		
-		_trackPoints.Append(new wxPoint(coord));
+		_trackPoints[trackId] = coord;
 
 		_mutex->Unlock();
 	}
@@ -90,8 +107,9 @@ public:
 
 	OSMutex *_mutex;
 	std::vector<SHPObject *> _shapeObjects;
+	std::map<long, wxPoint> _trackPoints;
 	std::vector<wxPointList *> _pointsLists;
-	wxPointList _trackPoints;
+//	wxPointList _trackPoints;
 	double _minX, _minY, _maxX, _maxY;
 	projPJ _latlongProjection;
 	projPJ _mercatorProjection;
@@ -113,6 +131,14 @@ public:
 		const wxSize& size);
 	~TablePanel();
 	void OnSize(wxSizeEvent &event);
+	void PrepareUpdate() 
+	{
+		_grid->BeginBatch();
+	}
+	void UpdateComplete()
+	{
+		_grid->EndBatch();
+	}
 	void UpdateRow(const FlightInfo &track);
 	void AddPoint(wxRealPoint point);
 	void OnQuit(wxCommandEvent &event);
@@ -186,7 +212,7 @@ public:
 	virtual bool TrackUpdate(const std::vector<FlightInfo *> flights) 
 	{
 
-		_panel->ClearPoints();
+//		_panel->ClearPoints();
 		for (unsigned int i = 0; i < flights.size(); i++)
 		{
 			double x,y;
@@ -195,12 +221,14 @@ public:
 			_panel->ConvertLatLongToUTM(&y,&x,
 				flights[i]->_track->latitude, 
 				flights[i]->_track->longitude);
-			_panel->AddPoint(wxRealPoint(x,y));
+			_panel->AddOrUpdatePoint(flights[i]->_track->trackId, 
+				wxRealPoint(x,y));
 		}
 
 		_panel->Refresh();
 		return true;
 	}
+
 	virtual bool TrackDelete(const std::vector<FlightInfo *> flights) 
 	{
 		return true;
@@ -220,10 +248,12 @@ public:
 	}
 	virtual bool TrackUpdate(const std::vector<FlightInfo *> flights) 
 	{
+		_panel->PrepareUpdate();
 		for (unsigned int i = 0; i < flights.size(); i++)
 		{
 			_panel->UpdateRow(*flights[i]);
 		}
+		_panel->UpdateComplete();
 		return true;
 
 	}

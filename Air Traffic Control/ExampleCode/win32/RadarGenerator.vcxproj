@@ -67,8 +67,8 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">.\objs\i86Win32VS2010\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">.\objs\i86Win32VS2010\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'" />
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\objs\i86Win32VS2010\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\objs\i86Win32VS2010\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\i86Win32VS2010\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\i86Win32VS2010\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">.\objs\i86Win32VS2010\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">.\objs\i86Win32VS2010\</IntDir>
@@ -183,7 +183,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>nddscppz.lib;nddscz.lib;nddscorez.lib;netapi32.lib;advapi32.lib;user32.lib;WS2_32.lib;;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>.\objs\i86Win32VS2010\RadarDataRaw_publisher.exe</OutputFile>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(NDDSHOME)\lib\i86Win32VS2010;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>.\objs\i86Win32VS2010\RadarDataRaw_publisher.pdb</ProgramDatabaseFile>

@@ -209,11 +209,13 @@ void TrackPanel::OnPaint(wxPaintEvent& paintEvt)
 
 	DrawRadarCircleSFO(dc);
 
-	for (unsigned int i = 0; i < _trackPoints.size(); i++) {
+	for (
+		std::map<long, wxPoint>::iterator it = 
+		_trackPoints.begin(); it != _trackPoints.end(); ++it) {
 		wxPen pen(*wxRED);
 		wxPen prevPen = dc.GetPen();
 		dc.SetPen(pen);
-		dc.DrawCircle(*_trackPoints[i], 3);
+		dc.DrawCircle((*it).second, 3);
 		dc.SetPen(prevPen);
 	}
 
@@ -377,6 +379,7 @@ void TrackPanel::OnSize(wxSizeEvent &event)
 // projection data, and free the map data itself.
 TrackPanel::~TrackPanel() 
 {
+	_mutex->Lock();
 	AppFrame *appFrame = (AppFrame *)GetParent();
 	appFrame->GetApp()->RemoveDataSource((wxPanel *)this);
 
@@ -396,12 +399,13 @@ TrackPanel::~TrackPanel()
 	}
 	_shapeObjects.clear();
 
-	for (unsigned int i = 0; i < _trackPoints.size(); i++) {
-		delete _trackPoints[i];
-	}
+	_trackPoints.clear();
 
 	pj_free(_latlongProjection);
 	pj_free(_mercatorProjection);
+
+	_mutex->Unlock();
+	delete _mutex;
 	Close(true);
 }
 
@@ -468,6 +472,7 @@ void TablePanel::OnSize(wxSizeEvent &event)
 // has changed.
 void TablePanel::UpdateRow(const FlightInfo &flight)
 {
+	_grid->BeginBatch();
 	bool exists = false;
 	for (int i = 0; i < _grid->GetNumberRows(); i++ )
 	{
@@ -485,7 +490,14 @@ void TablePanel::UpdateRow(const FlightInfo &flight)
 			flight._track->trackId) 
 		{
 			exists = true;
-			_grid->SetCellValue(i, 2, wxString(flight._track->flightId));
+
+			// Only update the cell value if this has changed
+			if (0 != strcmp(_grid->GetCellValue(i,2).c_str(), 
+				flight._track->flightId))
+			{
+				_grid->SetCellValue(i, 2, wxString(flight._track->flightId));
+			}
+
 			_grid->SetCellValue(i, 3, wxString::Format(wxT("%f"), flight._track->latitude));
 			_grid->SetCellValue(i, 4, wxString::Format(wxT("%f"), flight._track->longitude));
 			if (_grid->GetCellValue(i, 5) != flight._plan->departureAerodrome)
@@ -535,6 +547,7 @@ void TablePanel::UpdateRow(const FlightInfo &flight)
 			}
 		}
 	}
+	_grid->EndBatch();
 }
 
 // WxWidgets event table declarations.

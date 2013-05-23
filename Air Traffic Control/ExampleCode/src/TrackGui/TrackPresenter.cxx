@@ -123,7 +123,7 @@ void FlightInfoNetworkReceiver::ReceiveTracks(void *param)
 	// This periodically wakes up and updates the UI with the latest track
 	// information that is available from the middleware, which has been 
 	// collecting it asynchronously.
-	DDS::Duration_t uiUpdatePeriod = {0,10000000};
+	DDS::Duration_t uiUpdatePeriod = {0,200000000};
 
 	while (!app->ShuttingDown()) {
 
