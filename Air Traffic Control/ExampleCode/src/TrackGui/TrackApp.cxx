@@ -20,7 +20,7 @@ bool TrackApp::OnInit() {
 
 	_frame = new AppFrame(
 		this, "ATC Flight Viewer", 
-		wxPoint(0, 0), wxSize(340, 650),
+		wxPoint(0, 0), wxSize(450, 700),
 		"..\\resource\\bayarea_county2000\\bayarea_county2000");
 
 	wxPoint point(300, 300);

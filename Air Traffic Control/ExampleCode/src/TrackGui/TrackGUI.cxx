@@ -52,10 +52,10 @@ AppFrame::AppFrame(TrackApp *app,
 	// Open up the panel that shows tracks, and the panel that shows a grid of
 	// flight data.
 	_panel = new TrackPanel( this, 1, _("Track Viewer"), 
-		wxPoint(0, 0), wxSize(340, 480), filePath);
+		wxPoint(0, 0), wxSize(450, 480), filePath);
 	_tablePanel = new TablePanel(this, 2, _("Flight Info"), 
 		wxPoint(0, 451),
-		wxSize(340, 200));
+		wxSize(450, 250));
 
 	// Make the panels resize when the window resizes
 	wxSizer *sizer = new wxBoxSizer(wxVERTICAL);
@@ -360,7 +360,9 @@ void TrackPanel::ConvertMapCoordToWindow(wxRealPoint *coord,
 	double yDistance = maxY - minY;
 		
 	coord->x = ((xZeroBased)  * windowSizeX) / xDistance;
-	coord->y = -yZeroBasedReversed * windowSizeY / yDistance;
+
+	double yAspectRatio = yDistance / xDistance * windowSizeX;
+	coord->y = -yZeroBasedReversed * yAspectRatio / yDistance;
 
 }
 
