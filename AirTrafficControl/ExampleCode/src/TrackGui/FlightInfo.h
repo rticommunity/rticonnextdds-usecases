@@ -1,6 +1,7 @@
 #ifndef FLIGHT_INFO_H
 #define FLIGHT_INFO_H
 
+#include "wx/setup.h"
 #include "../Generated/AirTrafficControl.h"
 
 

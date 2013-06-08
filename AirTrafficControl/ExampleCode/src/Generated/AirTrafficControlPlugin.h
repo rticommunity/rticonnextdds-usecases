@@ -8,8 +8,8 @@
   or consult the RTI Connext manual.
 */
 
-#ifndef AirTrafficControlPlugin_1144379923_h
-#define AirTrafficControlPlugin_1144379923_h
+#ifndef AirTrafficControlPlugin_1144379801_h
+#define AirTrafficControlPlugin_1144379801_h
 
 #include "AirTrafficControl.h"
 
@@ -1052,4 +1052,4 @@ FlightPlanPlugin_delete(struct PRESTypePlugin *);
 #define NDDSUSERDllExport
 #endif        
 
-#endif /* AirTrafficControlPlugin_1144379923_h */
+#endif /* AirTrafficControlPlugin_1144379801_h */

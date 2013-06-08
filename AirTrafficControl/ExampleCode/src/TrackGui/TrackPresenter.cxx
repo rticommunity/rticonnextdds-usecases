@@ -1,10 +1,10 @@
-#include <sstream>
-#include <vector>
 #include "TrackPresenter.h"
 #include "TrackApp.h"
 #include "TrackGUI.h"
-#include "../CommonInfrastructure/OSAPI.h"
 
+#include "../CommonInfrastructure/OSAPI.h"
+#include <vector>
+#include <sstream>
 using namespace std;
 using namespace DDS;
 using namespace com::rti::atc::generated;
@@ -100,7 +100,7 @@ void FlightInfoNetworkReceiver::RemoveListener(
 void FlightInfoNetworkReceiver::StartReceiving()
 {
 	OSThread *thread = new OSThread(
-		FlightInfoNetworkReceiver::ReceiveTracks, _app);	
+		(ThreadFunction)FlightInfoNetworkReceiver::ReceiveTracks, _app);	
 	thread->Run();
 
 	// When the thread is done, delete it

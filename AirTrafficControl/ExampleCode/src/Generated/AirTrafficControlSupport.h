@@ -8,8 +8,8 @@
   or consult the RTI Connext manual.
 */
 
-#ifndef AirTrafficControlSupport_1144379923_h
-#define AirTrafficControlSupport_1144379923_h
+#ifndef AirTrafficControlSupport_1144379801_h
+#define AirTrafficControlSupport_1144379801_h
 
 /* Uses */
 #include "AirTrafficControl.h"
@@ -148,4 +148,4 @@ DDS_DATAREADER_C(FlightPlanDataReader, FlightPlanSeq, FlightPlan);
 } /* namespace com */
 
 
-#endif  /* AirTrafficControlSupport_1144379923_h */
+#endif  /* AirTrafficControlSupport_1144379801_h */

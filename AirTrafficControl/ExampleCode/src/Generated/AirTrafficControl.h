@@ -8,8 +8,8 @@
   or consult the RTI Connext manual.
 */
 
-#ifndef AirTrafficControl_1144379923_h
-#define AirTrafficControl_1144379923_h
+#ifndef AirTrafficControl_1144379801_h
+#define AirTrafficControl_1144379801_h
 
 #ifndef NDDS_STANDALONE_TYPE
     #ifdef __cplusplus
@@ -448,4 +448,4 @@ RTIBool FlightPlan_copy(
 } /* namespace com */
 
 
-#endif /* AirTrafficControl_1144379923_h */
+#endif /* AirTrafficControl_1144379801_h */

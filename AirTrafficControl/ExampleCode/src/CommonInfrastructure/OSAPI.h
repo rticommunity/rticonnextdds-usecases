@@ -38,7 +38,7 @@
 
 // A function that takes a void pointer, and is passed to the thread creation
 // function.
-typedef void (*ThreadFunction)(void *);   
+typedef void* (*ThreadFunction)(void *);   
 
 // wrap
 class OSThread

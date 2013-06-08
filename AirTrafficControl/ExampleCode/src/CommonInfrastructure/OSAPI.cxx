@@ -19,7 +19,7 @@ void OSThread::Run()
     pthread_attr_t threadAttr;
     pthread_attr_init(&threadAttr);
     pthread_attr_setdetachstate(&threadAttr, PTHREAD_CREATE_JOINABLE);
-    error = pthread_create(
+    int error = pthread_create(
                 &_thread, 
                 &threadAttr, 
                 _function,
@@ -42,7 +42,7 @@ OSMutex::~OSMutex()
 #ifdef RTI_WIN32
 	DeleteCriticalSection(&_handleCriticalSection);
 #else
-	pthread_mutex_destroy(_mutex);
+	pthread_mutex_destroy(&_mutex);
 #endif
 }
 

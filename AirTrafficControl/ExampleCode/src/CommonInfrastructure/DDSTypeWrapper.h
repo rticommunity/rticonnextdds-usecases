@@ -18,7 +18,8 @@ public:
 	// Constructor type for your generated data type
     DdsAutoType<T>() {
         if (T::TypeSupport::initialize_data(this) != DDS_RETCODE_OK) {
-            throw std::bad_alloc("create_data");
+            /*throw std::bad_alloc("create_data"); */
+		throw std::bad_alloc();
         }
     }
 

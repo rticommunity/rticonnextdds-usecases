@@ -77,12 +77,12 @@
 /* This is defined when the compiler provides some type of extended locale
    functions.  Otherwise, we implement them ourselves to only support the
    'C' locale */
-#if defined(HAVE_LOCALE_T) || \
+/*#if defined(HAVE_LOCALE_T) || \
     (wxCHECK_VISUALC_VERSION(8) && !defined(__WXWINCE__))
     #define wxHAS_XLOCALE_SUPPORT
-#else
+#else */
     #undef wxHAS_XLOCALE_SUPPORT
-#endif
+/*#endif*/
 
 /* Direct access to bitmap data is not implemented in all ports yet */
 #if defined(__WXGTK20__) || defined(__WXMAC__) || defined(__WXDFB__) || \
