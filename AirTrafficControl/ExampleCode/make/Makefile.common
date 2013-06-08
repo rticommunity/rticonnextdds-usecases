@@ -136,61 +136,32 @@ RadarApp: $(RADAROBJS) $(@:%=objs/$(ARCH)/RadarGenerator/%.o) \
 TrackGui: $(GUIOBJS) $(@:%=objs/$(ARCH)/TrackGui/%.o) \
 	 $(GUIEXEC:%=objs/$(ARCH)/TrackGui/%.out)
 
-
+# Building the flight plan application
 objs/$(ARCH)/FlightPlan/%.out: objs/$(ARCH)/FlightPlan/%.o
 	$(CXXLD) $(CXXLDFLAGS) -o $(@:%.out=%) $(FLIGHTOBJS) $(LIBS)
 
+# Building the radar generator application
 objs/$(ARCH)/RadarGenerator/%.out: objs/$(ARCH)/RadarGenerator/%.o
 	$(CXXLD) $(CXXLDFLAGS) -o $(@:%.out=%) $(RADAROBJS) $(LIBS)
 
+# Building the track GUI application
 objs/$(ARCH)/TrackGui/%.out: objs/$(ARCH)/TrackGui/%.o
 	$(CXXLD) $(CXXLDFLAGS) $(WX_LIBS) -o $(@:%.out=%) $(GUIOBJS) $(GUILIBS)
 
-#objs/$(ARCH)/Common/DDSCommunicator.o: src/CommonInfrastructure/DDSCommunicator.cxx $(COMMON_H)
-#	$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
 
 objs/$(ARCH)/Common/%.o: src/CommonInfrastructure/%.cxx $(COMMON_H)
 	$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
 	
-#objs/$(ARCH)/Common/OSAPI.o: src/CommonInfrastructure/OSAPI.cxx $(COMMON_H)
-#	$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
-
-
-objs/$(ARCH)/Common/AirTrafficControl.o: src/Generated/AirTrafficControl.cxx $(COMMON_H)
+objs/$(ARCH)/Common/%.o: src/Generated/%.cxx $(COMMON_H)
 	$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
 
-objs/$(ARCH)/Common/AirTrafficControlPlugin.o: src/Generated/AirTrafficControlPlugin.cxx $(COMMON_H)
+objs/$(ARCH)/FlightPlan/%.o: src/FlightPlanPublisher/%.cxx $(COMMON_H) $(HEADERS_IDL)
 	$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
 
-objs/$(ARCH)/Common/AirTrafficControlSupport.o: src/Generated/AirTrafficControlSupport.cxx $(COMMON_H)
+objs/$(ARCH)/RadarGenerator/%.o: src/RadarGenerator/%.cxx $(COMMON_H)
 	$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
 
-objs/$(ARCH)/FlightPlan/FlightPlanPublisherInterface.o: src/FlightPlanPublisher/FlightPlanPublisherInterface.cxx $(COMMON_H) $(HEADERS_IDL)
-	$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
-
-objs/$(ARCH)/FlightPlan/FlightPlanPublisher.o: src/FlightPlanPublisher/FlightPlanPublisher.cxx $(COMMON_H) $(HEADERS_IDL)
-	$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
-
-objs/$(ARCH)/RadarGenerator/RadarInterface.o: src/RadarGenerator/RadarInterface.cxx $(COMMON_H)
-	$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
-
-
-objs/$(ARCH)/RadarGenerator/TrackGenerator.o: src/RadarGenerator/TrackGenerator.cxx $(COMMON_H)
-	$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
-
-objs/$(ARCH)/RadarGenerator/RadarApp.o: src/RadarGenerator/RadarApp.cxx $(COMMON_H)
-	$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
-
-objs/$(ARCH)/TrackGui/NetworkInterface.o: src/TrackGui/NetworkInterface.cxx $(COMMON_H)
-	$(CXX) $(CXXFLAGS) $(WX_FLAGS) -o $@ $(DEFINES) $(INCLUDES) $(WX_INCLUDES) -c $<
-
-objs/$(ARCH)/TrackGui/TrackPresenter.o: src/TrackGui/TrackPresenter.cxx $(COMMON_H)
-	$(CXX) $(CXXFLAGS) $(WX_FLAGS) -o $@ $(DEFINES) $(INCLUDES) $(WX_INCLUDES) -c $<
-
-objs/$(ARCH)/TrackGui/TrackGUI.o: src/TrackGui/TrackGUI.cxx $(COMMON_H)
-	$(CXX) $(CXXFLAGS) $(WX_FLAGS) -o $@ $(DEFINES) $(INCLUDES)  $(WX_INCLUDES) -c $<
-
-objs/$(ARCH)/TrackGui/TrackApp.o: src/TrackGui/TrackApp.cxx $(COMMON_H)
+objs/$(ARCH)/TrackGui/%.o: src/TrackGui/%.cxx $(COMMON_H)
 	$(CXX) $(CXXFLAGS) $(WX_FLAGS) -o $@ $(DEFINES) $(INCLUDES) $(WX_INCLUDES) -c $<
 
 # Rule to rebuild the generated files when the .idl file change
