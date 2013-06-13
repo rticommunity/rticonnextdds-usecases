@@ -92,4 +92,9 @@
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\src\Idl\AirTrafficControl.idl">
+      <Filter>IDL</Filter>
+    </CustomBuild>
+  </ItemGroup>
 </Project>

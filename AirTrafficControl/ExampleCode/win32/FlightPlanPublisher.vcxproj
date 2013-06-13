@@ -106,6 +106,18 @@
     <ClCompile Include="..\src\Generated\AirTrafficControlPlugin.cxx" />
     <ClCompile Include="..\src\Generated\AirTrafficControlSupport.cxx" />
   </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\src\Idl\AirTrafficControl.idl">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CALL "$(NDDSHOME)\..\rti_set_env_5.0.0.bat"
+rtiddsgen ..\src\Idl\AirTrafficControl.idl -replace -namespace -language C++ -d ..\src\Generated</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(InputDir)\..\Generated\$(InputName).h;$(InputDir)\..\Generated\$(InputName).cxx;$(InputDir)\..\Generated\$(InputName)Plugin.h;$(InputDir)\..\Generated\$(InputName)Plugin.cxx;$(InputDir)\..\Generated\$(InputName)Support.h;$(InputDir)\$(InputName)Support.cxx</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(InputDir)\..\Generated\$(InputName).h;$(InputDir)\..\Generated\$(InputName).cxx;$(InputDir)\..\Generated\$(InputName)Plugin.h;$(InputDir)\..\Generated\$(InputName)Plugin.cxx;$(InputDir)\..\Generated\$(InputName)Support.h;$(InputDir)\$(InputName)Support.cxx</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CALL "$(NDDSHOME)\..\rti_set_env_5.0.0.bat"
+rtiddsgen ..\src\Idl\AirTrafficControl.idl -replace -namespace -language C++ -d ..\src\Generated</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating .cxx files from IDL...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating .cxx files from IDL...</Message>
+    </CustomBuild>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

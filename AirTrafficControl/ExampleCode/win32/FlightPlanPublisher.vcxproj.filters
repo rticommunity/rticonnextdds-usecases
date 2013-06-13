@@ -68,4 +68,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\src\Idl\AirTrafficControl.idl">
+      <Filter>IDL</Filter>
+    </CustomBuild>
+  </ItemGroup>
 </Project>

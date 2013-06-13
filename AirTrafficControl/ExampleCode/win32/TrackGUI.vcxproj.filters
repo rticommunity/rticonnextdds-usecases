@@ -19,6 +19,9 @@
     <Filter Include="GeneratedHeaders">
       <UniqueIdentifier>{62b9b47f-5b55-4657-b8e6-a17ffb41e89a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="IDL">
+      <UniqueIdentifier>{6baada7f-54dc-4254-9f7f-612191763388}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\TrackGui\NetworkInterface.h">
@@ -94,5 +97,10 @@
     <None Include="..\src\Config\radar_profiles_multicast.xml">
       <Filter>Resource Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\src\Idl\AirTrafficControl.idl">
+      <Filter>IDL</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>
