@@ -88,10 +88,12 @@ int main(int argc, char *argv[])
 	vector<string> xmlFiles;
 
 	// Adding the XML files that contain profiles used by this application
-	xmlFiles.push_back("file://../src/Config/multicast_base_profile.xml");
-	xmlFiles.push_back("file://../src/Config/radar_profiles_multicast.xml");
 	xmlFiles.push_back(
-		"file://../src/Config/flight_plan_profiles_multicast.xml");
+		"file://../../../src/Config/multicast_base_profile.xml");
+	xmlFiles.push_back(
+		"file://../../../src/Config/radar_profiles_multicast.xml");
+	xmlFiles.push_back(
+		"file://../../../src/Config/flight_plan_profiles_multicast.xml");
 
 	TrackGenerator *trackGenerator = NULL;
 	try { 

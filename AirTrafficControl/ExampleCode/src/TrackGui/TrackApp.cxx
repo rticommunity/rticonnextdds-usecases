@@ -27,10 +27,16 @@ bool TrackApp::OnInit() {
 
 	_shuttingDown = false;
 
+	string filePath;
+#ifdef RTI_WIN32
+	filePath = "..\\..\\..\\resource\\bayarea_county2000\\bayarea_county2000";
+#else
+	filePath = "../../../resource/bayarea_county2000/bayarea_county2000";
+#endif
 	_frame = new AppFrame(
 		this, "ATC Flight Viewer", 
 		wxPoint(0, 0), wxSize(450, 700),
-		"..\\resource\\bayarea_county2000\\bayarea_county2000");
+		filePath);
 
 	wxPoint point(300, 300);
 	_frame->SetPosition(point);
@@ -42,10 +48,12 @@ bool TrackApp::OnInit() {
 	vector<string> xmlFiles;
 
 	// Adding the XML files that contain profiles used by this application
-	xmlFiles.push_back("file://../src/Config/multicast_base_profile.xml");
-	xmlFiles.push_back("file://../src/Config/radar_profiles_multicast.xml");
 	xmlFiles.push_back(
-		"file://../src/Config/flight_plan_profiles_multicast.xml");
+		"file://../../../src/Config/multicast_base_profile.xml");
+	xmlFiles.push_back(
+		"file://../../../src/Config/radar_profiles_multicast.xml");
+	xmlFiles.push_back(
+		"file://../../../src/Config/flight_plan_profiles_multicast.xml");
 	_netInterface = new NetworkInterface(xmlFiles);
 
 	// This class accesses the data that arrives over the network.  This 
