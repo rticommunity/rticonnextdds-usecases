@@ -1,11 +1,49 @@
+/*********************************************************************************************
+(c) 2005-2013 Copyright, Real-Time Innovations, Inc.  All rights reserved.    	                             
+RTI grants Licensee a license to use, modify, compile, and create derivative works 
+of the Software.  Licensee has the right to distribute object form only for use with RTI 
+products.  The Software is provided “as is”, with no warranty of any type, including 
+any warranty for fitness for any purpose. RTI is under no obligation to maintain or 
+support the Software.  RTI shall not be liable for any incidental or consequential 
+damages arising out of the use or inability to use the software.
+**********************************************************************************************/
 #include "FlightPlanPublisherInterface.h"
 
+
+// ----------------------------------------------------------------------------
+// The FlightPlanPublisherInterface is the network interface to the whole 
+// application.  This creates a DataWriter in order to send flight plan data
+// over the network (or shared memory) to other applications that are 
+// interested in flight plans.
+//
+// This interface is built from:
+// 1. Network data types and topic names defined in the IDL file
+// 2. XML configuration files that describe the QoS profiles that should be 
+//    used by individual DataWriters and DataReaders.  These describe the 
+//    movement and persistence characteristics of the data (how reliable should
+//    this be?), as well as other QoS such as resource limits.
+// 3. The code itself creates DataWriters, and selects which QoS profile to use
+//    when creating the DataWriters.
+// 
+// Writing flight plan data:
+// -------------------------
+// This application sends flight plan data, configured to act as state data
+// (or last-value cache).  This will reliably deliver the flight plan to both
+// existing and late-joining applications that subscribe to flight plan data.
+//
+// For information on the flight plan data type, please see the 
+// AirTrafficControl.idl file.  
+//
+// For information on the quality of service for flight plan state data, please
+// see the flight_plan_profiles.xml file.
+// ------------------------------------------------------------------------- //
 
 FlightPlanPublisherInterface::FlightPlanPublisherInterface(std::vector<std::string> xmlFiles) 
 {
 
 	_communicator = new DDSCommunicator();
 
+	// Create a DomainParticipant
 	// Start by creating a DomainParticipant.  Generally you will have only
 	// one DomainParticipant per application.  A DomainParticipant is
 	// responsible for starting the discovery process, allocating resources,
@@ -18,6 +56,7 @@ FlightPlanPublisherInterface::FlightPlanPublisherInterface(std::vector<std::stri
 		throw errss.str();
 	}
 
+	// Create a Publisher
 	// This application only writes data, so we only need to create a
 	// publisher.  The RadarData application has a more complex pattern
 	// so we explicitly separate the writing interface from the overall
@@ -34,8 +73,8 @@ FlightPlanPublisherInterface::FlightPlanPublisherInterface(std::vector<std::stri
 	}
 
 
-	// 4. Look here at creating a Topic
-	// The topic object is the description of the data that you will be 
+	// Creating a Topic
+	// The Topic object is the description of the data that you will be 
 	// sending. It associates a particular data type with a name that 
 	// describes the meaning of the data.  Along with the data types, and
 	// whether your application is reading or writing particular data, this
@@ -50,8 +89,9 @@ FlightPlanPublisherInterface::FlightPlanPublisherInterface(std::vector<std::stri
 		AIRCRAFT_FLIGHT_PLAN_TOPIC);
 
 
-	// 5.  Look here at creating a DataWriter.  This creates a DataWriter
-	// that writes flight plan data, with QoS that is used for State Data.
+	// Create a DataWriter.  
+	// This creates a single DataWriter that writes flight plan data, with QoS
+	// that is used for State Data.
 	DDS::DataWriter *writer = pub->create_datawriter_with_profile(topic, 
 		"RTIExampleQosLibrary", "FlightPlanStateData",
 		NULL, DDS_STATUS_MASK_NONE);
@@ -69,7 +109,9 @@ FlightPlanPublisherInterface::FlightPlanPublisherInterface(std::vector<std::stri
 
 }
 
-// Deletes the Publisher, DataWriter, and the Communicator object
+// ----------------------------------------------------------------------------
+// Destructor.
+// Deletes the DataWriter, and the Communicator object
 FlightPlanPublisherInterface::~FlightPlanPublisherInterface()
 {
 	DDS::Publisher *pub = _writer->get_publisher();
@@ -80,7 +122,9 @@ FlightPlanPublisherInterface::~FlightPlanPublisherInterface()
 }
 
 
-// Sends the flight plan
+// ----------------------------------------------------------------------------
+// Sends the flight plan over a transport (such as shared memory or UDPv4)
+// This uses the 
 bool FlightPlanPublisherInterface::Write(FlightPlan *data)
 {
 	DDS_ReturnCode_t retcode = DDS_RETCODE_OK;
@@ -92,10 +136,10 @@ bool FlightPlanPublisherInterface::Write(FlightPlan *data)
 	// flight plan instance - a unique flight plan described by a 
 	// unique 8-character flight ID.  
 
-	// The flight plan data does not need the high-throughput that the 
-	// radar data requires, so we are not bothering to pre-register
-	// the instance handle.  If we did pre-register the instance handle,
-	// this could potentially speed up the writing.
+	// The flight plan data has a very simple ID, and does not need high-
+	// throughput, so we are not bothering to pre-register the instance 
+	// handle.  If we did pre-register the instance handle, this could 
+	// potentially speed up the writing.
 	retcode = _writer->write(*data, handle);
 
 	if (retcode != DDS_RETCODE_OK) {
@@ -106,6 +150,10 @@ bool FlightPlanPublisherInterface::Write(FlightPlan *data)
 
 }
 
+// ----------------------------------------------------------------------------
+// Sends a deletion message for the flight plan data over a transport (such as 
+// shared memory or UDPv4) This uses the unregiste_instance call to notify
+// other applications that this flight plan has gone away and should be deleted
 bool FlightPlanPublisherInterface::Delete(FlightPlan *data)
 {
 	DDS_ReturnCode_t retcode = DDS_RETCODE_OK;

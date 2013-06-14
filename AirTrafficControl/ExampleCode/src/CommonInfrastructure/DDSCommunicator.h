@@ -1,3 +1,12 @@
+/*********************************************************************************************
+(c) 2005-2013 Copyright, Real-Time Innovations, Inc.  All rights reserved.    	                             
+RTI grants Licensee a license to use, modify, compile, and create derivative works 
+of the Software.  Licensee has the right to distribute object form only for use with RTI 
+products.  The Software is provided “as is”, with no warranty of any type, including 
+any warranty for fitness for any purpose. RTI is under no obligation to maintain or 
+support the Software.  RTI shall not be liable for any incidental or consequential 
+damages arising out of the use or inability to use the software.
+**********************************************************************************************/
 #ifndef DDS_COMMUNICATOR_H
 #define DDS_COMMUNICATOR_H
 
@@ -19,6 +28,7 @@ struct UnregisterInfo {
   std::string typeName;
   unregister_fn unregisterFunction;
 };
+
 // ------------------------------------------------------------------------- //
 //
 // DDSCommunicator:
@@ -30,6 +40,7 @@ struct UnregisterInfo {
 class DDSCommunicator {
 
 public:
+	// --- Constructor and Destructor --- 
 	DDSCommunicator() : _participant(NULL), _pub(NULL), _sub(NULL)
 	{}
 
@@ -120,9 +131,10 @@ public:
 	DDS::Topic *CreateTopic(std::string topicName)
 	{
 		// Register the data type with the DomainParticipant - this
-		// allows the DomainParticipant to 
+		// tells the DomainParticipant how to create/destroy/
+		// serialize/deserialize this data type.
 		const char *typeName = T::TypeSupport::get_type_name();
-		
+
 		DDS_ReturnCode_t retcode = T::TypeSupport::register_type(
 				GetParticipant(), typeName);
 		if (retcode != DDS_RETCODE_OK) {
@@ -131,6 +143,8 @@ public:
 			throw errss.str();
 		}
 
+		// Create the Topic object, using the associated data type that
+		// was registered above.
 		DDS::Topic *topic = GetParticipant()->create_topic(
 			topicName.c_str(),
 			typeName, DDS_TOPIC_QOS_DEFAULT, NULL /* listener */,
@@ -141,6 +155,9 @@ public:
 			throw errss.str();
 		}
 
+		// Save the type unregister information for a clean shutdown.  This is
+		// not strictly necessary, but prevents what looks like a memory leak
+		// at shutdown.
 		UnregisterInfo unregisterInfo;
 		unregisterInfo.typeName = typeName;
 		unregisterInfo.unregisterFunction = 
@@ -152,9 +169,21 @@ public:
 
 private:
 
+	// --- Private members ---
+
+	// Used to create other DDS entities
 	DDS::DomainParticipant* _participant;
+
+	// Used to create DataWriters
 	DDS::Publisher* _pub;
+
+	// Used to create DataReaders
 	DDS::Subscriber* _sub;
+
+	// Map between type names and unregistration functions.  Functions are 
+	// added to this in CreateTopic(), after each data type is registered 
+	// with the DomainParticipant.  This cleans up a small amount of memory
+	// that would otherwise appear as a memory leak at shutdown.
 	std::map<std::string, UnregisterInfo> _typeCleanupFunctions;
 
 

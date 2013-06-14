@@ -20,10 +20,12 @@ class OSMutex;
 //
 // In this example, the GUI is only subscribing to data, so this class creates
 // two DDS DataReaders and no DDS DataWriters.
+//
 // ------------------------------------------------------------------------- //
 class NetworkInterface  {
 public:
 
+	// --- Constructor --- 
 	// The constructor creates all the necessary DDS objects (in this case, 
 	// a DomainParticipant, a Subscriber, and objects wrapping two DDS 
 	// DataReaders.)  This also configures the XML QoS configuration files that
@@ -31,32 +33,44 @@ public:
 	NetworkInterface( 
 		std::vector<std::string>qosFileNames);
 
-	// Destructor
+	// --- Destructor --- 
 	~NetworkInterface();
 
+	// --- Getter for Communicator --- 
 	// Accessor for the communicator (the class that sets up the basic
 	// DDS infrastructure like the DomainParticipant).
+	// This allows access to the DDS DomainParticipant/Publisher/Subscriber
+	// classes
 	DDSCommunicator *GetCommunicator() 
 	{ 
 		return _communicator; 
 	}
 
-	// Accessor for the flight plan reader
+	// --- Getter for the flight plan reader --- 
+	// Accessor for the object that receives flight plans from the network
 	FlightPlanReader *GetFlightPlanReader() 
 	{ 
 		return _flightPlanReader; 
 	}
 
-	// Accessor for the track reader
+	// --- Getter for the track reader --- 
+	// Accessor for the object that receives track updates from the network
 	TrackReader *GetTrackReader() 
 	{ 
 		return _trackReader; 
 	}
 
 private:
-		DDSCommunicator *_communicator;
-		FlightPlanReader *_flightPlanReader;
-		TrackReader *_trackReader;
+	// --- Private members ---
+
+	// Used to create basic DDS entities that all applications need
+	DDSCommunicator *_communicator;
+
+	// Flight plan receiver specific to this application
+	FlightPlanReader *_flightPlanReader;
+
+	// Track receiver specific to this application
+	TrackReader *_trackReader;
 
 };
 
@@ -77,16 +91,18 @@ class FlightPlanReader {
 
 public:
 
+	// --- Constructor --- 
 	// Subscribes to flight plan information
 	FlightPlanReader(NetworkInterface *app, DDS::Subscriber *sub, 
 		char *qosLibrary, char *qosProfile);
 
-
-	// Destructor
+	// --- Destructor --- 
 	~FlightPlanReader();
 
+	// --- Wake up the reader thread if it is waiting on data ---
 	void NotifyWakeup(); 
 
+	// --- Retrieve flight plan --- 
 	// This example is not being notified when new flight plans arrive, and
 	// instead queries the middleware for a particular flight plan update
 	// when it is interested in it.  It queries the middleware queue by
@@ -95,13 +111,27 @@ public:
 		com::rti::atc::generated::FlightPlan *plan);
 
 private:
+	// --- Private members ---
+
+	// Contains all the components needed to create the DataReader
 	NetworkInterface *_app;
+
+	// The DDS DataReader of flight plans 
 	com::rti::atc::generated::FlightPlanDataReader *_fpReader;
+
+	// The mechanisms that cause a thread to wait until flight plan data
+	// becomes available, and to be woken up when the data arrives
 	DDS::WaitSet *_waitSet;
 	DDS::StatusCondition *_condition;
 	DDS::GuardCondition *_shutDownNotifyCondition;
+
+	// Allows the application to query the middleware queue for a specific
+	// set of flight plans (in this case, it will query by ID, which means 
+	// it will get only one).
 	DDS::QueryCondition *_queryForFlights;
 	char _flightIdQueried[FLIGHT_ID_QUERY_LENGTH];
+
+	// Mutex for threading
 	OSMutex *_mutex;
 
 };
@@ -117,39 +147,45 @@ class TrackReader {
 
 public:
 
+	// --- Constructor --- 
 	// Subscribes to flight plan information
 	TrackReader(NetworkInterface *app, DDS::Subscriber *sub, 
 		char *qosLibrary, char *qosProfile);
 
-	// Destructor
+	// --- Destructor --- 
 	~TrackReader();
 
-	// This example is looking up all flight plans, and leaving them 
-	// in the middleware's queue.  it does this because it does not need
-	// to do any transformation on the flight plan data. 
-	// This method allows the application to be notified when tracks
-	// are available
+	// --- Waiting for tracks --- 
+	// This waits for new tracks to become available, and notifies the 
+	// application that there are new tracks.
 	void WaitForTracks(
 		std::vector<com::rti::atc::generated::Track *> *tracks);
 
-	// This example is looking up all flight plans, and leaving them 
-	// in the middleware's queue.  it does this because it does not need
-	// to do any transformation on the flight plan data.  This example does
-	// not care about when the tracks arrive, it simply queries which 
-	// tracks are in the queue (polling for data)
-	// See the other example application for alternatives - being notified
-	// that data is available.
+	// --- Retreiving current track updates --- 
+	// This retrieves track updates from the middleware queue.  This is used
+	// to poll for all the current track updates from the middleware.
 	void GetCurrentTracks(
 		std::vector<com::rti::atc::generated::Track *> *tracks);
 
+	// --- Wake up the reader thread if it is waiting on data ---
 	void NotifyWakeup();
 
 private:
+	// --- Private members ---
+
+	// Contains all the components needed to create the DataReader
 	NetworkInterface *_app;
+
+	// The DDS DataReader of tracks 
 	com::rti::atc::generated::TrackDataReader *_reader;
+
+	// The mechanisms that cause a thread to wait until flight plan data
+	// becomes available, and to be woken up when the data arrives
 	DDS::WaitSet *_waitSet;
 	DDS::StatusCondition *_condition;
 	DDS::GuardCondition *_shutDownNotifyCondition;
+
+	// Mutex for threading
 	OSMutex *_mutex;
 };
 

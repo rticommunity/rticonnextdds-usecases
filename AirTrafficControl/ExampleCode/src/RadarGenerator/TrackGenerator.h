@@ -1,3 +1,12 @@
+/*********************************************************************************************
+(c) 2005-2013 Copyright, Real-Time Innovations, Inc.  All rights reserved.    	                             
+RTI grants Licensee a license to use, modify, compile, and create derivative works 
+of the Software.  Licensee has the right to distribute object form only for use with RTI 
+products.  The Software is provided “as is”, with no warranty of any type, including 
+any warranty for fitness for any purpose. RTI is under no obligation to maintain or 
+support the Software.  RTI shall not be liable for any incidental or consequential 
+damages arising out of the use or inability to use the software.
+**********************************************************************************************/
 #ifndef TRACK_GENERATOR_H
 #define TRACK_GENERATOR_H
 
@@ -47,6 +56,7 @@ struct LatLong {
 // ------------------------------------------------------------------------- //
 struct GeneratorTrack 
 {
+	// --- Constructor --- 
 	GeneratorTrack(OSMutex *mutex) 
 	{
 		id = 0;
@@ -107,10 +117,12 @@ private:
 // ------------------------------------------------------------------------- //
 struct GeneratorFlightPlan 
 {
+	// --- Constructor --- 
 	GeneratorFlightPlan()
 	{
 	}
 
+	// --- Copy constructor --- 
 	GeneratorFlightPlan(GeneratorFlightPlan *plan) 
 	{
 		estimatedHours = plan->estimatedHours;
@@ -156,7 +168,7 @@ class TrackGenerator {
 
 public:
 
-	// Constructor
+	// --- Constructor --- 
 	TrackGenerator(int radarID, int maxTracks, 
 					int sendRate) : _shuttingDown(false),
 				_currentTrackId(0), _maxTracks(maxTracks),
@@ -166,47 +178,70 @@ public:
 		_mutex = new OSMutex();
 	}
 
-	// Destructor
+	// --- Destructor --- 
 	~TrackGenerator();
 
+	// --- Adding a listener to generated radar track events --- 
 	// Add a listener that listens for track updates from the radar
 	void AddListener(TrackListener *listener) 
 	{
 		_listeners.push_back(listener);
 	}
 
+	// --- Removing a listener to stop listening to radar track events --- 
 	// Remove listener that listens for track updates from the radar.  Note that 
 	// in this example, the DDSRadarListener must be removed from the 
 	// track generator before the RadarInterface is deleted.
 	void RemoveListener(const TrackListener *listener);
 
+	// --- Start generating tracks --- 
 	// Starts the thread that generates tracks
 	void Start();
 
+	// --- Stop generating tracks --- 
 	// Marks the thread as ready to shut down
 	void Shutdown();
 
 
+	// --- Add a flight plan to a track or the generator's list --- 
 	// Adds a flight plan to the track generator.  Will "correlate" the flight
 	// plan with an existing track, if one exists, or else will store the
 	// flight plan.
 	void AddFlightPlan(GeneratorFlightPlan *flightPlan);
 
+	// --- Update a track with a flight plan --- 
 	void UpdateTrackWithFlightData(GeneratorTrack &track, 
 		GeneratorFlightPlan &flightPlan);
+
+	// --- Delete a track --- 
 	void DeleteTrack(GeneratorTrack &track);
 
 protected:
+
+	// --- Internal generate method --- 
 	void GenerateTracks();
 
+	// --- "Correlate" flight plan to track --- 
+	// This example does nothing special for "correlating" a flight plan with
+	// a track - it just associates a flight plan with the first track that
+	// does not have a flight plan associate with it already.
 	bool CorrelateFlightPlanWithTrack(GeneratorFlightPlan *flightPlan, 
 		GeneratorTrack *track);
 
 private:
+	// --- Generate the tracks --- 
 	static void *GenerateTracksFunc(void *arg);
+
+	// --- Notify listeners of track updates --- 
 	void NotifyListenersUpdateTrack(const GeneratorTrack &track);
+
+	// --- Notify listeners of track deletions --- 
 	void NotifyListenersDeleteTrack(const GeneratorTrack &track);
+
+	// --- Create a new track  --- 
 	GeneratorTrack* AddTrack();
+
+	// --- Fly to SFO  --- 
 	void CalculatePathToSFO(LatLong *currentLatLong, double *bearing, 
 							FlightState *state, double sampleRate);
 	double CalculateDistance(LatLong latlong1, LatLong latlong2);
@@ -231,7 +266,6 @@ private:
 
 	double KnotsToKph(double knots);
 	void CalculateRandomPoint80KmFromSFO(LatLong *latLong);
-
 
 	void UpdateTrackPositionState(FlightState *state);
 
@@ -258,7 +292,7 @@ private:
 		return _shuttingDown; 
 	}
 
-	// Member variables
+	// --- Private members ---
 
 	// The list of currently-updating tracks that the generator is keeping
 	// updates about

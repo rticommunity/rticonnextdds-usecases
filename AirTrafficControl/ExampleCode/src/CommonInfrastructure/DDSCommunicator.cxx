@@ -1,12 +1,32 @@
+/*********************************************************************************************
+(c) 2005-2013 Copyright, Real-Time Innovations, Inc.  All rights reserved.    	                             
+RTI grants Licensee a license to use, modify, compile, and create derivative works 
+of the Software.  Licensee has the right to distribute object form only for use with RTI 
+products.  The Software is provided “as is”, with no warranty of any type, including 
+any warranty for fitness for any purpose. RTI is under no obligation to maintain or 
+support the Software.  RTI shall not be liable for any incidental or consequential 
+damages arising out of the use or inability to use the software.
+**********************************************************************************************/
 #include "DDSCommunicator.h"
 
 using namespace DDS;
 
+// ------------------------------------------------------------------------- //
+// Destruction of a DDS communication interface.  This first deletes all the
+// entities created by the DomainParticipant object.  Then, it cleans up the 
+// types that have been registered with the DomainParticipant.  (This is not
+// strictly necessary, but will cause a very small memory leak at shutdown if
+// all types are not unregistered.  Thirdly, this deletes the 
+// DomainParticipant.  Lastly, this finalizes the DomainParticipantFactory.
 DDSCommunicator::~DDSCommunicator() 
 {
 	if (_participant != NULL) {
+
+		// Delete DataWriters, DataReaders, Topics, Subscribers, and Publishers
+		// created by this DomainParticipant.
 		_participant->delete_contained_entities();
 
+		// Unregister all the data types registered with this DomainParticipant
 		for (std::map<std::string, 
 			UnregisterInfo>::iterator it =
 			_typeCleanupFunctions.begin();
@@ -16,17 +36,38 @@ DDSCommunicator::~DDSCommunicator()
 				*it).first.c_str());
 		}
 
+		// Delete the DomainParticipant
 		TheParticipantFactory->delete_participant(_participant);
 
-		// In theory, can finalize the participant factory here, but this
+		// You finalize the participant factory here, but this
 		// will not work if you have multiple communicators - for example
-		// in different DDS domains.  Leaving this commented out because
-		// this should only be called before the end of the application
+		// in different DDS domains.  In that case, you must be more careful
+		// to only finalize the participant factory after all 
+		// DomainParticipants have been deleted.
 		TheParticipantFactory->finalize_instance();
 	}
 }
 
+// --- Creating a DomainParticipant --- 
 
+// A DomainParticipant starts the DDS discovery process.  It creates
+// several threads, sends and receives discovery information over one or 
+// more transports, and maintains an in-memory discovery database of 
+// remote DomainParticipants, remote DataWriters, and remote DataReaders
+
+// Quality of Service can be applied on the level of the DomainParticipant.  
+// This QoS controls the characteristics of:	
+// 1. Transport properties such as which type of network (UDPv4, UDPv6, 
+//    shared memory) or which network interfaces it is allowed to use
+// 2. Which applications this discovers.  By default, apps will discover
+//    other DDS applications over multicast, loopback, and shared memory.
+// 3. Resource limits for the DomainParticipant
+//
+// For more information on participant QoS, see the USER_QOS_PROFILES.xml
+// file
+
+// ------------------------------------------------------------------------- //
+// Creating a DomainParticipant with a specified domain ID  
 DomainParticipant* DDSCommunicator::CreateParticipant(long domain) 
 {
 	DomainParticipant* participant = 
@@ -42,7 +83,8 @@ DomainParticipant* DDSCommunicator::CreateParticipant(long domain)
 	return participant;
 }
 
-
+// ------------------------------------------------------------------------- //
+// Creating a DomainParticipant with a domain ID of zero
 DomainParticipant* DDSCommunicator::CreateParticipant() 
 {
 	_participant = 
@@ -61,6 +103,8 @@ DomainParticipant* DDSCommunicator::CreateParticipant()
 }
 
 
+// ------------------------------------------------------------------------- //
+// Creating a DomainParticipant with a specified domain ID and specified QoS 
 DomainParticipant* DDSCommunicator::CreateParticipant(
 	long domain, 
 	char *participantQosLibrary, 
@@ -85,6 +129,9 @@ DomainParticipant* DDSCommunicator::CreateParticipant(
 }
 
 
+// ------------------------------------------------------------------------- //
+// Creating a DomainParticipant with a specified domain ID, specified QoS file
+// names, and specified QoS 
 DomainParticipant* DDSCommunicator::CreateParticipant(long domain, 
 	std::vector<std::string>fileNames, char *participantQosLibrary, 
 	char *participantQosProfile) 
@@ -92,7 +139,6 @@ DomainParticipant* DDSCommunicator::CreateParticipant(long domain,
 
 	// Adding a list of explicit file names to the DomainParticipantFactory
 	// This gives the middleware a set of places to search for the files
-	// 
 	DomainParticipantFactoryQos factoryQos;
 	TheParticipantFactory->get_qos(factoryQos);
 	factoryQos.profile.url_profile.ensure_length(fileNames.size(),
@@ -114,6 +160,7 @@ DomainParticipant* DDSCommunicator::CreateParticipant(long domain,
 		throw errss.str();
 	}
 
+	// Actually creating the DomainParticipant
 	_participant = 
 		TheParticipantFactory->create_participant_with_profile(
 									domain, 
@@ -133,6 +180,9 @@ DomainParticipant* DDSCommunicator::CreateParticipant(long domain,
 }
 
 
+// ------------------------------------------------------------------------- //
+// Creating a Publisher object.  This is used to create type-specific 
+// DataWriter objects in the application
 Publisher* DDSCommunicator::CreatePublisher()
 {
 	if (GetParticipant() == NULL) 
@@ -164,6 +214,9 @@ Publisher* DDSCommunicator::CreatePublisher()
 	return _pub;
 }
 
+// ------------------------------------------------------------------------- //
+// Creating a Publisher object with specified QoS.  This is used to create 
+// type-specific DataWriter objects in the application
 Publisher* DDSCommunicator::CreatePublisher(char *qosLibrary, char *qosProfile)
 {
 	if (GetParticipant() == NULL) 
@@ -197,6 +250,9 @@ Publisher* DDSCommunicator::CreatePublisher(char *qosLibrary, char *qosProfile)
 }
 
 
+// ------------------------------------------------------------------------- //
+// Creating a Subscriber object.  This is used to create type-specific 
+// DataReader objects in the application
 Subscriber* DDSCommunicator::CreateSubscriber()
 {
 	if (GetParticipant() == NULL) 
@@ -228,6 +284,9 @@ Subscriber* DDSCommunicator::CreateSubscriber()
 	return _sub;
 }
 
+// ------------------------------------------------------------------------- //
+// Creating a Subscriber object with specified QoS.  This is used to create 
+// type-specific DataReader objects in the application
 Subscriber* DDSCommunicator::CreateSubscriber(char *qosLibrary,
 	char *qosProfile)
 {

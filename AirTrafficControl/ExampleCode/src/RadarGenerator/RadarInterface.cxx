@@ -1,3 +1,13 @@
+/*********************************************************************************************
+(c) 2005-2013 Copyright, Real-Time Innovations, Inc.  All rights reserved.    	                             
+RTI grants Licensee a license to use, modify, compile, and create derivative works 
+of the Software.  Licensee has the right to distribute object form only for use with RTI 
+products.  The Software is provided “as is”, with no warranty of any type, including 
+any warranty for fitness for any purpose. RTI is under no obligation to maintain or 
+support the Software.  RTI shall not be liable for any incidental or consequential 
+damages arising out of the use or inability to use the software.
+**********************************************************************************************/
+
 #include <vector>
 #include <sstream>
 #include "../Generated/AirTrafficControl.h"
@@ -10,7 +20,6 @@ using namespace com::rti::atc::generated;
 
 
 // ------------------------------------------------------------------------- //
-//
 // The RadarInterface is the network interface to the whole application.  This 
 // creates DataReaders and DataWriters in order to receive and send data.  
 //
@@ -23,6 +32,30 @@ using namespace com::rti::atc::generated;
 // 3. The code itself creates DataReaders and DataWriters, and selects which 
 //    profile to use when creating the DataReaders and DataWriters.
 //
+// Writing radar data:
+// -------------------
+// This application sends radar data, either with the lowest possible latency
+// or with higher throughput at a slight cost in latency.
+// 
+// For information on the radar data type, please see the AirTrafficControl.idl
+// file.  
+//
+// For information on the quality of service for throughput vs. latency, please
+// see the radar_profiles_multicast.xml file.
+//
+// Reading flight plan data:
+// -------------------------
+// This application receives flight plan data.  This data is sent less
+// frequently, and if it was sent before the radar application was started, it
+// must be automatically delivered to the radar at startup.  Becasue of these
+// requirements, it has different QoS than the radar data.  This QoS is
+// generally described as the QoS for "state data"
+// 
+// For information on the flight plan data type, please see the 
+// AirTrafficControl.idl file.  
+//
+// For information on the quality of service for flight plan state data, please
+// see the flight_plan_profiles.xml file.
 // ------------------------------------------------------------------------- //
 
 
@@ -38,8 +71,8 @@ RadarInterface::RadarInterface(long radarId, int maxFlights,
 	char *libName = NULL;
 	char *profileName = NULL;
 
-	// 1. Depending on what is passed in, I choose one of two XML profiles to 
-	// use
+	// Depending on what is passed in, choose one of two XML profiles to 
+	// use - either for best latency or higher throughput
 	libName = "RTIExampleQosLibrary";
 	if (profile == LOW_LATENCY) {
 		profileName = "LowLatencyRadar";
@@ -49,7 +82,7 @@ RadarInterface::RadarInterface(long radarId, int maxFlights,
 
 	_communicator = new DDSCommunicator();
 
-	// 2. Calling the parent class's CreateParticipant method.
+	// Calling the parent class's CreateParticipant method.
 	// This creates the DomainParticpant, the first step in creating a DDS
 	// application.  This starts the discovery process.  For more information
 	// on what the DomainParticipant is responsible for, and how to configure
@@ -62,7 +95,7 @@ RadarInterface::RadarInterface(long radarId, int maxFlights,
 	}
 
 
-	// 3. Calling the parent class's CreatePublisher method.  
+	// Calling the parent class's CreatePublisher method.  
 	// You do _not_ need to create one publisher per DataWriter.
 	Publisher *publisher = _communicator->CreatePublisher();
 
@@ -72,7 +105,7 @@ RadarInterface::RadarInterface(long radarId, int maxFlights,
 		throw errss.str();
 	}
 
-	// 4.Creating the application's RadarWriter object.  
+	// Creating the application's RadarWriter object.  
 	// This could use the RTI Connext DDS writer directly as a way to write, 
 	// but this example assumes that you are converting between an internal 
 	// data structure and the network data structure.  If you are not doing 
@@ -82,7 +115,6 @@ RadarInterface::RadarInterface(long radarId, int maxFlights,
 	// profiles depending on the requirement for lowest latency or higher 
 	// throughput at the cost of latency. To see the individual QoS tuning,
 	// refer to the XML file.  
-
 	_radarWriter = new RadarWriter(this, publisher,
 		libName, profileName);
 	if (_radarWriter == NULL) { 
@@ -92,7 +124,7 @@ RadarInterface::RadarInterface(long radarId, int maxFlights,
 	}
 
 
-	// 6. Creating a DDS subscriber.  
+	// Creating a DDS subscriber.  
 	// You do _not_ need to create one subscriber per DataReader.
 	Subscriber *subscriber = _communicator->CreateSubscriber();
 	if (subscriber == NULL) {
@@ -101,7 +133,7 @@ RadarInterface::RadarInterface(long radarId, int maxFlights,
 		throw errss.str();
 	}
 
-	// 7. Creating the FlightPlanReader object.
+	// Creating the FlightPlanReader object.
 	// We could give the application access to the DataReader directly, but 
 	// this simplifies the application's access - in this case, we can choose 
 	// to let the application store the data in the DataReader's queue, and 
@@ -181,7 +213,7 @@ RadarWriter::RadarWriter(RadarInterface *netInterface,
 		AIR_TRACK_TOPIC);
 
 
-	// Look here at creating a DataWriter
+	// Create a DataWriter
 	// The topic object is the description of the data that you will be 
 	// sending. It associates a particular data type with a name that 
 	// describes the meaning of the data.  Along with the data types, and
@@ -211,6 +243,8 @@ RadarWriter::RadarWriter(RadarInterface *netInterface,
 	writerQos.resource_limits.max_samples = 
 		_communicator->GetMaxFlightsToHandle();
 
+	// Create the DDS DataWriter object that sends data over the network (or
+	// shared memory)
 	DataWriter *ddsWriter = 
 		pub->create_datawriter(topic, writerQos, 
 				NULL, DDS_STATUS_MASK_NONE);
@@ -224,8 +258,6 @@ RadarWriter::RadarWriter(RadarInterface *netInterface,
 		errss << "RadarWriter(): failure to create writer. Inconsistent Qos?";
 		throw errss.str();
 	}
-
-
 
 }
 
@@ -249,7 +281,7 @@ void RadarWriter::PublishTrack(DdsAutoType<Track> &track)
 	InstanceHandle_t handle = DDS_HANDLE_NIL;
 	bool handleSet = false;
 
-	// In theory, you can register the instance handle to get better 
+	// You can register the instance handle to get better 
 	// throughput - however, this mostly makes sense if you are keeping
 	// an object in your application where you can attach the instance
 	// handle, or if you key fields are complex (more than 16 bytes long)
@@ -277,7 +309,7 @@ void RadarWriter::DeleteTrack(DdsAutoType<Track> &track)
 {
 	InstanceHandle_t handle = DDS_HANDLE_NIL;
 	
-
+	// Retrieve the handle of the instance we were disposing
 	handle = _trackWriter->lookup_instance(track);
 
 	// Note that DDS has two ways to indicate that an instance has gone away

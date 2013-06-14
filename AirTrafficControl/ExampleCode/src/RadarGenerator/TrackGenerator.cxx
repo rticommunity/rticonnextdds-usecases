@@ -1,3 +1,12 @@
+/*********************************************************************************************
+(c) 2005-2013 Copyright, Real-Time Innovations, Inc.  All rights reserved.    	                             
+RTI grants Licensee a license to use, modify, compile, and create derivative works 
+of the Software.  Licensee has the right to distribute object form only for use with RTI 
+products.  The Software is provided “as is”, with no warranty of any type, including 
+any warranty for fitness for any purpose. RTI is under no obligation to maintain or 
+support the Software.  RTI shall not be liable for any incidental or consequential 
+damages arising out of the use or inability to use the software.
+**********************************************************************************************/
 #include <math.h>
 #include <sstream>
 #include "ndds/ndds_cpp.h"
@@ -6,22 +15,24 @@
 #include "TrackGenerator.h"
 
 
-/* --------------------------------------------------------------------------
+// ------------------------------------------------------------------------- //
+// 
+// Note that this file generates interesting-looking data, but this is not the
+// core value that RTI Connext DDS provides, which is the efficient transport
+// of data over one or more transports to all interested parties.
+//
+// This class generates example track data that is sent to illustrate how RTI
+// can send track data over DDS.  This example data is not intended to be 
+// complete or accurate, and there may be errors in the generated data.  This  
+// roughly simulates an air traffic control radar that can detect aircraft 
+// flying within 80 Km of SFO, using some of the typical flight paths.
 
-This class generates example track data that is sent to illustrate how RTI
-can send track data over DDS.  This example data is not intended to be complete
-or accurate, and there may be errors in the generated data.  This roughly 
-simulates an air traffic control radar that can detect aircraft flying within 
-80 Km of SFO, using some of the typical flight paths.
-
-It does not include radar tracks of aircraft landing at other nearby airports, 
-and it does not prevent (or accurately simulate) collisions of aircraft.  Note
-that this example currently does not set the altitude, though we may add that 
-in the future.
-
-modification history
------------- -------       
-*/
+// It does not include radar tracks of aircraft landing at other nearby 
+// airports, and it does not prevent (or accurately simulate) collisions of 
+// aircraft.  Note that this example currently does not set the altitude, 
+// though we may add that in the future.
+//
+// ------------------------------------------------------------------------- //
 
 // Pre-defined lat/longs where the flight paths may go.  These are all rough
 // estimates except for the position of SFO.

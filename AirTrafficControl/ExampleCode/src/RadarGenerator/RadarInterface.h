@@ -1,3 +1,12 @@
+/*********************************************************************************************
+(c) 2005-2013 Copyright, Real-Time Innovations, Inc.  All rights reserved.    	                             
+RTI grants Licensee a license to use, modify, compile, and create derivative works 
+of the Software.  Licensee has the right to distribute object form only for use with RTI 
+products.  The Software is provided “as is”, with no warranty of any type, including 
+any warranty for fitness for any purpose. RTI is under no obligation to maintain or 
+support the Software.  RTI shall not be liable for any incidental or consequential 
+damages arising out of the use or inability to use the software.
+**********************************************************************************************/
 #ifndef RADAR_INTERFACE_H
 #define RADAR_INTERFACE_H
 
@@ -17,7 +26,7 @@ class FlightPlanReader;
 class RadarWriter;
 class RadarInterface;
 
-
+// ----------------------------------------------------------------------------
 // The radar interface is composed of two parts:  
 //
 // Writing radar data:
@@ -82,14 +91,17 @@ public:
 	// allocate
 
 
+	// --- Constructor --- 
 	// Note that the radar may have two separate profiles depending in whether
 	// the requirement is for lowest latency or highest throughput.  Flight
 	// plan data has only one profile, so it is not part of the interface
 	RadarInterface(long radarId, int maxFlights, RadarProfile profile, 
 		std::vector<std::string>qosFileNames);
 
+	// --- Destructor --- 
 	~RadarInterface();
 
+	// --- Getter for the RadarWriter --- 
 	// This returns a RadarWriter object, which is the part of the network
 	// interface that sends the radar data over the network.  Look at the
 	// RadarWriter class to see how to write data in RTI Connext DDS.  This
@@ -105,6 +117,7 @@ public:
 		return _FlightPlanReader;
 	}
 
+	// --- How many flights should the middleware handle at once? --- 
 	// This is the maximum number of flights the middleware is expected to 
 	// handle at one time.  This could be set up as unlimited, but in a real
 	// system that must preallocate memory, this is one way to tell the 
@@ -113,13 +126,17 @@ public:
 		return _maxFlightsToHandle;
 	}
 
-	// This returns the communicator object, allowing access to the DDS
-	// DomainParticipant/Publisher/Subscriber classes
+	// --- Getter for Communicator --- 
+	// Accessor for the communicator (the class that sets up the basic
+	// DDS infrastructure like the DomainParticipant).
+	// This allows access to the DDS DomainParticipant/Publisher/Subscriber
+	// classes
 	DDSCommunicator *GetCommunicator() {
 		return _communicator; 
 	}
 
 private:
+	// --- Private members ---
 
 	// This contains the calls that allow the interface to create a 
 	// "DomainParticipant", the first object that must be created to 
@@ -160,6 +177,7 @@ class FlightPlanReader {
 
 public:
 
+	// --- Constructor --- 
 	// This creates a DDS DataReader that subscribes to flight plan information.  
 	// This uses the app object to access the DomainParticipant, and it uses the 
 	// QoS profiles specified when creating the DataReader.  The XML QoS files
@@ -169,9 +187,10 @@ public:
 		char *qosLibrary, char *qosProfile);
 
 
-	// Destructor
+	// --- Destructor --- 
 	~FlightPlanReader();
 
+	// --- Receive flight plans --- 
 	// This example is looking up all flight plans, and leaving them 
 	// in the middleware's queue.  it does this because it does not need
 	// to do any transformation on the flight plan data.  This example does
@@ -184,8 +203,15 @@ public:
 
 
 private:
+	// --- Private members ---
+
+	// Contains all the components needed to create the DataReader
 	RadarInterface *_communicator;
+
+	// Application-specific DDS DataReader for receiving flight plan data
 	com::rti::atc::generated::FlightPlanDataReader *_reader;
+
+	// Objects to block a thread until flight plan data arrives
 	DDS::WaitSet *_waitSet;
 	DDS::StatusCondition *_condition;
 };
@@ -204,6 +230,8 @@ private:
 class RadarWriter {
 
 public:
+
+	// --- Constructor --- 
 	// This creates a DDS DataWriter that publishes to track information.  
 	// This uses the app object to access the DomainParticipant, and it uses the 
 	// QoS profiles specified when creating the DataWriter.  The XML QoS files
@@ -212,18 +240,30 @@ public:
 	RadarWriter(RadarInterface *comm, DDS::Publisher *pub, 
 		char *qosLibrary, char *qosProfile);
 
-	// Destructor
+	// --- Destructor --- 
 	~RadarWriter();
 	
-	//  Uses the DDS APIs to write data efficiently
+	// --- Sends the Track Data --- 
+	// Uses DDS interface to send a flight plan efficiently over the network
+	// or shared memory to interested applications subscribing to flight plan
+	// information.
 	void PublishTrack(
 		DdsAutoType<com::rti::atc::generated::Track> &track);
-	//  Uses the DDS APIs to dispose data efficiently
+
+	// --- Deletes the Track Data --- 
+	// "Deletes" the flight plan from the system - removing the DDS instance 
+	// from all applications.
 	void DeleteTrack(
 		DdsAutoType<com::rti::atc::generated::Track> &track);
 
 private:
+	// --- Private members ---
+
+	// Contains all the components needed to create the DataWriter
 	RadarInterface *_communicator;
+
+	// The application-specific DDS DataWriter that sends track data updates
+	// over the network or shared memory
 	com::rti::atc::generated::TrackDataWriter *_trackWriter;
 
 
