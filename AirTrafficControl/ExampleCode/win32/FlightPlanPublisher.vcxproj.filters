@@ -32,9 +32,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\FlightPlanPublisher\FlightPlanPublisherInterface.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\CommonInfrastructure\DDSCommunicator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -47,11 +44,11 @@
     <ClInclude Include="..\src\Generated\AirTrafficControlSupport.h">
       <Filter>GeneratedHeaders</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\FlightPlanGenerator\FlightPlanPublisherInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\FlightPlanPublisher\FlightPlanPublisher.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\Generated\AirTrafficControl.cxx">
       <Filter>GeneratedSource</Filter>
     </ClCompile>
@@ -64,7 +61,10 @@
     <ClCompile Include="..\src\CommonInfrastructure\DDSCommunicator.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\FlightPlanPublisher\FlightPlanPublisherInterface.cxx">
+    <ClCompile Include="..\src\FlightPlanGenerator\FlightPlanPublisher.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\FlightPlanGenerator\FlightPlanPublisherInterface.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
