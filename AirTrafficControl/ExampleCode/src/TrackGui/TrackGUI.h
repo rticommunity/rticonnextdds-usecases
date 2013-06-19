@@ -233,7 +233,6 @@ public:
 			_panel->AddOrUpdatePoint(flights[i]->_track->trackId, 
 				wxRealPoint(x,y));
 		}
-
 		_panel->Refresh();
 		return true;
 	}

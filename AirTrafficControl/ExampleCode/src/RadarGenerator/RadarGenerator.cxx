@@ -120,8 +120,8 @@ int main(int argc, char *argv[])
 		// Start generating tracks
 		trackGenerator->Start();
 
-		while (1) {
-
+		while (1) 
+		{
 			// Listen for updates to flight plans, and add them to the track 
 			// generator as they arrive
 			vector<com::rti::atc::generated::FlightPlan *> flightPlans;
@@ -129,7 +129,8 @@ int main(int argc, char *argv[])
 				GetFlightPlanReader()->WaitForFlightPlans(&flightPlans);
 
 			for (vector<FlightPlan *>::iterator it = flightPlans.begin(); 
-				it != flightPlans.end(); it++) {
+				it != flightPlans.end(); it++) 
+			{
 
 				// Get flight plan data, and add it to the 
 				GeneratorFlightPlan flightPlan;

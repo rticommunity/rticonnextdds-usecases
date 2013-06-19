@@ -88,17 +88,17 @@ SOURCES_IDL = src/Generated/AirTrafficControl.cxx    \
           src/Generated/AirTrafficControlPlugin.cxx  \
           src/Generated/AirTrafficControlSupport.cxx
 
-FLIGHTSRC = src/FlightPlanPublisher/FlightPlanPublisherInterface.cxx \
-            src/FlightPlanPublisher/FlightPlanPublisher.cxx
+FLIGHTSRC = src/FlightPlanGenerator/FlightPlanPublisherInterface.cxx \
+            src/FlightPlanGenerator/FlightPlanGenerator.cxx
 
 TRACKSRC  = src/RadarGenerator/RadarInterface.cxx \
             src/RadarGenerator/TrackGenerator.cxx \
-            src/RadarGenerator/RadarApp.cxx
+            src/RadarGenerator/RadarGenerator.cxx
 
 GUISRC    = src/NetworkInterface.cxx \
             src/TrackPresenter.cxx \
             src/TrackGUI.cxx \
-            src/TrackApp.cxx 
+            src/TrackGuiApp.cxx 
 
 HEADERS_IDL = src/Generated/AirTrafficControl.h      \
           src/Generated/AirTrafficControlPlugin.h    \
@@ -109,31 +109,31 @@ DIRECTORIES   = objs.dir objs/$(ARCH).dir objs/$(ARCH)/FlightPlan.dir \
                 objs/$(ARCH)/Common.dir
 SOURCES_NODIR = $(notdir $(COMMONSRC)) $(notdir $(SOURCES_IDL))
 COMMONOBJS    = $(SOURCES_NODIR:%.cxx=objs/$(ARCH)/Common/%.o)
-EXEC          = FlightPlanPublisher
+EXEC          = FlightPlanGenerator
 
 FLIGHTSRC_NODIR = $(notdir $(FLIGHTSRC))
 FLIGHTOBJS    = $(FLIGHTSRC_NODIR:%.cxx=objs/$(ARCH)/FlightPlan/%.o) $(COMMONOBJS)
 
 TRACKSRC_NODIR = $(notdir $(TRACKSRC))
 RADAROBJS      = $(TRACKSRC_NODIR:%.cxx=objs/$(ARCH)/RadarGenerator/%.o) $(COMMONOBJS)
-RADAREXEC      = RadarApp
+RADAREXEC      = RadarGenerator
 
 GUISRC_NODIR = $(notdir $(GUISRC))
 GUIOBJS      = $(GUISRC_NODIR:%.cxx=objs/$(ARCH)/TrackGui/%.o) $(COMMONOBJS)
-GUIEXEC      = TrackApp 
+GUIEXEC      = TrackGuiApp
 
 ###############################################################################
 # Build Rules
 ###############################################################################
-$(ARCH): FlightPlanPublisher RadarApp TrackGui 
+$(ARCH): FlightPlanGenerator RadarGenerator TrackGuiApp 
 
-FlightPlanPublisher: $(DIRECTORIES) $(FLIGHTOBJS) $(EXEC:%=objs/$(ARCH)/FlightPlan/%.o) \
+FlightPlanGenerator: $(DIRECTORIES) $(FLIGHTOBJS) $(EXEC:%=objs/$(ARCH)/FlightPlan/%.o) \
 	$(EXEC:%=objs/$(ARCH)/FlightPlan/%.out)
 
-RadarApp: $(RADAROBJS) $(@:%=objs/$(ARCH)/RadarGenerator/%.o) \
+RadarGenerator: $(RADAROBJS) $(@:%=objs/$(ARCH)/RadarGenerator/%.o) \
 	 $(RADAREXEC:%=objs/$(ARCH)/RadarGenerator/%.out)
 
-TrackGui: $(GUIOBJS) $(@:%=objs/$(ARCH)/TrackGui/%.o) \
+TrackGuiApp: $(GUIOBJS) $(@:%=objs/$(ARCH)/TrackGui/%.o) \
 	 $(GUIEXEC:%=objs/$(ARCH)/TrackGui/%.out)
 
 # Building the flight plan application
@@ -155,7 +155,7 @@ objs/$(ARCH)/Common/%.o: src/CommonInfrastructure/%.cxx $(COMMON_H)
 objs/$(ARCH)/Common/%.o: src/Generated/%.cxx $(COMMON_H)
 	$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
 
-objs/$(ARCH)/FlightPlan/%.o: src/FlightPlanPublisher/%.cxx $(COMMON_H) $(HEADERS_IDL)
+objs/$(ARCH)/FlightPlan/%.o: src/FlightPlanGenerator/%.cxx $(COMMON_H) $(HEADERS_IDL)
 	$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
 
 objs/$(ARCH)/RadarGenerator/%.o: src/RadarGenerator/%.cxx $(COMMON_H)
