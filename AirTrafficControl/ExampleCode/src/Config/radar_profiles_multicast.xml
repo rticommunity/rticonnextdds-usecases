@@ -192,6 +192,10 @@ RTI Connext user manual.
                 <sec>0</sec>
                 <nanosec>10000000</nanosec>
               </fast_heartbeat_period>
+              <late_joiner_heartbeat_period>
+                <sec>0</sec>
+                <nanosec>50000000</nanosec>
+              </late_joiner_heartbeat_period>
             </rtps_reliable_writer>
           </protocol>
           

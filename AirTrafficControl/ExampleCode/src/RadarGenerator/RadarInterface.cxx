@@ -242,6 +242,16 @@ RadarWriter::RadarWriter(RadarInterface *netInterface,
 		_communicator->GetMaxFlightsToHandle();
 	writerQos.resource_limits.max_samples = 
 		_communicator->GetMaxFlightsToHandle();
+	writerQos.resource_limits.initial_samples = 
+		_communicator->GetMaxFlightsToHandle();
+	writerQos.resource_limits.initial_instances = 
+		_communicator->GetMaxFlightsToHandle();
+	if (_communicator->GetMaxFlightsToHandle() < 
+		writerQos.protocol.rtps_reliable_writer.heartbeats_per_max_samples)
+	{
+		writerQos.protocol.rtps_reliable_writer.heartbeats_per_max_samples
+				= _communicator->GetMaxFlightsToHandle();
+	}
 
 	// Create the DDS DataWriter object that sends data over the network (or
 	// shared memory)

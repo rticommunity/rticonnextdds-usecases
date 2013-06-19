@@ -67,17 +67,34 @@ int main(int argc, char *argv[])
 		} else if (0 == strcmp(argv[i], "--radar-id"))
 		{
 			++i;
+			if (i == argc)
+			{
+				cout << "Bad parameter: Did not pass a radar ID" << endl;
+				return -1;
+			}
 			radarId = atoi(argv[i]);
 		} else if (0 == strcmp(argv[i], "--max-tracks"))
 		{
 			// How many tracks can I handle?  Increasing this number will allow the 
 			// generator and the middleware to process more tracks.
 			++i;
+			if (i == argc)
+			{
+				cout << "Bad parameter: Did not pass a maximum number of tracks" 
+						<< endl;
+				return -1;
+			}
 			maxTracks = atoi(argv[i]);
 		} else if (0 == strcmp(argv[i], "--send-rate"))
 		{
 			// Should I be sending these in real time, faster, or slower?
 			++i;
+			if (i == argc)
+			{
+				cout << "Bad parameter: Did not pass a send rate" 
+						<< endl;
+				return -1;
+			}
 			sendRate = atoi(argv[i]);
 		}
 
