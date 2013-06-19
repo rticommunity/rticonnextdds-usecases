@@ -8,4 +8,4 @@ set Path=%NDDSHOME%\lib\i86Win32VS2010;%dir%\..\thirdparty\wxWidgets-2.9.4\lib\v
 
 cd %dir%\..\win32\Release\i86Win32VS2010\
 
-call %executable_name%
+call %executable_name% %*
