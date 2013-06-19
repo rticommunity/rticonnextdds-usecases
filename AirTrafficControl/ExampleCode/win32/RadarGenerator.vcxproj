@@ -236,7 +236,7 @@
     <ClCompile Include="..\src\Generated\AirTrafficControl.cxx" />
     <ClCompile Include="..\src\Generated\AirTrafficControlPlugin.cxx" />
     <ClCompile Include="..\src\Generated\AirTrafficControlSupport.cxx" />
-    <ClCompile Include="..\src\RadarGenerator\RadarApp.cxx" />
+    <ClCompile Include="..\src\RadarGenerator\RadarGenerator.cxx" />
     <ClCompile Include="..\src\RadarGenerator\RadarInterface.cxx" />
     <ClCompile Include="..\src\RadarGenerator\TrackGenerator.cxx" />
   </ItemGroup>

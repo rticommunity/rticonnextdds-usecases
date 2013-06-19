@@ -83,7 +83,7 @@
     <ClCompile Include="..\src\TrackGui\TrackPresenter.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\TrackGui\TrackApp.cxx">
+    <ClCompile Include="..\src\TrackGui\TrackGuiApp.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

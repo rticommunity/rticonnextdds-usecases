@@ -103,8 +103,8 @@
     <ClCompile Include="..\src\Generated\AirTrafficControlPlugin.cxx" />
     <ClCompile Include="..\src\Generated\AirTrafficControlSupport.cxx" />
     <ClCompile Include="..\src\TrackGui\NetworkInterface.cxx" />
-    <ClCompile Include="..\src\TrackGui\TrackApp.cxx" />
     <ClCompile Include="..\src\TrackGui\TrackGUI.cxx" />
+    <ClCompile Include="..\src\TrackGui\TrackGuiApp.cxx" />
     <ClCompile Include="..\src\TrackGui\TrackPresenter.cxx" />
   </ItemGroup>
   <ItemGroup>

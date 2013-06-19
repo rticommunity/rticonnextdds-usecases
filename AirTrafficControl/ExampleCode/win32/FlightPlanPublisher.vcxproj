@@ -101,7 +101,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\CommonInfrastructure\DDSCommunicator.cxx" />
-    <ClCompile Include="..\src\FlightPlanGenerator\FlightPlanPublisher.cxx" />
+    <ClCompile Include="..\src\FlightPlanGenerator\FlightPlanGenerator.cxx" />
     <ClCompile Include="..\src\FlightPlanGenerator\FlightPlanPublisherInterface.cxx" />
     <ClCompile Include="..\src\Generated\AirTrafficControl.cxx" />
     <ClCompile Include="..\src\Generated\AirTrafficControlPlugin.cxx" />
