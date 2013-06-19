@@ -61,10 +61,10 @@
     <ClCompile Include="..\src\CommonInfrastructure\DDSCommunicator.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\FlightPlanGenerator\FlightPlanPublisher.cxx">
+    <ClCompile Include="..\src\FlightPlanGenerator\FlightPlanPublisherInterface.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\FlightPlanGenerator\FlightPlanPublisherInterface.cxx">
+    <ClCompile Include="..\src\FlightPlanGenerator\FlightPlanGenerator.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
