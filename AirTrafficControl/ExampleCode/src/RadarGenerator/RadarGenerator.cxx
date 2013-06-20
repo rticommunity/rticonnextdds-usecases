@@ -55,6 +55,7 @@ int main(int argc, char *argv[])
     Duration_t expre = {4,0};
 	string setting;
 	RadarProfile profileToUse = LOW_LATENCY;
+	bool multicastAvailable = true;
 
 	for (int i = 0; i < argc; i++)
 	{
@@ -96,6 +97,9 @@ int main(int argc, char *argv[])
 				return -1;
 			}
 			sendRate = atoi(argv[i]);
+		} else if (0 == strcmp(argv[i], "--no-multicast"))
+		{
+			multicastAvailable = false;
 		}
 
 	}
@@ -104,13 +108,26 @@ int main(int argc, char *argv[])
 	// defined in USER_QOS_PROFILES.xml
 	vector<string> xmlFiles;
 
-	// Adding the XML files that contain profiles used by this application
-	xmlFiles.push_back(
-		"file://../../../src/Config/multicast_base_profile.xml");
-	xmlFiles.push_back(
-		"file://../../../src/Config/radar_profiles_multicast.xml");
-	xmlFiles.push_back(
-		"file://../../../src/Config/flight_plan_profiles_multicast.xml");
+	if (multicastAvailable)
+	{
+		// Adding the XML files that contain profiles used by this application
+		xmlFiles.push_back(
+			"file://../../../src/Config/base_profile_multicast.xml");
+		xmlFiles.push_back(
+			"file://../../../src/Config/radar_profiles_multicast.xml");
+		xmlFiles.push_back(
+			"file://../../../src/Config/flight_plan_profiles_multicast.xml");
+	}
+	else 
+	{
+		// Adding the XML files that contain profiles used by this application
+		xmlFiles.push_back(
+			"file://../../../src/Config/base_profile_no_multicast.xml");
+		xmlFiles.push_back(
+			"file://../../../src/Config/radar_profiles_no_multicast.xml");
+		xmlFiles.push_back(
+			"file://../../../src/Config/flight_plan_profiles_no_multicast.xml");
+	}
 
 	TrackGenerator *trackGenerator = NULL;
 	try { 

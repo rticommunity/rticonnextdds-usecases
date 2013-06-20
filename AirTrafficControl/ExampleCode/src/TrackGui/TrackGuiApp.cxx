@@ -26,7 +26,17 @@ using namespace std;
 bool TrackApp::OnInit() {
 
 	_shuttingDown = false;
+	bool multicastAvailable = true;
 
+	for (int i = 0; i < argc; i++)
+	{
+		if (0 == strcmp(argv[i], "--no-multicast"))
+		{
+			multicastAvailable = false;
+		}
+	}
+
+	// --- Setting the map file path --- //
 	string filePath;
 #ifdef RTI_WIN32
 	filePath = "..\\..\\..\\resource\\bayarea_county2000\\bayarea_county2000";
@@ -47,13 +57,26 @@ bool TrackApp::OnInit() {
 	// defined in USER_QOS_PROFILES.xml
 	vector<string> xmlFiles;
 
-	// Adding the XML files that contain profiles used by this application
-	xmlFiles.push_back(
-		"file://../../../src/Config/multicast_base_profile.xml");
-	xmlFiles.push_back(
-		"file://../../../src/Config/radar_profiles_multicast.xml");
-	xmlFiles.push_back(
-		"file://../../../src/Config/flight_plan_profiles_multicast.xml");
+	if (multicastAvailable)
+	{
+		// Adding the XML files that contain profiles used by this application
+		xmlFiles.push_back(
+			"file://../../../src/Config/base_profile_multicast.xml");
+		xmlFiles.push_back(
+			"file://../../../src/Config/radar_profiles_multicast.xml");
+		xmlFiles.push_back(
+			"file://../../../src/Config/flight_plan_profiles_multicast.xml");
+	}
+	else 
+	{
+		// Adding the XML files that contain profiles used by this application
+		xmlFiles.push_back(
+			"file://../../../src/Config/base_profile_no_multicast.xml");
+		xmlFiles.push_back(
+			"file://../../../src/Config/radar_profiles_no_multicast.xml");
+		xmlFiles.push_back(
+			"file://../../../src/Config/flight_plan_profiles_no_multicast.xml");
+	}
 	_netInterface = new NetworkInterface(xmlFiles);
 
 	// This class accesses the data that arrives over the network.  This 

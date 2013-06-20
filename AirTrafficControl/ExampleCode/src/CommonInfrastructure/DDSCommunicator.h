@@ -61,8 +61,8 @@ public:
 	//    other DDS applications over multicast, loopback, and shared memory.
 	// 3. Resource limits for the DomainParticipant
 	//
-	// For more information on participant QoS, see the USER_QOS_PROFILES.xml
-	// file
+	// For more information on participant QoS, see the .xml files in the 
+	// Config directory
 
 	// Creates a DomainParticipant with default QoS in domain 0
 	DDS::DomainParticipant* CreateParticipant();

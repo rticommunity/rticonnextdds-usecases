@@ -61,17 +61,31 @@ int main(int argc, char *argv[])
 
 	int numFlightPlans = 200;
 	int timeBetweenLandings = 5; // Five minutes
+	bool multicastAvailable = true;
 	for (int i = 0; i < argc; i++)
 	{
 		if (0 == strcmp(argv[i], "--num-plans"))
 		{
 			++i;
+			if (i == argc)
+			{
+				cout << "Bad parameter: Did not pass number of plans" << endl;
+				return -1;
+			}
 			numFlightPlans =  atoi(argv[i]);
 		} else if (0 == strcmp(argv[i], "--time-between"))
 		{
 			++i;
+			if (i == argc)
+			{
+				cout << "Bad parameter: Did not pass time between landing" << endl;
+				return -1;
+			}
 			timeBetweenLandings =  atoi(argv[i]);
-		}  
+		} else if (0 == strcmp(argv[i], "--no-multicast"))
+		{
+			multicastAvailable = false;
+		}
 
 	}
 	int airlineNum = 35;
@@ -89,17 +103,30 @@ int main(int argc, char *argv[])
 		"KBOS", "KDFW", "KDEN", "KJFK"};
 
 	// Tune the radar for low latency.  The two QoS profiles are 
-	// defined in USER_QOS_PROFILES.xml
+	// defined in radar_profiles_multicast.xml and 
+	// radar_profiles_no_multicast.xml
 	vector<string> xmlFiles;
 
-	// Adding the XML files that contain profiles used by this application
-	xmlFiles.push_back(
-		"file://../../../src/Config/multicast_base_profile.xml");
-	xmlFiles.push_back(
-		"file://../../../src/Config/radar_profiles_multicast.xml");
-	xmlFiles.push_back(
-		"file://../../../src/Config/flight_plan_profiles_multicast.xml");
-
+	if (multicastAvailable)
+	{
+		// Adding the XML files that contain profiles used by this application
+		xmlFiles.push_back(
+			"file://../../../src/Config/base_profile_multicast.xml");
+		xmlFiles.push_back(
+			"file://../../../src/Config/radar_profiles_multicast.xml");
+		xmlFiles.push_back(
+			"file://../../../src/Config/flight_plan_profiles_multicast.xml");
+	}
+	else 
+	{
+		// Adding the XML files that contain profiles used by this application
+		xmlFiles.push_back(
+			"file://../../../src/Config/base_profile_no_multicast.xml");
+		xmlFiles.push_back(
+			"file://../../../src/Config/radar_profiles_no_multicast.xml");
+		xmlFiles.push_back(
+			"file://../../../src/Config/flight_plan_profiles_no_multicast.xml");
+	}
 	try {
 
 		// This is the network interface for this application - this is what
