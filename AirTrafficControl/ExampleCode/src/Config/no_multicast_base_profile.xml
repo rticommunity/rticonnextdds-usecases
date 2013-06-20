@@ -71,7 +71,7 @@ RTI Connext user manual.
               <discovery>
                 <initial_peers>
                   <!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
-                  <!-- Insert the addresses here of the machines you want to contact -->
+                  <!-- Insert addresses here of machines you want to contact -->
                   <!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
                   <element>127.0.0.1</element>
                   <!-- <element>192.168.1.2</element>-->
