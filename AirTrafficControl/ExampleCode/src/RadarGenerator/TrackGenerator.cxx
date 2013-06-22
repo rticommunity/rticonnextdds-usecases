@@ -686,7 +686,7 @@ void TrackGenerator::GenerateTracks()
 
 	int circlePos = 0;
 	while (!IsShuttingDown())
-    {
+	{
 
 		double timeInMs = clockUpdatePeriod.nanosec / 1000000;
 

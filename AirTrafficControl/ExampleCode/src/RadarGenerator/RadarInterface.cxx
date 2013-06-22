@@ -458,6 +458,7 @@ void FlightPlanReader::WaitForFlightPlans(std::vector<FlightPlan *> *plans)
 	// How long to block for data at a time
 	DDS_Duration_t timeout = {1,0};
 
+	// Block thread for flight plan data to arrive
 	DDS_ReturnCode_t retcode = _waitSet->wait(activeConditions, timeout);
 
 	// May be normal to time out
@@ -466,7 +467,7 @@ void FlightPlanReader::WaitForFlightPlans(std::vector<FlightPlan *> *plans)
 	}
 	if (retcode != DDS_RETCODE_OK) {
 		std::stringstream errss;
-		errss << "WaitForFlightPlans(): error when receiving flight plans.";
+		errss << "WaitForFlightPlans(): error " << retcode << " when receiving flight plans.";
 		throw errss.str();
 	}
 
@@ -481,9 +482,11 @@ void FlightPlanReader::WaitForFlightPlans(std::vector<FlightPlan *> *plans)
 	retcode = _reader->take(flightPlans, sampleInfos, 
 		_communicator->GetMaxFlightsToHandle());
 
-	if (retcode != DDS_RETCODE_OK) {
+	if ((retcode != DDS_RETCODE_OK) && 
+                (retcode != DDS_RETCODE_NO_DATA)) 
+	{
 		std::stringstream errss;
-		errss << "WaitForFlightPlans(): error when retrieving flight plans.";
+		errss << "WaitForFlightPlans(): error " << retcode << " when retrieving flight plans.";
 		throw errss.str();
 	}
 

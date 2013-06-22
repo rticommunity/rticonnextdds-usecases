@@ -52,7 +52,6 @@ int main(int argc, char *argv[])
 	int sec = 0;
 	int sendRate = 1;
 	int maxTracks = 64;
-    Duration_t expre = {4,0};
 	string setting;
 	RadarProfile profileToUse = LOW_LATENCY;
 	bool multicastAvailable = true;
@@ -134,7 +133,8 @@ int main(int argc, char *argv[])
 
 		// This sets up the data interface for the radar - what data it sends
 		// and receives over the network, along with the quality of service
-		RadarInterface radarNetInterface(radarId, maxTracks,
+		RadarInterface *radarNetInterface
+					= new RadarInterface(radarId, maxTracks,
 								profileToUse, xmlFiles);
 
 
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
 		// track data. In this case, the listener will use the radar writer to
 		// write data when track data becomes available.
 		DDSRadarListener *radarListener = new DDSRadarListener(
-			radarNetInterface.GetRadarWriter(), radarId);
+			radarNetInterface->GetRadarWriter(), radarId);
 
 		// Adding a listener to the "track generator" that gets updates about 
 		// tracks being generated
@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
 			// Listen for updates to flight plans, and add them to the track 
 			// generator as they arrive
 			vector<com::rti::atc::generated::FlightPlan *> flightPlans;
-			radarNetInterface.
+			radarNetInterface->
 				GetFlightPlanReader()->WaitForFlightPlans(&flightPlans);
 
 			for (vector<FlightPlan *>::iterator it = flightPlans.begin(); 
@@ -179,14 +179,20 @@ int main(int argc, char *argv[])
 			}
 		}
 
+		// Remove the listener from the track generator to prevent crashes
 		trackGenerator->RemoveListener(radarListener);
+
+		// Shut down the track generator
 		trackGenerator->Shutdown();
+
+		// Delete the track generator
 		delete trackGenerator;
+		delete radarNetInterface;
 
 	}
 	catch (string message) 
 	{
-		cout << "Application exception" << message << endl;
+		cout << "Application exception " << message << endl;
 	}
 
 
