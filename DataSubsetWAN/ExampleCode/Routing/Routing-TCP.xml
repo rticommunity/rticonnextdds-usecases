@@ -1,0 +1,431 @@
+<?xml version="1.0"?>
+<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:noNamespaceSchemaLocation="c:/program files/rti/5.0.0/RTI_Routing_Service_5.0.0/resource/schema/rti_routing_service.xsd">
+
+    <qos_library name="RoutingLibrary">
+        <datareader_qos name="StateDataReader">
+
+            <!-- The Alarm topic is:  -->
+            <!--   1) Reliable        -->
+            <!--   2) Durable         -->
+            <!--   3) History of 1    -->
+            <reliability>
+                <kind>RELIABLE_RELIABILITY_QOS</kind>
+            </reliability>
+            <durability>
+                <kind>TRANSIENT_LOCAL_DURABILITY_QOS</kind>
+            </durability>
+            <history>
+                <kind>KEEP_LAST_HISTORY_QOS</kind>
+                <depth>1</depth>
+            </history>
+
+        </datareader_qos>
+        <datawriter_qos name="StateDataWriter">
+            <!-- The Alarm topic is:  -->
+            <!--   1) Reliable        -->
+            <!--   2) Durable         -->
+            <!--   3) History of 1    -->
+            <reliability>
+                <kind>RELIABLE_RELIABILITY_QOS</kind>
+            </reliability>
+            <durability>
+                <kind>TRANSIENT_LOCAL_DURABILITY_QOS</kind>
+            </durability>
+            <history>
+                <kind>KEEP_LAST_HISTORY_QOS</kind>
+                <depth>1</depth>
+            </history>
+        </datawriter_qos>
+
+        <!-- The Temperature topic is:  -->
+        <!-- 1) Best effort             -->
+        <datareader_qos name="SensorDataReader">
+            <reliability>
+                <kind>BEST_EFFORT_RELIABILITY_QOS</kind>
+            </reliability>
+        </datareader_qos>
+
+        <!-- The Temperature topic is:  -->
+        <!-- 1) Best effort             -->
+        <datawriter_qos name="SensorDataWriter">
+            <reliability>
+                <kind>BEST_EFFORT_RELIABILITY_QOS</kind>
+            </reliability>
+        </datawriter_qos>
+
+    </qos_library>
+
+    <!-- ****************************************************************** -->
+    <!-- Configuration file for RTI Routing Service showing usage of TCP    -->
+    <!-- ****************************************************************** -->
+
+    <routing_service name="Router1">
+
+        <annotation>
+            <documentation>
+                Routes all topics from one domain to second domain and the
+                other way around over TCP.
+                UDP side:  Sending to/receiving from everybody in domain 6
+                TCP side:  Sending to/receiving from machine with IP address
+                10.10.1.31:9400 on domain 0.  Please change this IP address to
+                one of your machines.  Local machine also listening on port
+                9400.
+            </documentation>
+        </annotation>
+
+
+        <domain_route name="DataDomain">
+
+
+            <!-- This routes from a local area network on domain 6 to a TCP -->
+            <!-- network on domain 0 -->
+            <participant_1>
+                <domain_id>6</domain_id>
+            </participant_1>
+
+            <participant_2>
+                <domain_id>0</domain_id>
+                <participant_qos>
+                    <!-- Turning off the shared memory and UDPv4/UDPv6 -->
+                    <!-- transports -->
+                    <transport_builtin>
+                        <mask>MASK_NONE</mask>
+                    </transport_builtin>
+                    <discovery>
+                        <initial_peers>
+                            <!--                                            -->
+                            <!-- CHANGE THIS TO THE MACHINE YOU WANT TO     -->
+                            <!-- CONTACT                                    -->
+                            <!--                                            -->
+                            <element>tcpv4_lan://10.10.1.31:9400</element>
+                        </initial_peers>
+                    </discovery>
+                    <property>
+                        <value>
+                            <element>
+                                <name>dds.transport.load_plugins</name>
+                                <value>dds.transport.TCPv4.tcp1</value>
+                            </element>
+                            <!--<element>
+                        <name>dds.transport.TCPv4.tcp1.logging_verbosity_bitmap</name>
+                        <value>0x9F</value>
+                        </element>-->
+                            <element>
+                                <name>dds.transport.TCPv4.tcp1.library</name>
+                                <value>nddstransporttcp</value>
+                            </element>
+                            <element>
+                                <name>dds.transport.TCPv4.tcp1.create_function</name>
+                                <value>NDDS_Transport_TCPv4_create</value>
+                            </element>
+                            <element>
+                                <name>dds.transport.TCPv4.tcp1.parent.classid</name>
+                                <value>NDDS_TRANSPORT_CLASSID_TCPV4_LAN</value>
+                            </element>
+                            <element>
+                                <name>dds.transport.TCPv4.tcp1.server_bind_port</name>
+                                <value>9400</value>
+                            </element>
+                        </value>
+                    </property>
+                </participant_qos>
+            </participant_2>
+
+            <session name="SessionForward">
+                <auto_topic_route name="AlarmForward">
+                    <publish_with_original_info>true</publish_with_original_info>
+                    <publish_with_original_timestamp>true</publish_with_original_timestamp>
+
+                    <!-- The DomainParticipant in domain 6 that uses UDP -->
+                    <input participant="1">
+                        <allow_topic_name_filter>*Alarm*</allow_topic_name_filter>
+                        <creation_mode>IMMEDIATE</creation_mode>
+
+                        <!-- The Alarm topic is:  -->
+                        <!--   1) Reliable        -->
+                        <!--   2) Durable         -->
+                        <!--   3) History of 1    -->
+                        <datareader_qos base_name="RoutingLibrary::StateDataReader">
+                        </datareader_qos>
+                    </input>
+
+                    <!-- The DomainParticipant that uses TCP in domain 0 -->
+                    <output>
+                        <allow_topic_name_filter>*Alarm*</allow_topic_name_filter>
+                        <creation_mode>IMMEDIATE</creation_mode>
+
+                        <!-- The Alarm topic is:  -->
+                        <!--   1) Reliable        -->
+                        <!--   2) Durable         -->
+                        <!--   3) History of 1    -->
+                        <datawriter_qos base_name="RoutingLibrary::StateDataWriter">
+                        </datawriter_qos>
+
+                    </output>
+                </auto_topic_route>
+                <auto_topic_route name="SensorForward">
+                    <publish_with_original_info>true</publish_with_original_info>
+                    <publish_with_original_timestamp>true</publish_with_original_timestamp>
+
+                    <!-- The DomainParticipant in domain 6 that uses UDP -->
+                    <input participant="1">
+                        <allow_topic_name_filter>*Temperature*</allow_topic_name_filter>
+                        <creation_mode>IMMEDIATE</creation_mode>
+
+                        <!-- The Temperature topic is:  -->
+                        <!-- 1) Best effort -->
+                        <datareader_qos base_name="RoutingLibrary::SensorDataReader">
+                        </datareader_qos>
+
+                    </input>
+
+                    <!-- The DomainParticipant that uses TCP in domain 0 -->
+                    <output>
+                        <allow_topic_name_filter>*Temperature*</allow_topic_name_filter>
+                        <creation_mode>IMMEDIATE</creation_mode>
+
+                        <!-- The Temperature topic is:  -->
+                        <!-- 1) Best effort             -->
+                        <datawriter_qos base_name="RoutingLibrary::SensorDataWriter">
+                        </datawriter_qos>
+                    </output>
+
+                </auto_topic_route>
+            </session>
+            <session name="SessionBackward">
+                <auto_topic_route name="AlarmBackward">
+                    <publish_with_original_info>true</publish_with_original_info>
+                    <publish_with_original_timestamp>true</publish_with_original_timestamp>
+
+                    <!-- The DomainParticipant that uses TCP in domain 0 -->
+                    <input participant="2">
+                        <allow_topic_name_filter>*Alarm*</allow_topic_name_filter>
+                        <creation_mode>IMMEDIATE</creation_mode>
+
+                        <!-- The Alarm topic is:  -->
+                        <!--   1) Reliable        -->
+                        <!--   2) Durable         -->
+                        <!--   3) History of 1    -->
+                        <datareader_qos base_name="RoutingLibrary::StateDataReader">
+                        </datareader_qos>
+
+                    </input>
+                    <!-- The DomainParticipant in domain 6 that uses UDP -->
+                    <output>
+                        <allow_topic_name_filter>*Alarm*</allow_topic_name_filter>
+                        <creation_mode>IMMEDIATE</creation_mode>
+
+                        <!-- The Alarm topic is:  -->
+                        <!--   1) Reliable        -->
+                        <!--   2) Durable         -->
+                        <!--   3) History of 1    -->
+                        <datawriter_qos base_name="RoutingLibrary::StateDataWriter">
+                        </datawriter_qos>
+
+                    </output>
+                </auto_topic_route>
+                <auto_topic_route name="SensorBackward">
+                    <publish_with_original_info>true</publish_with_original_info>
+                    <publish_with_original_timestamp>true</publish_with_original_timestamp>
+
+                    <!-- The DomainParticipant that uses TCP in domain 0 -->
+                    <input participant="2">
+                        <allow_topic_name_filter>*Temperature*</allow_topic_name_filter>
+                        <creation_mode>IMMEDIATE</creation_mode>
+
+                        <!-- The Temperature topic is:  -->
+                        <!-- 1) Best effort -->
+                        <datareader_qos base_name="RoutingLibrary::SensorDataReader">
+                        </datareader_qos>
+
+                    </input>
+                    <!-- The DomainParticipant in domain 6 that uses UDP -->
+                    <output>
+                        <allow_topic_name_filter>*Temperature*</allow_topic_name_filter>
+                        <creation_mode>IMMEDIATE</creation_mode>
+
+                        <!-- The Temperature topic is:  -->
+                        <!-- 1) Best effort -->
+                        <datawriter_qos base_name="RoutingLibrary::SensorDataWriter">
+                        </datawriter_qos>
+
+                    </output>
+
+                </auto_topic_route>
+            </session>
+
+
+        </domain_route>
+
+    </routing_service>
+
+    <routing_service name="Router2">
+
+        <annotation>
+            <documentation>
+                Routes all topics from one domain to second domain and the other way
+                around over TCP.
+                UDP side:  Sending to/receiving from everybody in domain 5
+                TCP side:  Sending to/receiving from machine with IP address
+                10.10.1.150:9400 on domain 0.  Please change this IP address to one of
+                your machines.  Local machine also listening on port 9400.
+            </documentation>
+        </annotation>
+        <domain_route name="DataDomain">
+            <!-- This routes from a local area network on domain 5 to a -->
+            <!-- TCP network on domain 0 -->
+            <participant_1>
+                <domain_id>5</domain_id>
+            </participant_1>
+
+            <participant_2>
+                <domain_id>0</domain_id>
+                <participant_qos>
+
+                    <!-- Turning off the shared memory and UDPv4/UDPv6 transports -->
+                    <transport_builtin>
+                        <mask>MASK_NONE</mask>
+                    </transport_builtin>
+
+                    <discovery>
+
+                        <initial_peers>
+                            <!--                                                -->
+                            <!-- CHANGE THIS TO THE MACHINE YOU WANT TO CONTACT -->
+                            <!--                                                -->
+                            <element>tcpv4_lan://10.10.1.150:9400</element>
+                        </initial_peers>
+                    </discovery>
+                    <property>
+                        <value>
+                            <element>
+                                <name>dds.transport.load_plugins</name>
+                                <value>dds.transport.TCPv4.tcp1</value>
+                            </element>
+                            <element>
+                                <name>dds.transport.TCPv4.tcp1.library</name>
+                                <value>nddstransporttcp</value>
+                            </element>
+                            <element>
+                                <name>dds.transport.TCPv4.tcp1.create_function</name>
+                                <value>NDDS_Transport_TCPv4_create</value>
+                            </element>
+                            <element>
+                                <name>dds.transport.TCPv4.tcp1.parent.classid</name>
+                                <value>NDDS_TRANSPORT_CLASSID_TCPV4_LAN</value>
+                            </element>
+                            <element>
+                                <name>dds.transport.TCPv4.tcp1.server_bind_port</name>
+                                <value>9400</value>
+                            </element>
+                        </value>
+                    </property>
+                </participant_qos>
+            </participant_2>
+
+            <session name="SessionForward">
+                <auto_topic_route name="AlarmForward">
+                    <publish_with_original_info>true</publish_with_original_info>
+                    <publish_with_original_timestamp>true</publish_with_original_timestamp>
+                    <input participant="1">
+                        <allow_topic_name_filter>*Alarm*</allow_topic_name_filter>
+                        <creation_mode>IMMEDIATE</creation_mode>
+
+                        <!-- The Alarm topic is:  -->
+                        <!--   1) Reliable        -->
+                        <!--   2) Durable         -->
+                        <!--   3) History of 1    -->
+                        <datareader_qos base_name="RoutingLibrary::StateDataReader">
+                        </datareader_qos>
+                    </input>
+                    <output>
+                        <allow_topic_name_filter>*Alarm*</allow_topic_name_filter>
+                        <creation_mode>IMMEDIATE</creation_mode>
+                        <!-- The Alarm topic is:  -->
+                        <!--   1) Reliable        -->
+                        <!--   2) Durable         -->
+                        <!--   3) History of 1    -->
+                        <datawriter_qos base_name="RoutingLibrary::StateDataWriter">
+                        </datawriter_qos>
+
+                    </output>
+                </auto_topic_route>
+                <auto_topic_route name="TemperatureForward">
+                    <publish_with_original_info>true</publish_with_original_info>
+                    <publish_with_original_timestamp>true</publish_with_original_timestamp>
+                    <input participant="1">
+                        <allow_topic_name_filter>*Temperature*</allow_topic_name_filter>
+                        <creation_mode>IMMEDIATE</creation_mode>
+
+                        <!-- The Temperature topic is:  -->
+                        <!--   1) Best effort           -->
+                        <datareader_qos base_name="RoutingLibrary::SensorDataReader">
+                        </datareader_qos>
+                    </input>
+                    <output>
+                        <allow_topic_name_filter>*Temperature*</allow_topic_name_filter>
+                        <creation_mode>IMMEDIATE</creation_mode>
+                        <!-- The Temperature topic is:  -->
+                        <!--   1) Best effort           -->
+                        <datawriter_qos base_name="RoutingLibrary::SensorDataWriter">
+                        </datawriter_qos>
+
+                    </output>
+                </auto_topic_route>
+            </session>
+            <session name="SessionBackward">
+                <auto_topic_route name="AllBackward">
+                    <publish_with_original_info>true</publish_with_original_info>
+                    <publish_with_original_timestamp>true</publish_with_original_timestamp>
+                    <input participant="2">
+                        <allow_topic_name_filter>*Alarm*</allow_topic_name_filter>
+                        <creation_mode>IMMEDIATE</creation_mode>
+                        <!-- The Alarm topic is:  -->
+                        <!--   1) Reliable        -->
+                        <!--   2) Durable         -->
+                        <!--   3) History of 1    -->
+                        <datareader_qos base_name="RoutingLibrary::StateDataReader">
+                        </datareader_qos>
+                    </input>
+
+                    <output>
+                        <allow_topic_name_filter>*Alarm*</allow_topic_name_filter>
+                        <creation_mode>IMMEDIATE</creation_mode>
+
+                        <!-- The Alarm topic is:  -->
+                        <!--   1) Reliable        -->
+                        <!--   2) Durable         -->
+                        <!--   3) History of 1    -->
+                        <datawriter_qos base_name="RoutingLibrary::StateDataWriter">
+                        </datawriter_qos>
+                    </output>
+                </auto_topic_route>
+                <auto_topic_route name="TemperatureForward">
+                    <publish_with_original_info>true</publish_with_original_info>
+                    <publish_with_original_timestamp>true</publish_with_original_timestamp>
+                    <input participant="2">
+                        <allow_topic_name_filter>*Temperature*</allow_topic_name_filter>
+                        <creation_mode>IMMEDIATE</creation_mode>
+
+                        <!-- The Temperature topic is:  -->
+                        <!--   1) Best effort           -->
+                        <datareader_qos base_name="RoutingLibrary::SensorDataReader">
+                        </datareader_qos>
+                    </input>
+                    <output>
+                        <allow_topic_name_filter>*Temperature*</allow_topic_name_filter>
+                        <creation_mode>IMMEDIATE</creation_mode>
+                        <!-- The Temperature topic is:  -->
+                        <!--   1) Best effort           -->
+                        <datawriter_qos base_name="RoutingLibrary::SensorDataWriter">
+                        </datawriter_qos>
+
+                    </output>
+                </auto_topic_route>
+            </session>
+
+        </domain_route>
+
+    </routing_service>
+</dds>
