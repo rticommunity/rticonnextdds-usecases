@@ -254,16 +254,12 @@
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\src\Idl\AirTrafficControl.idl">
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CALL "$(NDDSHOME)\..\rti_set_env_5.0.0.bat"
-rtiddsgen ..\src\Idl\AirTrafficControl.idl -replace -namespace -language C++ -d ..\src\Generated</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(NDDSHOME)"\scripts\rtiddsgen ..\src\Idl\AirTrafficControl.idl -replace -namespace -language C++ -d ..\src\Generated</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating .cxx files from IDL...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(InputDir)\..\Generated\$(InputName).h;$(InputDir)\..\Generated\$(InputName).cxx;$(InputDir)\..\Generated\$(InputName)Plugin.h;$(InputDir)\..\Generated\$(InputName)Plugin.cxx;$(InputDir)\..\Generated\$(InputName)Support.h;$(InputDir)\$(InputName)Support.cxx</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">CALL "$(NDDSHOME)\..\rti_set_env_5.0.0.bat"
-rtiddsgen ..\src\Idl\AirTrafficControl.idl -replace -namespace -language C++ -d ..\src\Generated</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">CALL "$(NDDSHOME)\..\rti_set_env_5.0.0.bat"
-rtiddsgen ..\src\Idl\AirTrafficControl.idl -replace -namespace -language C++ -d ..\src\Generated</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CALL "$(NDDSHOME)\..\rti_set_env_5.0.0.bat"
-rtiddsgen ..\src\Idl\AirTrafficControl.idl -replace -namespace -language C++ -d ..\src\Generated</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">"$(NDDSHOME)"\scripts\rtiddsgen ..\src\Idl\AirTrafficControl.idl -replace -namespace -language C++ -d ..\src\Generated</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">"$(NDDSHOME)"\scripts\rtiddsgen ..\src\Idl\AirTrafficControl.idl -replace -namespace -language C++ -d ..\src\Generated</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(NDDSHOME)"\scripts\rtiddsgen ..\src\Idl\AirTrafficControl.idl -replace -namespace -language C++ -d ..\src\Generated</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">Generating .cxx files from IDL...</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">Generating .cxx files from IDL...</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating .cxx files from IDL...</Message>
@@ -273,7 +269,9 @@ rtiddsgen ..\src\Idl\AirTrafficControl.idl -replace -namespace -language C++ -d 
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\src\Config\base_profile_multicast.xml" />
+    <None Include="..\src\Config\base_profile_multicast.xml">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="..\src\Config\base_profile_no_multicast.xml" />
     <None Include="..\src\Config\flight_plan_profiles_multicast.xml" />
     <None Include="..\src\Config\flight_plan_profiles_no_multicast.xml" />
