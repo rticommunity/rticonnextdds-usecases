@@ -1,10 +1,16 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C++ Express 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FlightPlanPublisher", "FlightPlanPublisher.vcxproj", "{FA2857A7-83A2-426C-82A5-87F5A54EECFF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FlightPlanGenerator", "FlightPlanPublisher.vcxproj", "{FA2857A7-83A2-426C-82A5-87F5A54EECFF}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TrackGUI", "TrackGUI.vcxproj", "{BF91B58A-6407-4AFE-A17D-8C541C298A4F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TrackGUIApp", "TrackGUI.vcxproj", "{BF91B58A-6407-4AFE-A17D-8C541C298A4F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A1C363CB-AD62-63EE-4470-90E215CEB3DB} = {A1C363CB-AD62-63EE-4470-90E215CEB3DB}
+	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RadarApp", "RadarGenerator.vcxproj", "{A1C363CB-AD62-63EE-4470-90E215CEB3DB}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RadarGenerator", "RadarGenerator.vcxproj", "{A1C363CB-AD62-63EE-4470-90E215CEB3DB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{FA2857A7-83A2-426C-82A5-87F5A54EECFF} = {FA2857A7-83A2-426C-82A5-87F5A54EECFF}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
