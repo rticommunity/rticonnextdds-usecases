@@ -74,9 +74,11 @@ RadarInterface::RadarInterface(long radarId, int maxFlights,
 	// Depending on what is passed in, choose one of two XML profiles to 
 	// use - either for best latency or higher throughput
 	libName = "RTIExampleQosLibrary";
-	if (profile == LOW_LATENCY) {
+	if (profile == LOW_LATENCY) 
+	{
 		profileName = "LowLatencyRadar";
-	} else if (profile == HIGH_THROUGHPUT) {
+	} else if (profile == HIGH_THROUGHPUT) 
+	{
 		profileName = "HighThroughputRadar";
 	}
 
@@ -88,7 +90,8 @@ RadarInterface::RadarInterface(long radarId, int maxFlights,
 	// on what the DomainParticipant is responsible for, and how to configure
 	// it, see the base class.
 	if (NULL == _communicator->CreateParticipant(0, qosFileNames, libName, 
-					profileName)) {
+					profileName)) 
+	{
 		std::stringstream errss;
 		errss << "Failed to create DomainParticipant object";
 		throw errss.str();
@@ -99,7 +102,8 @@ RadarInterface::RadarInterface(long radarId, int maxFlights,
 	// You do _not_ need to create one publisher per DataWriter.
 	Publisher *publisher = _communicator->CreatePublisher();
 
-	if (publisher == NULL) {
+	if (publisher == NULL) 
+	{
 		std::stringstream errss;
 		errss << "Failed to create Publisher object";
 		throw errss.str();
@@ -117,7 +121,8 @@ RadarInterface::RadarInterface(long radarId, int maxFlights,
 	// refer to the XML file.  
 	_radarWriter = new RadarWriter(this, publisher,
 		libName, profileName);
-	if (_radarWriter == NULL) { 
+	if (_radarWriter == NULL) 
+	{
 		std::stringstream errss;
 		errss << "Failed to create RadarWriter object";
 		throw errss.str();
@@ -127,7 +132,8 @@ RadarInterface::RadarInterface(long radarId, int maxFlights,
 	// Creating a DDS subscriber.  
 	// You do _not_ need to create one subscriber per DataReader.
 	Subscriber *subscriber = _communicator->CreateSubscriber();
-	if (subscriber == NULL) {
+	if (subscriber == NULL) 
+	{
 		std::stringstream errss;
 		errss << "Failed to create Subscriber object";
 		throw errss.str();
@@ -145,7 +151,8 @@ RadarInterface::RadarInterface(long radarId, int maxFlights,
 		"RTIExampleQosLibrary",
 		"FlightPlanStateData");
 
-	if (_FlightPlanReader == NULL) {
+	if (_FlightPlanReader == NULL) 
+	{
 		std::stringstream errss;
 		errss << "Failed to create FlightPlanReader object";
 		throw errss.str();
@@ -174,7 +181,8 @@ RadarWriter::RadarWriter(RadarInterface *netInterface,
 						char *qosProfile) {
 	ReturnCode_t retcode;
 
-	if (netInterface == NULL) {
+	if (netInterface == NULL) 
+	{
 		std::stringstream errss;
 		errss << "RadarWriter(): Bad parameter app";
 		throw errss.str();
@@ -186,7 +194,8 @@ RadarWriter::RadarWriter(RadarInterface *netInterface,
 	DomainParticipant *participant = 
 		netInterface->GetCommunicator()->GetParticipant();
 		
-	if (participant == NULL) {
+	if (participant == NULL) 
+	{
 		std::stringstream errss;
 		errss << "RadarWriter(): participant has not been created";
 		throw errss.str();
@@ -233,7 +242,8 @@ RadarWriter::RadarWriter(RadarInterface *netInterface,
 	retcode = TheParticipantFactory->get_datawriter_qos_from_profile(writerQos,
 											qosLibrary, qosProfile);
 
-	if (retcode != DDS_RETCODE_OK) {
+	if (retcode != DDS_RETCODE_OK) 
+	{
 		std::stringstream errss;
 		errss << "RadarWriter(): failure to get writer Qos. Bad names?";
 		throw errss.str();
@@ -263,7 +273,8 @@ RadarWriter::RadarWriter(RadarInterface *netInterface,
 	// You cannot use a generic DataWriter to write data, you must cast it to
 	// your type-specific DataWriter - in this case, a TrackDataWriter.
 	_trackWriter = TrackDataWriter::narrow(ddsWriter);
-	if (_trackWriter == NULL) {
+	if (_trackWriter == NULL) 
+	{
 		std::stringstream errss;
 		errss << "RadarWriter(): failure to create writer. Inconsistent Qos?";
 		throw errss.str();
@@ -302,7 +313,8 @@ void RadarWriter::PublishTrack(DdsAutoType<Track> &track)
 	// Write the track data onto the network (or over shared memory)
 	DDS_ReturnCode_t retcode = _trackWriter->write(track, handle);
 
-	if (retcode != RETCODE_OK) {
+	if (retcode != RETCODE_OK) 
+	{
 		std::stringstream errss;
 		errss << "Write failure - resource limits hit?";
 		throw errss.str();
@@ -332,7 +344,8 @@ void RadarWriter::DeleteTrack(DdsAutoType<Track> &track)
 	DDS_ReturnCode_t retcode = 
 		_trackWriter->dispose(track, handle);
 
-	if (retcode != RETCODE_OK) {
+	if (retcode != RETCODE_OK) 
+	{
 		std::stringstream errss;
 		errss << "Write failure - resource limits hit?";
 		throw errss.str();
@@ -346,7 +359,8 @@ FlightPlanReader::FlightPlanReader(RadarInterface *comm, Subscriber *sub,
 										char *qosLibrary, char *qosProfile) 
 {
 
-	if (comm == NULL) {
+	if (comm == NULL) 
+	{
 		std::stringstream errss;
 		errss << "FlightPlanReader(): bad parameter \"app\"";
 		throw errss.str();
@@ -378,7 +392,8 @@ FlightPlanReader::FlightPlanReader(RadarInterface *comm, Subscriber *sub,
 	 // Down casting to the type-specific reader
 	 _reader = FlightPlanDataReader::narrow(reader);
 	_waitSet = new WaitSet();
-	if (_waitSet == NULL) {
+	if (_waitSet == NULL) 
+	{
 		std::stringstream errss;
 		errss << "FlightPlanReader(): failure to create WaitSet.";
 		throw errss.str();
@@ -393,7 +408,8 @@ FlightPlanReader::FlightPlanReader(RadarInterface *comm, Subscriber *sub,
 	// rejected
 	_condition->set_enabled_statuses(DDS_SAMPLE_LOST_STATUS | 
 		DDS_SAMPLE_REJECTED_STATUS | DDS_DATA_AVAILABLE_STATUS);
-	if (_condition == NULL) {
+	if (_condition == NULL) 
+	{
 		std::stringstream errss;
 		errss << "FlightPlanReader(): failure to initialize condition.";
 		throw errss.str();
@@ -462,10 +478,12 @@ void FlightPlanReader::WaitForFlightPlans(std::vector<FlightPlan *> *plans)
 	DDS_ReturnCode_t retcode = _waitSet->wait(activeConditions, timeout);
 
 	// May be normal to time out
-	if (retcode == DDS_RETCODE_TIMEOUT) {
+	if (retcode == DDS_RETCODE_TIMEOUT) 
+	{
 		return;
 	}
-	if (retcode != DDS_RETCODE_OK) {
+	if (retcode != DDS_RETCODE_OK) 
+	{
 		std::stringstream errss;
 		errss << "WaitForFlightPlans(): error " << retcode << " when receiving flight plans.";
 		throw errss.str();
@@ -495,8 +513,10 @@ void FlightPlanReader::WaitForFlightPlans(std::vector<FlightPlan *> *plans)
 	// is only one entry per flight.  So if a flight plan for a particular 
 	// flight has been changed 10 times, we will  only be maintaining the most 
 	// recent update to that flight plan in the middleware queue.
-	for (int i = 0; i < flightPlans.length(); i++) {
-		if (sampleInfos[i].valid_data) {
+	for (int i = 0; i < flightPlans.length(); i++) 
+	{
+		if (sampleInfos[i].valid_data) 
+		{
 
 			// Making copies of this type for clean API because we do not need lowest latency for flight plan data
 			plans->push_back(new FlightPlan(flightPlans[i]));

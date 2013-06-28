@@ -49,7 +49,8 @@ NetworkInterface::NetworkInterface(
 	// it, see the base class.
 	if (NULL == _communicator->CreateParticipant(0, qosFileNames, 
 									"RTIExampleQosLibrary", 
-									"HighThroughputRadar")) {
+									"HighThroughputRadar")) 
+	{
 		std::stringstream errss;
 		errss << "Failed to create DomainParticipant object";
 		throw errss.str();
@@ -110,7 +111,8 @@ FlightPlanReader::FlightPlanReader(NetworkInterface *app,
 
 	_mutex = new OSMutex();
 
-	if (app == NULL) {
+	if (app == NULL) 
+	{
 		std::stringstream errss;
 		errss << "FlightPlanReader(): bad parameter \"app\"";
 		throw errss.str();
@@ -143,7 +145,8 @@ FlightPlanReader::FlightPlanReader(NetworkInterface *app,
 	 // Down casting to the type-specific reader
 	 _fpReader = FlightPlanDataReader::narrow(reader);
 	_waitSet = new WaitSet();
-	if (_waitSet == NULL) {
+	if (_waitSet == NULL) 
+	{
 		std::stringstream errss;
 		errss << "FlightPlanReader(): failure to create WaitSet.";
 		throw errss.str();
@@ -170,7 +173,8 @@ FlightPlanReader::FlightPlanReader(NetworkInterface *app,
 	_condition = _fpReader->get_statuscondition();
 	_condition->set_enabled_statuses(DDS_SAMPLE_LOST_STATUS | 
 		DDS_SAMPLE_REJECTED_STATUS | DDS_DATA_AVAILABLE_STATUS);
-	if (_condition == NULL) {
+	if (_condition == NULL) 
+	{
 		std::stringstream errss;
 		errss << "FlightPlanReader(): failure to initialize condition.";
 		throw errss.str();
@@ -288,7 +292,8 @@ TrackReader::TrackReader(NetworkInterface *app,
 	_mutex = new OSMutex();
 	ReturnCode_t retcode;
 
-	if (app == NULL) {
+	if (app == NULL) 
+	{
 		std::stringstream errss;
 		errss << "FlightPlanReader(): bad parameter \"app\"";
 		throw errss.str();
@@ -299,7 +304,8 @@ TrackReader::TrackReader(NetworkInterface *app,
 	const char *typeName = TrackTypeSupport::get_type_name();
 	retcode = TrackTypeSupport::register_type(
 			_app->GetCommunicator()->GetParticipant(), typeName);
-	if (retcode != RETCODE_OK) {
+	if (retcode != RETCODE_OK) 
+	{
 		std::stringstream errss;
 		errss << "TrackReader(): failure to register type. Registered twice?";
 		throw errss.str();
@@ -329,7 +335,8 @@ TrackReader::TrackReader(NetworkInterface *app,
 	 // Down casting to the type-specific reader
 	 _reader = TrackDataReader::narrow(reader);
 	_waitSet = new WaitSet();
-	if (_waitSet == NULL) {
+	if (_waitSet == NULL) 
+	{
 		std::stringstream errss;
 		errss << "FlightPlanReader(): failure to create WaitSet.";
 		throw errss.str();
@@ -338,7 +345,8 @@ TrackReader::TrackReader(NetworkInterface *app,
 	_condition = _reader->get_statuscondition();
 	_condition->set_enabled_statuses(DDS_SAMPLE_LOST_STATUS | 
 		DDS_SAMPLE_REJECTED_STATUS | DDS_DATA_AVAILABLE_STATUS);
-	if (_condition == NULL) {
+	if (_condition == NULL) 
+	{
 		std::stringstream errss;
 		errss << "FlightPlanReader(): failure to initialize condition.";
 		throw errss.str();
@@ -447,7 +455,8 @@ void TrackReader::WaitForTracks(std::vector<Track *> *tracks) {
 	retcode = _reader->read(trackSeq, sampleInfos);
 
 	if (retcode != DDS_RETCODE_NO_DATA &&
-		retcode != DDS_RETCODE_OK) {
+		retcode != DDS_RETCODE_OK) 
+	{
 		std::stringstream errss;
 		errss << "WaitForTracks(): error when retrieving flight plans.";
 		_mutex->Unlock();
@@ -459,8 +468,10 @@ void TrackReader::WaitForTracks(std::vector<Track *> *tracks) {
 	// is only one entry per flight.  So if a flight plan for a particular 
 	// flight has been changed 10 times, we will  only be maintaining the most 
 	// recent update to that flight plan in the middleware queue.
-	for (int i = 0; i < trackSeq.length(); i++) {
-		if (sampleInfos[i].valid_data) {
+	for (int i = 0; i < trackSeq.length(); i++) 
+	{
+		if (sampleInfos[i].valid_data) 
+		{
 			SampleInfo info = sampleInfos[i];
 
 			// Making copies of this type for clean API because we do not need 
@@ -495,7 +506,8 @@ void TrackReader::GetCurrentTracks(std::vector<Track *> *tracks)
 	DDS_ReturnCode_t retcode = _reader->read(trackSeq, sampleInfos);
 
 	if (retcode != DDS_RETCODE_NO_DATA &&
-		retcode != DDS_RETCODE_OK) {
+		retcode != DDS_RETCODE_OK) 
+	{
 		std::stringstream errss;
 		errss << "WaitForTracks(): error when retrieving flight plans.";
 		_mutex->Unlock();
@@ -507,8 +519,10 @@ void TrackReader::GetCurrentTracks(std::vector<Track *> *tracks)
 	// is only one entry per flight.  So if a flight plan for a particular 
 	// flight has been changed 10 times, we will  only be maintaining the most 
 	// recent update to that flight plan in the middleware queue.
-	for (int i = 0; i < trackSeq.length(); i++) {
-		if (sampleInfos[i].valid_data) {
+	for (int i = 0; i < trackSeq.length(); i++) 
+	{
+		if (sampleInfos[i].valid_data) 
+		{
 			SampleInfo info = sampleInfos[i];
 			// Currently we are allocating and copying the data, though in the 
 			// future, we may change to pre-allocating.

@@ -97,14 +97,17 @@ RTI Connext user manual.
       <qos_profile name="OneToManyMulticast" base_name="MaxTransportThroughput">
 
         <datareader_qos>
-          <multicast>
+            <!-- Uncomment this to enable user data over multicast.  This is 
+               commented out for systems that do not have multicast, or 
+               with switches that block some multicast traffic -->
+          <!--<multicast>
             <value>
               <element>
-                <!-- Must be a valid multicast address-->
-                <receive_address>239.255.5.1</receive_address>
+                <!- - Must be a valid multicast address- ->
+                  <receive_address>239.255.5.1</receive_address>
               </element>
             </value>
-          </multicast>
+          </multicast>-->
         </datareader_qos>
       </qos_profile>
 

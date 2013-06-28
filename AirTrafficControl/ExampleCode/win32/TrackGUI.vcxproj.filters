@@ -88,17 +88,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\src\Config\flight_plan_profiles_multicast.xml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\src\Config\multicast_base_profile.xml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\src\Config\radar_profiles_multicast.xml">
-      <Filter>Resource Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <CustomBuild Include="..\src\Idl\AirTrafficControl.idl">
       <Filter>IDL</Filter>
     </CustomBuild>
@@ -107,5 +96,25 @@
     <ResourceCompile Include="..\resource\gui\TrackGuiApp.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\src\Config\base_profile_multicast.xml">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\src\Config\base_profile_no_multicast.xml">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\src\Config\flight_plan_profiles_multicast.xml">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\src\Config\flight_plan_profiles_no_multicast.xml">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\src\Config\radar_profiles_multicast.xml">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\src\Config\radar_profiles_no_multicast.xml">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

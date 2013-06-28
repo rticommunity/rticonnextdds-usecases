@@ -89,10 +89,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="..\src\Config\flight_plan_profiles_multicast.xml" />
-    <None Include="..\src\Config\multicast_base_profile.xml" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\src\CommonInfrastructure\DDSCommunicator.h" />
     <ClInclude Include="..\src\FlightPlanGenerator\FlightPlanPublisherInterface.h" />
     <ClInclude Include="..\src\Generated\AirTrafficControl.h" />
@@ -118,6 +114,14 @@ rtiddsgen ..\src\Idl\AirTrafficControl.idl -replace -namespace -language C++ -d 
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating .cxx files from IDL...</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating .cxx files from IDL...</Message>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\src\Config\base_profile_multicast.xml" />
+    <None Include="..\src\Config\base_profile_no_multicast.xml" />
+    <None Include="..\src\Config\flight_plan_profiles_multicast.xml" />
+    <None Include="..\src\Config\flight_plan_profiles_no_multicast.xml" />
+    <None Include="..\src\Config\radar_profiles_multicast.xml" />
+    <None Include="..\src\Config\radar_profiles_no_multicast.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
