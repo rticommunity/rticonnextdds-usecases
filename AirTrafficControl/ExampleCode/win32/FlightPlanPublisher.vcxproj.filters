@@ -13,43 +13,16 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="GeneratedHeaders">
-      <UniqueIdentifier>{b12335e8-a5b5-4851-9977-ab0a8dd5d90e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="GeneratedSource">
-      <UniqueIdentifier>{4e8ac4f9-fde3-4ba1-96d5-22dfa19a4646}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="IDL">
-      <UniqueIdentifier>{f7246b1a-6bb9-4818-ad6a-568784a51051}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\CommonInfrastructure\DDSCommunicator.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Generated\AirTrafficControl.h">
-      <Filter>GeneratedHeaders</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Generated\AirTrafficControlPlugin.h">
-      <Filter>GeneratedHeaders</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Generated\AirTrafficControlSupport.h">
-      <Filter>GeneratedHeaders</Filter>
     </ClInclude>
     <ClInclude Include="..\src\FlightPlanGenerator\FlightPlanPublisherInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\Generated\AirTrafficControl.cxx">
-      <Filter>GeneratedSource</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\Generated\AirTrafficControlPlugin.cxx">
-      <Filter>GeneratedSource</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\Generated\AirTrafficControlSupport.cxx">
-      <Filter>GeneratedSource</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\CommonInfrastructure\DDSCommunicator.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -59,11 +32,6 @@
     <ClCompile Include="..\src\FlightPlanGenerator\FlightPlanGenerator.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="..\src\Idl\AirTrafficControl.idl">
-      <Filter>IDL</Filter>
-    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\Config\base_profile_multicast.xml">

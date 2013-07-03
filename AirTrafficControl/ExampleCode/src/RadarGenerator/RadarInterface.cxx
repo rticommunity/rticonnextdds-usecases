@@ -406,8 +406,7 @@ FlightPlanReader::FlightPlanReader(RadarInterface *comm, Subscriber *sub,
 	//
 	// Wake up the thread when data is available, data is lost, or data is
 	// rejected
-	_condition->set_enabled_statuses(DDS_SAMPLE_LOST_STATUS | 
-		DDS_SAMPLE_REJECTED_STATUS | DDS_DATA_AVAILABLE_STATUS);
+	_condition->set_enabled_statuses(DDS_DATA_AVAILABLE_STATUS);
 	if (_condition == NULL) 
 	{
 		std::stringstream errss;
