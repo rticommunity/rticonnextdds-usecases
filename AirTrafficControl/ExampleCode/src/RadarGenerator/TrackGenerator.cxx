@@ -679,8 +679,8 @@ void TrackGenerator::GenerateTracks()
 
 	double sendRateSec = _sec / _sendRate;
 	double sendRateNanosec = _nanosec / _sendRate;
-	DDS::Duration_t actualSleepTime = {sendRateSec,
-		sendRateNanosec};
+	DDS::Duration_t actualSleepTime = {(long)sendRateSec,
+		(unsigned long)sendRateNanosec};
 	int timeSinceFirstCreation = 0;
 
 
@@ -691,7 +691,7 @@ void TrackGenerator::GenerateTracks()
 		double timeInMs = clockUpdatePeriod.nanosec / 1000000;
 
 		// Every sixty seconds of "clock time" which may be sped up
-		long trackCreationRate = 60000 / timeInMs;
+		long trackCreationRate = (long) (60000 / timeInMs);
 
 		if (GetActiveTrackNumber() == 0  ||
 			((timeToCreateTrack > trackCreationRate ) && 
