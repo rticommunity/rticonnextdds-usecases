@@ -8,8 +8,6 @@ objs/
 *.com
 *.class
 *.o
-*.dylib
-*.html
 
 # Packages #
 ############
