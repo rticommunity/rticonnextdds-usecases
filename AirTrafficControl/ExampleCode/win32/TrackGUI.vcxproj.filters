@@ -13,15 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="GeneratedSource">
-      <UniqueIdentifier>{1731d1fe-5a9e-4e2f-88a9-92fe7ec8daae}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="GeneratedHeaders">
-      <UniqueIdentifier>{62b9b47f-5b55-4657-b8e6-a17ffb41e89a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="IDL">
-      <UniqueIdentifier>{6baada7f-54dc-4254-9f7f-612191763388}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\TrackGui\NetworkInterface.h">
@@ -35,15 +26,6 @@
     </ClInclude>
     <ClInclude Include="..\src\CommonInfrastructure\OSAPI.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Generated\AirTrafficControl.h">
-      <Filter>GeneratedHeaders</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Generated\AirTrafficControlPlugin.h">
-      <Filter>GeneratedHeaders</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Generated\AirTrafficControlSupport.h">
-      <Filter>GeneratedHeaders</Filter>
     </ClInclude>
     <ClInclude Include="..\src\TrackGui\FlightInfo.h">
       <Filter>Header Files</Filter>
@@ -65,15 +47,6 @@
     <ClCompile Include="..\src\TrackGui\NetworkInterface.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Generated\AirTrafficControl.cxx">
-      <Filter>GeneratedSource</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\Generated\AirTrafficControlPlugin.cxx">
-      <Filter>GeneratedSource</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\Generated\AirTrafficControlSupport.cxx">
-      <Filter>GeneratedSource</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\TrackGui\TrackGUI.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -86,11 +59,6 @@
     <ClCompile Include="..\src\TrackGui\TrackGuiApp.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="..\src\Idl\AirTrafficControl.idl">
-      <Filter>IDL</Filter>
-    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resource\gui\TrackGuiApp.rc">

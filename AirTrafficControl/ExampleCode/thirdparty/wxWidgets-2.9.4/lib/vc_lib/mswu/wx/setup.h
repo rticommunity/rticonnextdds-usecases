@@ -565,22 +565,22 @@
 #define wxUSE_FILESYSTEM    1
 
 // Set to 1 to enable virtual ZIP filesystem (requires wxUSE_FILESYSTEM)
-#define wxUSE_FS_ZIP        1
+#define wxUSE_FS_ZIP        0
 
 // Set to 1 to enable virtual archive filesystem (requires wxUSE_FILESYSTEM)
-#define wxUSE_FS_ARCHIVE    1
+#define wxUSE_FS_ARCHIVE    0
 
 // Set to 1 to enable virtual Internet filesystem (requires wxUSE_FILESYSTEM)
-#define wxUSE_FS_INET       1
+#define wxUSE_FS_INET       0
 
 // wxArchive classes for accessing archives such as zip and tar
-#define wxUSE_ARCHIVE_STREAMS     1
+#define wxUSE_ARCHIVE_STREAMS     0
 
 // Set to 1 to compile wxZipInput/OutputStream classes.
-#define wxUSE_ZIPSTREAM     1
+#define wxUSE_ZIPSTREAM     0
 
 // Set to 1 to compile wxTarInput/OutputStream classes.
-#define wxUSE_TARSTREAM     1
+#define wxUSE_TARSTREAM     0
 
 // Set to 1 to compile wxZlibInput/OutputStream classes. Also required by
 // wxUSE_LIBPNG
@@ -616,12 +616,12 @@
 #define wxUSE_PROTOCOL 1
 
 // The settings for the individual URL schemes
-#define wxUSE_PROTOCOL_FILE 1
-#define wxUSE_PROTOCOL_FTP 1
-#define wxUSE_PROTOCOL_HTTP 1
+#define wxUSE_PROTOCOL_FILE 0
+#define wxUSE_PROTOCOL_FTP 0
+#define wxUSE_PROTOCOL_HTTP 0
 
 // Define this to use wxURL class.
-#define wxUSE_URL 1
+#define wxUSE_URL 0
 
 // Define this to use native platform url and protocol support.
 // Currently valid only for MS-Windows.
@@ -671,14 +671,14 @@
 // Default is 1.
 //
 // Recommended setting: 1
-#define wxUSE_MEDIACTRL     1
+#define wxUSE_MEDIACTRL     0
 
 // Use wxWidget's XRC XML-based resource system.  Recommended.
 //
 // Default is 1
 //
 // Recommended setting: 1 (requires wxUSE_XML)
-#define wxUSE_XRC       1
+#define wxUSE_XRC       0
 
 // XML parsing classes. Note that their API will change in the future, so
 // using wxXmlDocument and wxXmlNode in your app is not recommended.
@@ -693,35 +693,35 @@
 // Default is 1
 //
 // Recommended setting: 1
-#define wxUSE_AUI       1
+#define wxUSE_AUI       0
 
 // Use wxWidget's Ribbon classes for interfaces
 //
 // Default is 1
 //
 // Recommended setting: 1
-#define wxUSE_RIBBON    1
+#define wxUSE_RIBBON    0
 
 // Use wxPropertyGrid.
 //
 // Default is 1
 //
 // Recommended setting: 1
-#define wxUSE_PROPGRID  1
+#define wxUSE_PROPGRID  0
 
 // Use wxStyledTextCtrl, a wxWidgets implementation of Scintilla.
 //
 // Default is 1
 //
 // Recommended setting: 1
-#define wxUSE_STC 1
+#define wxUSE_STC 0
 
 // Use wxWidget's web viewing classes
 //
 // Default is 1
 //
 // Recommended setting: 1
-#define wxUSE_WEBVIEW 1
+#define wxUSE_WEBVIEW 0
 
 // Use the IE wxWebView backend
 //
@@ -900,6 +900,7 @@
 // Recommended setting: 1 (there is no advantage in using the generic one)
 #define wxUSE_NATIVE_STATUSBAR        1
 
+
 // wxToolBar related settings: if wxUSE_TOOLBAR is 0, don't compile any toolbar
 // classes at all. Otherwise, use the native toolbar class unless
 // wxUSE_TOOLBAR_NATIVE is 0.
@@ -1038,7 +1039,7 @@
 // the GTK+ stock icons replaces it so it is normally not necessary.
 //
 // Recommended setting: 1 but can be turned off to reduce the library size.
-#define wxUSE_ARTPROVIDER_TANGO 1
+#define wxUSE_ARTPROVIDER_TANGO 0
 
 // Hotkey support (currently Windows only)
 #define wxUSE_HOTKEY 1
@@ -1306,7 +1307,7 @@
 //
 // Recommended setting: 1 if you intend to use OpenGL, can be safely set to 0
 // otherwise.
-#define wxUSE_GLCANVAS       1
+#define wxUSE_GLCANVAS       0
 
 // wxRichTextCtrl allows editing of styled text.
 //
@@ -1314,7 +1315,7 @@
 //
 // Recommended setting: 1, set to 0 if you want compile a
 // smaller library.
-#define wxUSE_RICHTEXT       1
+#define wxUSE_RICHTEXT       0
 
 // ----------------------------------------------------------------------------
 // Data transfer
@@ -1409,7 +1410,7 @@
 
 // Set to 1 to compile in support for wxSVGFileDC, a wxDC subclass which allows
 // to create files in SVG (Scalable Vector Graphics) format.
-#define wxUSE_SVG 1
+#define wxUSE_SVG 0
 
 // Should wxDC provide SetTransformMatrix() and related methods?
 //
@@ -1440,28 +1441,28 @@
 #define wxUSE_LIBPNG        1
 
 // Set to 1 for JPEG format support (requires libjpeg)
-#define wxUSE_LIBJPEG       1
+#define wxUSE_LIBJPEG       0
 
 // Set to 1 for TIFF format support (requires libtiff)
-#define wxUSE_LIBTIFF       1
+#define wxUSE_LIBTIFF       0
 
 // Set to 1 for TGA format support (loading only)
-#define wxUSE_TGA           1
+#define wxUSE_TGA           0
 
 // Set to 1 for GIF format support
 #define wxUSE_GIF           1
 
 // Set to 1 for PNM format support
-#define wxUSE_PNM           1
+#define wxUSE_PNM           0
 
 // Set to 1 for PCX format support
-#define wxUSE_PCX           1
+#define wxUSE_PCX           0
 
 // Set to 1 for IFF format support (Amiga format)
 #define wxUSE_IFF           0
 
 // Set to 1 for XPM format support
-#define wxUSE_XPM           1
+#define wxUSE_XPM           0
 
 // Set to 1 for MS Icons and Cursors format support
 #define wxUSE_ICO_CUR       1

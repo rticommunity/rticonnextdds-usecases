@@ -41,11 +41,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)$(Configuration)\i86Win32VS2010\</OutDir>
-    <IntDir>$(Configuration)\i86Win32VS2010\</IntDir>
+    <IntDir>$(Configuration)\i86Win32VS2010\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)$(Configuration)\i86Win32VS2010\</OutDir>
+    <IntDir>$(Configuration)\i86Win32VS2010\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -91,27 +92,11 @@
   <ItemGroup>
     <ClInclude Include="..\src\CommonInfrastructure\DDSCommunicator.h" />
     <ClInclude Include="..\src\FlightPlanGenerator\FlightPlanPublisherInterface.h" />
-    <ClInclude Include="..\src\Generated\AirTrafficControl.h" />
-    <ClInclude Include="..\src\Generated\AirTrafficControlPlugin.h" />
-    <ClInclude Include="..\src\Generated\AirTrafficControlSupport.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\CommonInfrastructure\DDSCommunicator.cxx" />
     <ClCompile Include="..\src\FlightPlanGenerator\FlightPlanGenerator.cxx" />
     <ClCompile Include="..\src\FlightPlanGenerator\FlightPlanPublisherInterface.cxx" />
-    <ClCompile Include="..\src\Generated\AirTrafficControl.cxx" />
-    <ClCompile Include="..\src\Generated\AirTrafficControlPlugin.cxx" />
-    <ClCompile Include="..\src\Generated\AirTrafficControlSupport.cxx" />
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="..\src\Idl\AirTrafficControl.idl">
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(NDDSHOME)"\scripts\rtiddsgen ..\src\Idl\AirTrafficControl.idl -replace -namespace -language C++ -d ..\src\Generated</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(InputDir)\..\Generated\$(InputName).h;$(InputDir)\..\Generated\$(InputName).cxx;$(InputDir)\..\Generated\$(InputName)Plugin.h;$(InputDir)\..\Generated\$(InputName)Plugin.cxx;$(InputDir)\..\Generated\$(InputName)Support.h;$(InputDir)\$(InputName)Support.cxx</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(InputDir)\..\Generated\$(InputName).h;$(InputDir)\..\Generated\$(InputName).cxx;$(InputDir)\..\Generated\$(InputName)Plugin.h;$(InputDir)\..\Generated\$(InputName)Plugin.cxx;$(InputDir)\..\Generated\$(InputName)Support.h;$(InputDir)\$(InputName)Support.cxx</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(NDDSHOME)"\scripts\rtiddsgen ..\src\Idl\AirTrafficControl.idl -replace -namespace -language C++ -d ..\src\Generated</Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating .cxx files from IDL...</Message>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating .cxx files from IDL...</Message>
-    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\Config\base_profile_multicast.xml" />
@@ -120,6 +105,11 @@
     <None Include="..\src\Config\flight_plan_profiles_no_multicast.xml" />
     <None Include="..\src\Config\radar_profiles_multicast.xml" />
     <None Include="..\src\Config\radar_profiles_no_multicast.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="SharedDataTypes.vcxproj">
+      <Project>{e287142f-0d1e-49bf-b3bc-a218c1d1629f}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
