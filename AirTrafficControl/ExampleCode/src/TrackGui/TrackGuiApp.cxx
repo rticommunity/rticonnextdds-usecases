@@ -23,7 +23,8 @@ using namespace std;
 // interface, initializes the listeners that update the display with new 
 // data that has arrived from the network.
 //
-bool TrackApp::OnInit() {
+bool TrackApp::OnInit() 
+{
 
 	_shuttingDown = false;
 	bool multicastAvailable = true;

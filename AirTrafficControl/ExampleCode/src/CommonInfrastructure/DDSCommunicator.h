@@ -24,7 +24,8 @@ damages arising out of the use or inability to use the software.
 
 typedef DDS_ReturnCode_t (*unregister_fn)(DDSDomainParticipant *, const char *);
 
-struct UnregisterInfo {
+struct UnregisterInfo 
+{
   std::string typeName;
   unregister_fn unregisterFunction;
 };
@@ -37,7 +38,8 @@ struct UnregisterInfo {
 // Subscriber.
 //
 // ------------------------------------------------------------------------- //
-class DDSCommunicator {
+class DDSCommunicator 
+{
 
 public:
 	// --- Constructor and Destructor --- 
@@ -83,7 +85,8 @@ public:
 	// --- Getting the DomainParticipant --- 
 
 	// Returns the DomainParticipant created by the Communicator.
-	DDS::DomainParticipant* GetParticipant() {
+	DDS::DomainParticipant* GetParticipant() 
+	{
 		return _participant;
 	}
 
@@ -102,7 +105,8 @@ public:
 	// --- Getting the Publisher --- 
 
 	// Returns the Publisher created by the Communicator.
-	DDS::Publisher* GetPublisher() {
+	DDS::Publisher* GetPublisher() 
+	{
 		return _pub;
 	}
 
@@ -122,7 +126,8 @@ public:
 	// --- Getting the Subscriber --- 
 
 	// Returns the Publisher created by the Communicator.
-	DDS::Subscriber* GetSubscriber() {
+	DDS::Subscriber* GetSubscriber() 
+	{
 		return _sub;
 	}
 
@@ -137,7 +142,8 @@ public:
 
 		DDS_ReturnCode_t retcode = T::TypeSupport::register_type(
 				GetParticipant(), typeName);
-		if (retcode != DDS_RETCODE_OK) {
+		if (retcode != DDS_RETCODE_OK) 
+		{
 			std::stringstream errss;
 			errss << "Failure to register type. Regisetered twice?";
 			throw errss.str();
@@ -149,7 +155,8 @@ public:
 			topicName.c_str(),
 			typeName, DDS_TOPIC_QOS_DEFAULT, NULL /* listener */,
 			DDS_STATUS_MASK_NONE);
-		if (topic == NULL) {
+		if (topic == NULL) 
+		{
 			std::stringstream errss;
 			errss << "FlightPlanReader(): failure to create Topic. Created twice?";
 			throw errss.str();

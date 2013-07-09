@@ -27,7 +27,7 @@ RTI Connext user manual.
 
 
 
-        <qos_profile name="FlightPlanStateData" is_default_qos="true" base_name="OneToManyMulticast">
+        <qos_profile name="FlightPlanStateData" base_name="OneToManyMulticast">
             <!-- QoS used to configure the data writer created in the example code -->
             <datawriter_qos>
 

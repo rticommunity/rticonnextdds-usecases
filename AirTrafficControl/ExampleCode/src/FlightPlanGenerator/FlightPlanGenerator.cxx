@@ -127,7 +127,8 @@ int main(int argc, char *argv[])
 		xmlFiles.push_back(
 			"file://../../../src/Config/flight_plan_profiles_no_multicast.xml");
 	}
-	try {
+	try 
+	{
 
 		// This is the network interface for this application - this is what
 		// actually sends the flight plan information over the transport 
@@ -141,13 +142,15 @@ int main(int argc, char *argv[])
 
 		printf("Sending flight plans over RTI Connext DDS\n");
 
-		while (1) {
+		while (1) 
+		{
 
 			list<FlightPlan *> flightPlans;
 			int i = 0;
 
 			// Write all flight plans
-			for (int i = 0; i < numFlightPlans; i++) {
+			for (int i = 0; i < numFlightPlans; i++) 
+			{
 
 				// Allocate a flight plan structure
 				FlightPlan *plan = FlightPlanTypeSupport::create_data();
@@ -202,7 +205,8 @@ int main(int argc, char *argv[])
 			NDDSUtility::sleep(deletion_time);
 
 			// Delete all flight plans from network and from the system
-			for (int i = 0; i < numFlightPlans; i++) {
+			for (int i = 0; i < numFlightPlans; i++) 
+			{
 
 				// Notify the network that these flight plans are no longer
 				// valid.  This is necessary if we want to free up resources

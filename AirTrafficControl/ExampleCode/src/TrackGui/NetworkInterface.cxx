@@ -106,7 +106,8 @@ NetworkInterface::~NetworkInterface()
 FlightPlanReader::FlightPlanReader(NetworkInterface *app, 
 							Subscriber *sub,			
 							char *qosLibrary, 
-							char *qosProfile) {
+							char *qosProfile) 
+{
 
 
 	_mutex = new OSMutex();
@@ -287,7 +288,8 @@ void FlightPlanReader::NotifyWakeup()
 TrackReader::TrackReader(NetworkInterface *app, 
 						Subscriber *sub, 
 						char *qosLibrary, 
-						char *qosProfile) {
+						char *qosProfile) 
+{
 
 	_mutex = new OSMutex();
 	ReturnCode_t retcode;
@@ -417,22 +419,29 @@ TrackReader::~TrackReader()
 //    A simple example of this can be found at:
 //    http://community.rti.com/examples/polling-read
 
-void TrackReader::WaitForTracks(std::vector<Track *> *tracks) {
+void TrackReader::WaitForTracks(std::vector<Track *> *tracks) 
+{
 
 	ConditionSeq activeConditions;
 	DDS_Duration_t timeout = {0,300000000};
 
 	_mutex->Lock();
 
+	while (retcode != DDS_RETCODE_NO_DATA)
+	{
+	}
+
 	// Block this thread until track data becomes available.
 	DDS_ReturnCode_t retcode = _waitSet->wait(activeConditions, timeout);
 
 	// May be normal to time out
-	if (retcode == DDS_RETCODE_TIMEOUT) {
+	if (retcode == DDS_RETCODE_TIMEOUT) 
+	{
 		_mutex->Unlock();
 		return;
 	}
-	if (retcode != DDS_RETCODE_OK) {
+	if (retcode != DDS_RETCODE_OK) 
+	{
 		std::stringstream errss;
 		errss << "WaitForTracks(): error when receiving flight plans.";
 		_mutex->Unlock();

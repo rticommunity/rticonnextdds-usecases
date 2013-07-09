@@ -25,7 +25,8 @@ damages arising out of the use or inability to use the software.
 //
 // ------------------------------------------------------------------------- //
 
-class RadarAdapter {
+class RadarAdapter 
+{
 public:
 
 	// --- Adapting types ---
@@ -33,7 +34,8 @@ public:
 	// network data types.  In other words, this converts between GeneratorTrack
 	// and GeneratorFlightPlan to Track and FlightPlan data types.
 	static void AdaptToGeneratorTrack(GeneratorTrack &genTrack, 
-		const DdsAutoType<com::rti::atc::generated::Track> &track) {
+		const DdsAutoType<com::rti::atc::generated::Track> &track) 
+	{
 		genTrack.altitudeInFeet = track.altitude;
 		genTrack.latLong.latitude = track.latitude;
 		genTrack.latLong.longitude = track.longitude;
@@ -48,7 +50,8 @@ public:
 	// and GeneratorFlightPlan to Track and FlightPlan data types.
 	static void AdaptToTrack(
 		DdsAutoType<com::rti::atc::generated::Track> &track, 
-		const GeneratorTrack &genTrack) {
+		const GeneratorTrack &genTrack) 
+	{
 		track.altitude = genTrack.altitudeInFeet;
 		track.latitude = genTrack.latLong.latitude;
 		track.longitude = genTrack.latLong.longitude;
@@ -61,7 +64,8 @@ public:
 	// network data types.  In other words, this converts between GeneratorTrack
 	// and GeneratorFlightPlan to Track and FlightPlan data types.
 	static void AdaptToGeneratorFlightPlan(GeneratorFlightPlan &genPlan, 
-		const com::rti::atc::generated::FlightPlan &plan) {
+		const com::rti::atc::generated::FlightPlan &plan) 
+	{
 		genPlan.estimatedHours = plan.estimatedHours;
 		genPlan.estimatedMinute = plan.estimatedMinutes;
 		sprintf(genPlan.flightID, "%s", plan.flightId);
@@ -73,7 +77,8 @@ public:
 	// and GeneratorFlightPlan to Track and FlightPlan data types.
 	static void AdaptToFlightPlan(
 		com::rti::atc::generated::FlightPlan &plan, 
-		const GeneratorFlightPlan &genPlan) {
+		const GeneratorFlightPlan &genPlan) 
+	{
 		plan.estimatedHours = genPlan.estimatedHours;
 		plan.estimatedMinutes = genPlan.estimatedMinute;
 		sprintf(plan.flightId, genPlan.flightID);

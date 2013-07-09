@@ -43,8 +43,10 @@ void FlightInfoNetworkReceiver::NotifyListenersDeleteTrack(
 {
 	_mutex->Lock();
 	for (std::vector<FlightInfoListener *>::iterator it = _listeners.begin(); 
-		it != _listeners.end(); ++it) {
-		if (false == (*it)->TrackDelete(flights)) {
+		it != _listeners.end(); ++it) 
+	{
+		if (false == (*it)->TrackDelete(flights)) 
+		{
 			std::stringstream errss;
 			errss << "NotifyListenersDeleteTrack(): error deleting track.";
 			_mutex->Unlock();
@@ -64,9 +66,11 @@ void FlightInfoNetworkReceiver::NotifyListenersUpdateTrack(
 {
 	_mutex->Lock();
 	for (std::vector<FlightInfoListener *>::iterator it = 
-		_listeners.begin(); it != _listeners.end(); ++it) {
+		_listeners.begin(); it != _listeners.end(); ++it) 
+	{
 
-		if (false == (*it)->TrackUpdate(flights)) {
+		if (false == (*it)->TrackUpdate(flights)) 
+		{
 			std::stringstream errss;
 			errss << "NotifyListenersUpdateTrack(): error updating track.";
 			_mutex->Unlock();
@@ -134,7 +138,8 @@ void FlightInfoNetworkReceiver::ReceiveTracks(void *param)
 	// collecting it asynchronously.
 	DDS::Duration_t uiUpdatePeriod = {0,200000000};
 
-	while (!app->ShuttingDown()) {
+	while (!app->ShuttingDown()) 
+	{
 
 		// Note that this API allocates tracks that are a copy of tracks
 		// in the queue.  This allows us to pass in an empty vector and
@@ -150,7 +155,8 @@ void FlightInfoNetworkReceiver::ReceiveTracks(void *param)
 		if (!tracks.empty()) 
 		{
 
-			for (unsigned int i = 0; i < tracks.size(); i++) {
+			for (unsigned int i = 0; i < tracks.size(); i++) 
+			{
 
 				// Allocate a flight info object.  This will be filled in with
 				// the flight plan information.

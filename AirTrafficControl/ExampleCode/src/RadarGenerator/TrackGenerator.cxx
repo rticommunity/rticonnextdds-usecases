@@ -85,19 +85,22 @@ TrackGenerator::~TrackGenerator()
 {
 	_mutex->Lock();
 	for (std::vector<TrackListener *>::iterator it = _listeners.begin(); 
-			it != _listeners.end(); ++it) {
+			it != _listeners.end(); ++it) 
+	{
 		delete (*it);
 	}
 	_listeners.clear();
 
-	while(!_flightPlans.empty()) {
+	while(!_flightPlans.empty()) 
+	{
 		GeneratorFlightPlan *plan = _flightPlans.front();
 		delete plan;
 		_flightPlans.pop();
 	}
 
 	for (std::vector<GeneratorTrack *>::iterator it = _trackList.begin(); 
-			it != _trackList.end(); ++it) {
+			it != _trackList.end(); ++it) 
+	{
 		delete (*it);
 	}
 	_trackList.clear();
@@ -138,8 +141,10 @@ void TrackGenerator::NotifyListenersDeleteTrack(const GeneratorTrack &track)
 	_mutex->Lock();
 
 	for (std::vector<TrackListener *>::iterator it = _listeners.begin(); 
-		it != _listeners.end(); ++it) {
-		if (false == (*it)->TrackDelete(track)) {
+		it != _listeners.end(); ++it) 
+	{
+		if (false == (*it)->TrackDelete(track)) 
+		{
 			std::stringstream errss;
 			errss << "NotifyListenersDeleteTrack(): error deleting track.";
 			throw errss.str();
@@ -155,9 +160,11 @@ void TrackGenerator::NotifyListenersUpdateTrack(const GeneratorTrack &track)
 	_mutex->Lock();
 
 	for (std::vector<TrackListener *>::iterator it = _listeners.begin();
-		it != _listeners.end(); ++it) {
+		it != _listeners.end(); ++it) 
+	{
 
-		if (false == (*it)->TrackUpdate(track)) {
+		if (false == (*it)->TrackUpdate(track)) 
+		{
 			std::stringstream errss;
 			errss << "NotifyListenersUpdateTrack(): error updating track.";
 			throw errss.str();
@@ -209,22 +216,26 @@ double TrackGenerator::KnotsToKph(double knots)
 void TrackGenerator::UpdateTrackPositionState(FlightState *state)
 {
 
-	if (*state == INITIAL_NORTH) {
+	if (*state == INITIAL_NORTH) 
+	{
 		*state = PATH_FROM_NORTH;
 		return;
 	}
 
-	if (*state == PATH_FROM_NORTH) {
+	if (*state == PATH_FROM_NORTH) 
+	{
 		*state = TURNING_TO_APPROACH_FROM_NORTH;
 		return;
 	}
 
-	if (*state == TURNING_TO_APPROACH_FROM_NORTH) {
+	if (*state == TURNING_TO_APPROACH_FROM_NORTH) 
+	{
 		*state = ON_APPROACH;
 		return;
 	}
 
-	if (*state == INITIAL_SOUTH) {
+	if (*state == INITIAL_SOUTH) 
+	{
 		*state = ON_APPROACH;
 		return;
 	}
@@ -398,7 +409,8 @@ void TrackGenerator::CalculatePathToSFO(LatLong *currentLatLong,
 	CalculateBearing(&approachBearing, approach, finalDestination);
 	double turnRadius = 9.656;
 
-	if (*state == INITIAL) {
+	if (*state == INITIAL) 
+	{
 		// Make slightly dumb assumption that bearing is directly toward
 		// SFO when flight is arriving in the airspace
 
@@ -532,20 +544,23 @@ GeneratorTrack* TrackGenerator::AddTrack()
 
 	// Cannot create more tracks than the generator is 
 	// supposed to handle
-	if (_trackList.size() == _maxTracks) {
+	if (_trackList.size() == _maxTracks) 
+	{
 		return NULL;
 	}
 
 	GeneratorTrack *track = new GeneratorTrack(_mutex);
 
 	// Recycle track ID when it gets to the max
-	if (_currentTrackId == GetMaxTracks()) {
+	if (_currentTrackId == GetMaxTracks()) 
+	{
 		_currentTrackId = 0;
 	}
 	track->id = _currentTrackId;
 
 	CalculateRandomPoint80KmFromSFO(&track->latLong);
-	if (!_flightPlans.empty()) {
+	if (!_flightPlans.empty()) 
+	{
 
 
 		GeneratorFlightPlan *plan = _flightPlans.front();
@@ -591,8 +606,10 @@ void TrackGenerator::DeleteTrack(GeneratorTrack &track)
 {
 	for (std::vector<GeneratorTrack *>::iterator it = 
 			_trackList.begin(); 	
-			it != _trackList.end(); ++it) {
-		if ((*it)->id == track.id) {
+			it != _trackList.end(); ++it) 
+	{
+		if ((*it)->id == track.id) 
+		{
 			_trackList.erase(it);
 			break;
 		}
@@ -704,9 +721,11 @@ void TrackGenerator::GenerateTracks()
 		timeToCreateTrack++;
 
 
-		for (int i = 0; i < GetActiveTrackNumber(); i++) {
+		for (int i = 0; i < GetActiveTrackNumber(); i++) 
+		{
 		
-			if ( i == 0 ) {
+			if ( i == 0 ) 
+			{
 				timeSinceFirstCreation++;
 			}
 			GeneratorTrack *track = GetTrack(i);
@@ -718,7 +737,8 @@ void TrackGenerator::GenerateTracks()
 			CalculatePathToSFO(&track->latLong, &track->bearing, 
 				&track->state, trackUpdateRate);
 
-			if (track->altitudeInFeet < 0) {
+			if (track->altitudeInFeet < 0) 
+			{
 				track->altitudeInFeet = 0;
 			}
 

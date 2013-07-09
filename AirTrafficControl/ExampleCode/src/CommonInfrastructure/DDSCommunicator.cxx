@@ -20,7 +20,8 @@ using namespace DDS;
 // DomainParticipant.  Lastly, this finalizes the DomainParticipantFactory.
 DDSCommunicator::~DDSCommunicator() 
 {
-	if (_participant != NULL) {
+	if (_participant != NULL) 
+	{
 
 		// Delete DataWriters, DataReaders, Topics, Subscribers, and Publishers
 		// created by this DomainParticipant.
@@ -74,7 +75,8 @@ DomainParticipant* DDSCommunicator::CreateParticipant(long domain)
 		TheParticipantFactory->create_participant(domain, 
 		PARTICIPANT_QOS_DEFAULT, NULL, STATUS_MASK_NONE);
 
-	if (participant == NULL) {
+	if (participant == NULL) 
+	{
 		std::stringstream errss;
 		errss << "Failed to create DomainParticipant object";
 		throw errss.str();
@@ -93,7 +95,8 @@ DomainParticipant* DDSCommunicator::CreateParticipant()
 									PARTICIPANT_QOS_DEFAULT, 
 									NULL, STATUS_MASK_NONE);
 
-	if (_participant == NULL) {
+	if (_participant == NULL) 
+	{
 		std::stringstream errss;
 		errss << "Failed to create DomainParticipant object";
 		throw errss.str();
@@ -118,7 +121,8 @@ DomainParticipant* DDSCommunicator::CreateParticipant(
 									NULL, 
 									STATUS_MASK_NONE);
 
-	if (_participant == NULL) {
+	if (_participant == NULL) 
+	{
 		std::stringstream errss;
 		errss << "Failed to create DomainParticipant object";
 		throw errss.str();
@@ -154,7 +158,8 @@ DomainParticipant* DDSCommunicator::CreateParticipant(long domain,
 
 	DDS_ReturnCode_t retcode = TheParticipantFactory->set_qos(factoryQos);
 		
-	if (retcode != DDS_RETCODE_OK) {
+	if (retcode != DDS_RETCODE_OK) 
+	{
 		std::stringstream errss;
 		errss << "Failed to create DomainParticipant object";
 		throw errss.str();
@@ -169,7 +174,8 @@ DomainParticipant* DDSCommunicator::CreateParticipant(long domain,
 									NULL, 
 									STATUS_MASK_NONE);
 
-	if (_participant == NULL) {
+	if (_participant == NULL) 
+	{
 		std::stringstream errss;
 		errss << "Failed to create DomainParticipant object";
 		throw errss.str();

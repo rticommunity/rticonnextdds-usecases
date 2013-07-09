@@ -60,8 +60,12 @@ public:
 
 	void NotifyListenersUpdateTrack(const std::vector<FlightInfo *> flights);
 	void NotifyListenersDeleteTrack(const std::vector<FlightInfo *> flights);
-	bool IsShuttingDown() const { return _shuttingDown; }
-	void AddListener(FlightInfoListener *listener) {
+	bool IsShuttingDown() const 
+	{ 
+		return _shuttingDown; 
+	}
+	void AddListener(FlightInfoListener *listener) 
+	{
 		_listeners.push_back(listener);
 	}
 

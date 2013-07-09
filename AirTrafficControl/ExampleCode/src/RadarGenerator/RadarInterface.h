@@ -60,7 +60,8 @@ class RadarInterface;
 // These map in the source to two different QoS profiles that are described in 
 // the USER_QOS_PROFILES.xml file.  The XML contains different tunings for how 
 // to send or receive data.
-enum RadarProfile {
+enum RadarProfile 
+{
 	LOW_LATENCY,
 	HIGH_THROUGHPUT
 };
@@ -76,7 +77,8 @@ enum RadarProfile {
 // DataReaders, and all other DDS objects.
 //
 // ------------------------------------------------------------------------- //
-class RadarInterface  {
+class RadarInterface  
+{
 
 public:
 
@@ -106,14 +108,16 @@ public:
 	// interface that sends the radar data over the network.  Look at the
 	// RadarWriter class to see how to write data in RTI Connext DDS.  This
 	// RadarWriter class has some logic for writing efficiently for low latency
-	RadarWriter *GetRadarWriter() {
+	RadarWriter *GetRadarWriter() 
+	{
 		return _radarWriter;
 	}
 
 	// This returns the FlightPlan receiver - a small wrapper around the 
 	// FlightPlanDataReader that initializes the reader and uses the 
 	// DDS "WaitSet" object to wait for flight plans
-	FlightPlanReader *GetFlightPlanReader() {
+	FlightPlanReader *GetFlightPlanReader() 
+	{
 		return _FlightPlanReader;
 	}
 
@@ -122,7 +126,8 @@ public:
 	// handle at one time.  This could be set up as unlimited, but in a real
 	// system that must preallocate memory, this is one way to tell the 
 	// middleware the maximum amount of memory to allocate
-	int GetMaxFlightsToHandle() {
+	int GetMaxFlightsToHandle() 
+	{
 		return _maxFlightsToHandle;
 	}
 
@@ -131,7 +136,8 @@ public:
 	// DDS infrastructure like the DomainParticipant).
 	// This allows access to the DDS DomainParticipant/Publisher/Subscriber
 	// classes
-	DDSCommunicator *GetCommunicator() {
+	DDSCommunicator *GetCommunicator() 
+	{
 		return _communicator; 
 	}
 
@@ -173,7 +179,8 @@ private:
 // of its threads to wait for data from the FlightPlanReader.
 //
 // ------------------------------------------------------------------------- //
-class FlightPlanReader {
+class FlightPlanReader 
+{
 
 public:
 
@@ -227,7 +234,8 @@ private:
 // In particular, it sends data efficiently by pre-registering the DDS instance
 // and storing the instance handle in a map.  (It is not necesary to pre-
 // register an instance, but it makes the write() call more efficient.)
-class RadarWriter {
+class RadarWriter 
+{
 
 public:
 

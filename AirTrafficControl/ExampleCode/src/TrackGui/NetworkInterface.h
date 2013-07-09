@@ -22,7 +22,8 @@ class OSMutex;
 // two DDS DataReaders and no DDS DataWriters.
 //
 // ------------------------------------------------------------------------- //
-class NetworkInterface  {
+class NetworkInterface  
+{
 public:
 
 	// --- Constructor --- 
@@ -87,7 +88,8 @@ private:
 // in the middleware queue, and queries the flight plan when a track updates.
 //
 // ------------------------------------------------------------------------- //
-class FlightPlanReader {
+class FlightPlanReader 
+{
 
 public:
 
@@ -143,7 +145,8 @@ private:
 // to receive notifications of track data.
 //
 // ------------------------------------------------------------------------- //
-class TrackReader {
+class TrackReader 
+{
 
 public:
 

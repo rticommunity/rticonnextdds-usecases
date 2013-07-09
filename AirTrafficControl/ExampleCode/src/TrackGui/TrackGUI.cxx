@@ -94,7 +94,8 @@ TrackPanel::TrackPanel(wxWindow *parent, wxWindowID id, const wxString& title,
 	int shapeType = 0;
 	double minBound[4], maxBound[4];
 	SHPGetInfo(handle, &numEntities, &shapeType, minBound, maxBound);
-	for (int i = 0; i < numEntities; i++) {
+	for (int i = 0; i < numEntities; i++) 
+	{
 		SHPObject *shapeObject = 
 			SHPReadObject(handle, i);
 		_shapeObjects.push_back(shapeObject);
@@ -109,10 +110,12 @@ TrackPanel::TrackPanel(wxWindow *parent, wxWindowID id, const wxString& title,
 // before the next repainting.
 void TrackPanel::ClearPointsLists()
 {
-	for (unsigned int i = 0; i < _pointsLists.size(); i++) {
+	for (unsigned int i = 0; i < _pointsLists.size(); i++) 
+	{
 		wxPointList *list = _pointsLists[i];
 
-		for (unsigned int j = 0; j < list->size(); j++) {
+		for (unsigned int j = 0; j < list->size(); j++) 
+		{
 			delete (*list)[j];
 		}
 
@@ -207,7 +210,8 @@ void TrackPanel::OnPaint(wxPaintEvent& paintEvt)
 	dc.Clear();
 
 		
-	for (unsigned int i = 0; i < _pointsLists.size(); i++) {
+	for (unsigned int i = 0; i < _pointsLists.size(); i++) 
+	{
 
 		dc.DrawPolygon(_pointsLists[i]);
 
@@ -217,7 +221,8 @@ void TrackPanel::OnPaint(wxPaintEvent& paintEvt)
 
 	for (
 		std::map<long, wxPoint>::iterator it = 
-		_trackPoints.begin(); it != _trackPoints.end(); ++it) {
+		_trackPoints.begin(); it != _trackPoints.end(); ++it) 
+	{
 		wxPen pen(*wxRED);
 		wxPen prevPen = dc.GetPen();
 		dc.SetPen(pen);
@@ -235,7 +240,8 @@ void TrackPanel::CalculateGeoMinMax()
 {
 	vector<wxRealPoint *> realPoints;
 
-	if (_shapeObjects.size() == 0) {
+	if (_shapeObjects.size() == 0) 
+	{
 		return;
 	}
 	double xMax = _shapeObjects[0]->padfX[0];
@@ -243,18 +249,24 @@ void TrackPanel::CalculateGeoMinMax()
 	double xMin = _shapeObjects[0]->padfX[0];
 	double yMin = _shapeObjects[0]->padfY[0];
 
-	for (unsigned int i = 0; i < _shapeObjects.size(); i++) {
-		for (int j = 0; j < _shapeObjects[i]->nVertices; j++) {
-			if (_shapeObjects[i]->padfX[j] > xMax) {
+	for (unsigned int i = 0; i < _shapeObjects.size(); i++) 
+	{
+		for (int j = 0; j < _shapeObjects[i]->nVertices; j++) 
+		{
+			if (_shapeObjects[i]->padfX[j] > xMax) 
+			{
 				xMax = _shapeObjects[i]->padfX[j];
 			}
-			if (_shapeObjects[i]->padfY[j] > yMax) {
+			if (_shapeObjects[i]->padfY[j] > yMax) 
+			{
 				yMax = _shapeObjects[i]->padfY[j];
 			}
-			if (_shapeObjects[i]->padfX[j] < xMin) {
+			if (_shapeObjects[i]->padfX[j] < xMin) 
+			{
 				xMin = _shapeObjects[i]->padfX[j];
 			}
-			if (_shapeObjects[i]->padfY[j] < yMin) {
+			if (_shapeObjects[i]->padfY[j] < yMin) 
+			{
 				yMin = _shapeObjects[i]->padfY[j];
 			}
 
@@ -276,23 +288,28 @@ void TrackPanel::CalculateGeoMinMax()
 void TrackPanel::CalculateCoordinateForWindowSize()
 {
 
-	for (unsigned int i = 0; i < _shapeObjects.size(); i++) {
+	for (unsigned int i = 0; i < _shapeObjects.size(); i++) 
+	{
 
-		for (int j = 0; j < _shapeObjects[i]->nParts; j++) {
+		for (int j = 0; j < _shapeObjects[i]->nParts; j++) 
+		{
 
 			wxPointList *points = new wxPointList;
 			int nVerticesPerPart = 0;
-			if (j == _shapeObjects[i]->nParts - 1) {
+			if (j == _shapeObjects[i]->nParts - 1) 
+			{
 				int startOfPart = _shapeObjects[i]->panPartStart[j];
 				nVerticesPerPart = _shapeObjects[i]->nVertices -
 					_shapeObjects[i]->panPartStart[j];
-			} else {
+			} else 
+			{
 				nVerticesPerPart = _shapeObjects[i]->panPartStart[j + 1] - 
 					_shapeObjects[i]->panPartStart[j];
 			}
 			for (int k = _shapeObjects[i]->panPartStart[j]; k < 
 						_shapeObjects[i]->panPartStart[j] + nVerticesPerPart;
-						k++) {
+						k++) 
+			{
 				wxRealPoint coord;
 				ConvertMapCoordToWindow(&coord, 
 					wxRealPoint( _shapeObjects[i]->padfX[k], 
@@ -391,9 +408,11 @@ TrackPanel::~TrackPanel()
 	AppFrame *appFrame = (AppFrame *)GetParent();
 	appFrame->GetApp()->RemoveDataSource((wxPanel *)this);
 
-	for (unsigned int i = 0; i < _pointsLists.size(); i++) {	
+	for (unsigned int i = 0; i < _pointsLists.size(); i++) 
+	{	
 		wxPointList *list = _pointsLists[i];
-		for (unsigned int j = 0; j < _pointsLists[i]->size(); j++) {
+		for (unsigned int j = 0; j < _pointsLists[i]->size(); j++) 
+		{
 			delete (*list)[j];
 		}
 
@@ -402,7 +421,8 @@ TrackPanel::~TrackPanel()
 	}
 	_pointsLists.clear();
 
-	for (unsigned int i = 0; i < _shapeObjects.size(); i++) {
+	for (unsigned int i = 0; i < _shapeObjects.size(); i++) 
+	{
 		SHPDestroyObject(_shapeObjects[i]);
 	}
 	_shapeObjects.clear();
@@ -486,11 +506,13 @@ void TablePanel::UpdateRow(const FlightInfo &flight)
 	{
 
 		long radarIdCell = -1;
-		if (!_grid->GetCellValue(i,0).IsEmpty()) {
+		if (!_grid->GetCellValue(i,0).IsEmpty()) 
+		{
 			_grid->GetCellValue(i,0).ToLong(&radarIdCell);
 		}
 		long trackIdCell = -1;
-		if (!_grid->GetCellValue(i,1).IsEmpty()) {
+		if (!_grid->GetCellValue(i,1).IsEmpty()) 
+		{
 			_grid->GetCellValue(i,1).ToLong(&trackIdCell);
 		}
 

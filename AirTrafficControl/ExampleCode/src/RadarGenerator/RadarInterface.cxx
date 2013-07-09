@@ -178,7 +178,8 @@ RadarInterface::~RadarInterface()
 RadarWriter::RadarWriter(RadarInterface *netInterface, 
 						Publisher *pub, 
 						char *qosLibrary,
-						char *qosProfile) {
+						char *qosProfile) 
+{
 	ReturnCode_t retcode;
 
 	if (netInterface == NULL) 

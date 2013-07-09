@@ -27,7 +27,8 @@ damages arising out of the use or inability to use the software.
 // ------------------------------------------------------------------------- //
 
 // Flight paths around SFO
-enum FlightState {
+enum FlightState 
+{
 	INITIAL,
 	INITIAL_NORTH,
 	INITIAL_SOUTH,
@@ -38,7 +39,8 @@ enum FlightState {
 };
 
 // Structure containing latitude and longitude.
-struct LatLong {
+struct LatLong 
+{
 	double latitude;
 	double longitude;
 };
@@ -76,7 +78,8 @@ struct GeneratorTrack
 	void SetFlightId(std::string id)
 	{
 		_mutex->Lock();
-		if (id.size() < 8) {
+		if (id.size() < 8) 
+		{
 			strcpy(flightId, id.c_str());
 		}
 		_mutex->Unlock();
@@ -144,7 +147,8 @@ struct GeneratorFlightPlan
 // generator.
 //
 // ------------------------------------------------------------------------- //
-class TrackListener {
+class TrackListener 
+{
 public:
 	virtual bool TrackUpdate(const GeneratorTrack &track) = 0;
 	virtual bool TrackDelete(const GeneratorTrack &track) = 0;
@@ -164,7 +168,8 @@ public:
 // radar and being sent over the middleware.
 //
 // ------------------------------------------------------------------------- //
-class TrackGenerator {
+class TrackGenerator 
+{
 
 public:
 

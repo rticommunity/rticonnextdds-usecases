@@ -50,7 +50,8 @@ FlightPlanPublisherInterface::FlightPlanPublisherInterface(std::vector<std::stri
 	// and being the factory class used to create Publishers, Subscribers, 
 	// Topics, etc.
 	if (NULL == _communicator->CreateParticipant(0, xmlFiles, 
-				"RTIExampleQosLibrary", "FlightPlanStateData")) {
+				"RTIExampleQosLibrary", "FlightPlanStateData")) 
+	{
 		std::stringstream errss;
 		errss << "Failed to create DomainParticipant object";
 		throw errss.str();
@@ -142,7 +143,8 @@ bool FlightPlanPublisherInterface::Write(FlightPlan *data)
 	// potentially speed up the writing.
 	retcode = _writer->write(*data, handle);
 
-	if (retcode != DDS_RETCODE_OK) {
+	if (retcode != DDS_RETCODE_OK) 
+	{
 		return false;
 	}
 

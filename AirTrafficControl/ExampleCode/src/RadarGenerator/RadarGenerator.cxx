@@ -129,7 +129,8 @@ int main(int argc, char *argv[])
 	}
 
 	TrackGenerator *trackGenerator = NULL;
-	try { 
+	try 
+	{ 
 
 		// This sets up the data interface for the radar - what data it sends
 		// and receives over the network, along with the quality of service

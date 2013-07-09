@@ -15,7 +15,7 @@ RTI Connext user manual.
     -->
     <qos_library name="RTIExampleQosLibrary">
       
-        <qos_profile name="LowLatencyRadar" is_default_qos="true" base_name="OneToManyMulticast">
+        <qos_profile name="LowLatencyRadar" base_name="OneToManyMulticast">
             <!-- QoS used to configure the data writer created in the example code -->                
             <datawriter_qos>
 
@@ -145,7 +145,7 @@ RTI Connext user manual.
             </participant_qos>
         </qos_profile>
 
-        <qos_profile name="HighThroughputRadar" is_default_qos="true" base_name="OneToManyMulticast">
+        <qos_profile name="HighThroughputRadar" base_name="OneToManyMulticast">
             <!-- QoS used to configure the data writer created in the example code -->
             <datawriter_qos>
 
