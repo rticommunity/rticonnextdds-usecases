@@ -412,7 +412,7 @@ TrackReader::~TrackReader()
 //    A simple example of this can be found at:
 //    http://community.rti.com/examples/polling-read
 
-void TrackReader::WaitForTracks(std::vector<DdsAutoType<Track>> *tracks) 
+void TrackReader::WaitForTracks(std::vector< DdsAutoType<Track> > *tracks) 
 {
 
 	ConditionSeq activeConditions;
@@ -498,7 +498,7 @@ void TrackReader::WaitForTracks(std::vector<DdsAutoType<Track>> *tracks)
 // ----------------------------------------------------------------------------
 // This example is using an application thread to poll for all the existing 
 // track data inside the middleware's queue.
-void TrackReader::GetCurrentTracks(std::vector<DdsAutoType<Track>> *tracks)
+void TrackReader::GetCurrentTracks(std::vector< DdsAutoType<Track> > *tracks)
 {
 	_mutex->Lock();
 

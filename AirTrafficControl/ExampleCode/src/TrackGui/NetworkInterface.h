@@ -152,13 +152,13 @@ public:
 	// This waits for new tracks to become available, and notifies the 
 	// application that there are new tracks.
 	void WaitForTracks(
-		std::vector<DdsAutoType<com::rti::atc::generated::Track>> *tracks);
+		std::vector< DdsAutoType<com::rti::atc::generated::Track> > *tracks);
 
 	// --- Retreiving current track updates --- 
 	// This retrieves track updates from the middleware queue.  This is used
 	// to poll for all the current track updates from the middleware.
 	void GetCurrentTracks(
-		std::vector<DdsAutoType<com::rti::atc::generated::Track>> *tracks);
+		std::vector< DdsAutoType<com::rti::atc::generated::Track> > *tracks);
 
 	// --- Wake up the reader thread if it is waiting on data ---
 	void NotifyWakeup();

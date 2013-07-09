@@ -130,7 +130,7 @@ void FlightInfoNetworkReceiver::ReceiveTracks(void *param)
 	NetworkInterface *netInterface = app->GetNetworkInterface();
 	TrackReader *reader = netInterface->GetTrackReader();
 	FlightPlanReader *planReader = netInterface->GetFlightPlanReader();
-	vector<DdsAutoType<Track>> tracks;
+	vector< DdsAutoType<Track> > tracks;
 	vector <FlightInfo *> flights;
 
 	// This periodically wakes up and updates the UI with the latest track

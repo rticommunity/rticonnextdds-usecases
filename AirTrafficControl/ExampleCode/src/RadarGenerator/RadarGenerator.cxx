@@ -159,11 +159,11 @@ int main(int argc, char *argv[])
 		{
 			// Listen for updates to flight plans, and add them to the track 
 			// generator as they arrive
-			vector<DdsAutoType<FlightPlan>> flightPlans;
+			vector< DdsAutoType<FlightPlan> > flightPlans;
 			radarNetInterface->
 				GetFlightPlanReader()->WaitForFlightPlans(&flightPlans);
 
-			for (vector<DdsAutoType<FlightPlan>>::iterator it = flightPlans.begin(); 
+			for (vector< DdsAutoType<FlightPlan> >::iterator it = flightPlans.begin(); 
 				it != flightPlans.end(); it++) 
 			{
 

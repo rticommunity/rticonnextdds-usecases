@@ -458,7 +458,8 @@ FlightPlanReader::~FlightPlanReader()
 //    A simple example of this can be found at:
 //    http://community.rti.com/examples/polling-read
 
-void FlightPlanReader::WaitForFlightPlans(std::vector<DdsAutoType<FlightPlan>> *plans) 
+void FlightPlanReader::WaitForFlightPlans(
+std::vector< DdsAutoType<FlightPlan> > *plans) 
 {
 
 	ConditionSeq activeConditions;
@@ -506,7 +507,8 @@ void FlightPlanReader::WaitForFlightPlans(std::vector<DdsAutoType<FlightPlan>> *
 // a different format, you can call read().  This leaves the data in the queue,
 // and lets the application access it without having to copy it.
 
-bool FlightPlanReader::ProcessFlightPlans(std::vector<DdsAutoType<FlightPlan>> *plans) 
+bool FlightPlanReader::ProcessFlightPlans(
+std::vector< DdsAutoType<FlightPlan> > *plans) 
 {
 	// Note: These two sequences are being created with a length = 0.
 	// this means that the middleware is loaning memory to them, which
