@@ -12,4 +12,4 @@ set executable_name=rtiroutingservice
 
 cd %dir%\..\routing
 
-call %ROUTER_HOME%\scripts\%executable_name% -cfgFile Routing-TCP.xml -cfgName %1
+call %ROUTER_HOME%\scripts\%executable_name% -cfgFile Routing-TCP-WAN.xml -cfgName %1

@@ -9,8 +9,7 @@ then
     cd $script_dir/../apps
     $PROTOTYPER_HOME/scripts/$executable_name \
 	-cfgFile PrototyperConfig.xml \
-	-cfgName ParticipantLibrary::Sender \
-	-luaFile scripts/alarm.lua
+	-cfgName ParticipantLibrary::Receiver
 else
     echo "**************************************************************************"
     echo "PROTOTYPER_HOME must be set to prototyper install dir to run this example"

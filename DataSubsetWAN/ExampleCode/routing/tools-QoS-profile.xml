@@ -17,8 +17,8 @@
                         <!-- CHANGE THIS TO THE MACHINE YOU WANT TO     -->
                         <!-- CONTACT                                    -->
                         <!--                                            -->
-                        <element>tcpv4_lan://10.211.55.3:9400</element>
-                        <element>tcpv4_lan://10.211.55.3:9401</element>
+                        <element>tcpv4_lan://10.211.55.9:9400</element>
+                        <element>tcpv4_lan://10.211.55.9:9401</element>
                     </initial_peers>
                 </discovery>
                 <!-- These are the settings to enable TCP for your      -->

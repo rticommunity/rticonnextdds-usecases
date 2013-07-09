@@ -146,7 +146,7 @@
 
             <session name="SessionForward">
                 <topic_route name="AlarmForward">
-                
+                    <route_types>true</route_types> 
                     <publish_with_original_info>true</publish_with_original_info>
                     <publish_with_original_timestamp>true</publish_with_original_timestamp>
 
@@ -181,6 +181,7 @@
                 </topic_route>
                 
                 <topic_route name="TemperatureForward">
+                    <route_types>true</route_types>
                     <publish_with_original_info>true</publish_with_original_info>
                     <publish_with_original_timestamp>true</publish_with_original_timestamp>
 
@@ -217,6 +218,7 @@
             </session>
             <session name="SessionBackward">
                 <topic_route name="AlarmBackward">
+                    <route_types>true</route_types>
                     <publish_with_original_info>true</publish_with_original_info>
                     <publish_with_original_timestamp>true</publish_with_original_timestamp>
 
@@ -250,6 +252,7 @@
                     </output>
                 </topic_route>
                 <topic_route name="TemperatureBackward">
+                    <route_types>true</route_types>
                     <publish_with_original_info>true</publish_with_original_info>
                     <publish_with_original_timestamp>true</publish_with_original_timestamp>
 
@@ -369,6 +372,7 @@
 
             <session name="SessionForward">
                 <topic_route name="AlarmForward">
+                    <route_types>true</route_types>
                     <publish_with_original_info>true</publish_with_original_info>
                     <publish_with_original_timestamp>true</publish_with_original_timestamp>
                     <input participant="1">
@@ -397,6 +401,7 @@
                     </output>
                 </topic_route>
                 <topic_route name="TemperatureForward">
+                    <route_types>true</route_types>
                     <publish_with_original_info>true</publish_with_original_info>
                     <publish_with_original_timestamp>true</publish_with_original_timestamp>
                     <input participant="1">
@@ -426,6 +431,7 @@
             </session>
             <session name="SessionBackward">
                 <topic_route name="AlarmBackward">
+                    <route_types>true</route_types>
                     <publish_with_original_info>true</publish_with_original_info>
                     <publish_with_original_timestamp>true</publish_with_original_timestamp>
                     <input participant="2">
@@ -454,6 +460,7 @@
                     </output>
                 </topic_route>
                 <topic_route name="TemperatureBackward">
+                    <route_types>true</route_types>
                     <publish_with_original_info>true</publish_with_original_info>
                     <publish_with_original_timestamp>true</publish_with_original_timestamp>
                     <input participant="2">
