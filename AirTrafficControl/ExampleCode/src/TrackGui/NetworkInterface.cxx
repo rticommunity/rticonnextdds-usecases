@@ -213,7 +213,7 @@ FlightPlanReader::~FlightPlanReader()
 //      of one, so only the latest flight plan information will be in the 
 //      DataReader's queue.
 void FlightPlanReader::GetFlightPlan(char *flightId, 
-	DdsAutoType<FlightPlan> plan)
+	DdsAutoType<FlightPlan> *plan)
 {
 
 	// Create a placeholder with only the key field filled in.  This will be
@@ -250,7 +250,7 @@ void FlightPlanReader::GetFlightPlan(char *flightId,
 		{
 			// DdsAutoType has a copy constructor that calls 
 			// the appropriate TypeSupport::copy_data method
-			plan = flightSeq[0];
+			*plan = flightSeq[0];
 		}
 	}
 	_fpReader->return_loan(flightSeq, infoSeq);

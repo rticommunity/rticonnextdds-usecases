@@ -166,7 +166,7 @@ void FlightInfoNetworkReceiver::ReceiveTracks(void *param)
 				// This copies a flight plan from the middleware into 
 				// the object passed in
 				planReader->GetFlightPlan(tracks[i].flightId, 
-					flightInfo->_plan);
+					&flightInfo->_plan);
 				flights.push_back(flightInfo);
 
 				

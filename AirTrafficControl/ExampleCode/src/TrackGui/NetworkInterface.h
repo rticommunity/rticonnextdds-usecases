@@ -106,7 +106,7 @@ public:
 	// when it is interested in it.  It queries the middleware queue by
 	// flight ID.
 	void GetFlightPlan(char *flightId, 
-		DdsAutoType<com::rti::atc::generated::FlightPlan> plan);
+		DdsAutoType<com::rti::atc::generated::FlightPlan> *plan);
 
 private:
 	// --- Private members ---
