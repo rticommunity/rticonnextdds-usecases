@@ -23,6 +23,7 @@ damages arising out of the use or inability to use the software.
 #include "wx/wx.h"
 #include "wx/dcbuffer.h"
 #include "wx/grid.h"
+#include "wx/splitter.h"
 #include "shapefil.h"
 #include "proj_api.h"
 
@@ -100,7 +101,6 @@ public:
 
 
 
-
 	void CalculateGeoMinMax();
 	
 	void ConvertLatLongToUTM(double *northing, double *easting, 
@@ -118,7 +118,6 @@ public:
 	std::vector<SHPObject *> _shapeObjects;
 	std::map<long, wxPoint> _trackPoints;
 	std::vector<wxPointList *> _pointsLists;
-//	wxPointList _trackPoints;
 	double _minX, _minY, _maxX, _maxY;
 	projPJ _latlongProjection;
 	projPJ _mercatorProjection;
@@ -157,6 +156,8 @@ private:
 	DECLARE_EVENT_TABLE()
 
 };
+
+
 
 // ------------------------------------------------------------------------- //
 //
@@ -228,9 +229,9 @@ public:
 
 
 			_panel->ConvertLatLongToUTM(&y,&x,
-				flights[i]->_track->latitude, 
-				flights[i]->_track->longitude);
-			_panel->AddOrUpdatePoint(flights[i]->_track->trackId, 
+				flights[i]->_track.latitude, 
+				flights[i]->_track.longitude);
+			_panel->AddOrUpdatePoint(flights[i]->_track.trackId, 
 				wxRealPoint(x,y));
 		}
 		_panel->Refresh();
@@ -274,5 +275,6 @@ public:
 private:
 	TablePanel *_panel;
 };
+
 
 #endif

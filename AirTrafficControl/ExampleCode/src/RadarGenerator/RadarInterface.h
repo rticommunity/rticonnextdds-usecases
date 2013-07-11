@@ -206,10 +206,16 @@ public:
 	// See the other example application for alternatives - being notified
 	// that data is available.
 	void WaitForFlightPlans(
-		std::vector<com::rti::atc::generated::FlightPlan *> *plans);
+		std::vector<DdsAutoType<com::rti::atc::generated::FlightPlan>> *plans);
 
 
 private:
+	// --- Private methods --- 
+
+	// --- Process flight plans in queue ---
+	bool ProcessFlightPlans(
+		std::vector<DdsAutoType<com::rti::atc::generated::FlightPlan>> *plans);
+
 	// --- Private members ---
 
 	// Contains all the components needed to create the DataReader

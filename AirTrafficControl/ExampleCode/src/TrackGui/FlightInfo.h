@@ -3,6 +3,7 @@
 
 #include "wx/setup.h"
 #include "../Generated/AirTrafficControl.h"
+#include "../CommonInfrastructure/DDSTypeWrapper.h"
 
 
 // ------------------------------------------------------------------------- //
@@ -18,8 +19,8 @@
 // ------------------------------------------------------------------------- //
 struct FlightInfo
 {
-	com::rti::atc::generated::Track *_track;
-	com::rti::atc::generated::FlightPlan *_plan;
+	DdsAutoType<com::rti::atc::generated::Track> _track;
+	DdsAutoType<com::rti::atc::generated::FlightPlan> _plan;
 
 };
 

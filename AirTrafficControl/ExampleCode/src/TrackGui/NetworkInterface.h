@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "../CommonInfrastructure/DDSCommunicator.h"
+#include "../CommonInfrastructure/DDSTypeWrapper.h"
 #include "../Generated/AirTrafficControl.h"
 #include "../Generated/AirTrafficControlSupport.h"
 
@@ -75,11 +76,6 @@ private:
 
 };
 
-// ------------------------------------------------------------------------- //
-// A query string has two single quotes around the string to be queried.
-// In this case, our query is for a particular flight ID, so we have the 
-// length pre-defined in IDL.
-#define FLIGHT_ID_QUERY_LENGTH com::rti::atc::generated::FLIGHT_ID_LENGTH + 2
 
 // ------------------------------------------------------------------------- //
 //
@@ -110,7 +106,7 @@ public:
 	// when it is interested in it.  It queries the middleware queue by
 	// flight ID.
 	void GetFlightPlan(char *flightId, 
-		com::rti::atc::generated::FlightPlan *plan);
+		DdsAutoType<com::rti::atc::generated::FlightPlan> plan);
 
 private:
 	// --- Private members ---
@@ -126,12 +122,6 @@ private:
 	DDS::WaitSet *_waitSet;
 	DDS::StatusCondition *_condition;
 	DDS::GuardCondition *_shutDownNotifyCondition;
-
-	// Allows the application to query the middleware queue for a specific
-	// set of flight plans (in this case, it will query by ID, which means 
-	// it will get only one).
-	DDS::QueryCondition *_queryForFlights;
-	char _flightIdQueried[FLIGHT_ID_QUERY_LENGTH];
 
 	// Mutex for threading
 	OSMutex *_mutex;
@@ -162,13 +152,13 @@ public:
 	// This waits for new tracks to become available, and notifies the 
 	// application that there are new tracks.
 	void WaitForTracks(
-		std::vector<com::rti::atc::generated::Track *> *tracks);
+		std::vector<DdsAutoType<com::rti::atc::generated::Track>> *tracks);
 
 	// --- Retreiving current track updates --- 
 	// This retrieves track updates from the middleware queue.  This is used
 	// to poll for all the current track updates from the middleware.
 	void GetCurrentTracks(
-		std::vector<com::rti::atc::generated::Track *> *tracks);
+		std::vector<DdsAutoType<com::rti::atc::generated::Track>> *tracks);
 
 	// --- Wake up the reader thread if it is waiting on data ---
 	void NotifyWakeup();

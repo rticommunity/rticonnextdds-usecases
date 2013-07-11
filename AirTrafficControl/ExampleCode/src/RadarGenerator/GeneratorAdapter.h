@@ -64,7 +64,7 @@ public:
 	// network data types.  In other words, this converts between GeneratorTrack
 	// and GeneratorFlightPlan to Track and FlightPlan data types.
 	static void AdaptToGeneratorFlightPlan(GeneratorFlightPlan &genPlan, 
-		const com::rti::atc::generated::FlightPlan &plan) 
+		const DdsAutoType<com::rti::atc::generated::FlightPlan> &plan) 
 	{
 		genPlan.estimatedHours = plan.estimatedHours;
 		genPlan.estimatedMinute = plan.estimatedMinutes;
@@ -76,7 +76,7 @@ public:
 	// network data types.  In other words, this converts between GeneratorTrack
 	// and GeneratorFlightPlan to Track and FlightPlan data types.
 	static void AdaptToFlightPlan(
-		com::rti::atc::generated::FlightPlan &plan, 
+		DdsAutoType<com::rti::atc::generated::FlightPlan> &plan, 
 		const GeneratorFlightPlan &genPlan) 
 	{
 		plan.estimatedHours = genPlan.estimatedHours;

@@ -13,6 +13,7 @@ damages arising out of the use or inability to use the software.
 #include <iostream>
 #include "../Generated/AirTrafficControl.h"
 #include "../Generated/AirTrafficControlSupport.h"
+#include "../CommonInfrastructure/DDSTypeWrapper.h"
 #include "FlightPlanPublisherInterface.h"
 
 using namespace std;
@@ -142,83 +143,57 @@ int main(int argc, char *argv[])
 
 		printf("Sending flight plans over RTI Connext DDS\n");
 
-		while (1) 
+
+		// Write all flight plans up to the number specified
+		for (int i = 0; i < numFlightPlans; i++) 
 		{
 
-			list<FlightPlan *> flightPlans;
-			int i = 0;
+			// Allocate a flight plan structure
+			DdsAutoType<FlightPlan> flightPlan;
 
-			// Write all flight plans
-			for (int i = 0; i < numFlightPlans; i++) 
-			{
+			// Give it a random airline and flight ID based on airlines
+			// that fly into SFO
+			sprintf(flightPlan.flightId, "%s%d", 
+				airlines[i % airlineNum], i + 1); 
 
-				// Allocate a flight plan structure
-				FlightPlan *plan = FlightPlanTypeSupport::create_data();
+			// Give it a departure aerodrome
+			sprintf(flightPlan.departureAerodrome, "%s", 
+				departureAerodromes[i%8]);
 
-				// Add it to our vector of flight plans
-				flightPlans.push_back(plan);
+			// Destination aerodrome is always SFO
+			sprintf(flightPlan.destinationAerodrome, "%s", "KSFO");
 
-				// Give it a random airline and flight ID based on airlines
-				// that fly into SFO
-				sprintf(plan->flightId, "%s%d", 
-					airlines[i % airlineNum], i + 1); 
+			// Use the current time as a starting point for the expected
+			// landing time of the aircraft
+			DDS_Time_t time;
+			fpInterface.GetCommunicator()->GetParticipant()
+										->get_current_time(time);
+			unsigned long currDay = time.sec % SECONDS_PER_DAY; 
+			short currHour = (short)(currDay / SECONDS_PER_HOUR);
+			short currMin = (short)((currDay % SECONDS_PER_HOUR) / 
+				SECONDS_PER_MIN);
 
-				// Give it a departure aerodrome
-				sprintf(plan->departureAerodrome, "%s", 
-					departureAerodromes[i%8]);
-
-				// Destination aerodrome is always SFO
-				sprintf(plan->destinationAerodrome, "%s", "KSFO");
-
-				// Use the current time as a starting point for the expected
-				// landing time of the aircraft
-				DDS_Time_t time;
-				fpInterface.GetCommunicator()->GetParticipant()
-											->get_current_time(time);
-				unsigned long currDay = time.sec % SECONDS_PER_DAY; 
-				short currHour = (short)(currDay / SECONDS_PER_HOUR);
-				short currMin = (short)((currDay % SECONDS_PER_HOUR) / 
-					SECONDS_PER_MIN);
-
-				// In this example, each flight lands 5 minutes after the 
-				// previous flight
-				short minToLanding = (currMin + 
-					(timeBetweenLandings * (i + 1)));
-				plan->estimatedMinutes = minToLanding % SECONDS_PER_MIN;
+			// In this example, each flight lands 5 minutes after the 
+			// previous flight
+			short minToLanding = (currMin + 
+				(timeBetweenLandings * (i + 1)));
+			flightPlan.estimatedMinutes = minToLanding % SECONDS_PER_MIN;
 				
-				long hourTemp = currHour + (minToLanding / SECONDS_PER_MIN);
-				hourTemp = hourTemp % HOURS_PER_DAY;
-				plan->estimatedHours = (short)hourTemp;
+			long hourTemp = currHour + (minToLanding / SECONDS_PER_MIN);
+			hourTemp = hourTemp % HOURS_PER_DAY;
+			flightPlan.estimatedHours = (short)hourTemp;
 
-				// Write the data to the network.  This is a thin wrapper 
-				// around the RTI Connext DDS DataWriter that writes data to
-				// the network.
-				fpInterface.Write(plan);
+			// Write the data to the network.  This is a thin wrapper 
+			// around the RTI Connext DDS DataWriter that writes data to
+			// the network.
+			fpInterface.Write(flightPlan);
 
-				NDDSUtility::sleep(send_period);
-			}
+			NDDSUtility::sleep(send_period);
+		}
 
-
-
-			// Sleep for two minutes after publishing the flight plans
-			DDS_Duration_t deletion_time = {180,000000000};
-			NDDSUtility::sleep(deletion_time);
-
-			// Delete all flight plans from network and from the system
-			for (int i = 0; i < numFlightPlans; i++) 
-			{
-
-				// Notify the network that these flight plans are no longer
-				// valid.  This is necessary if we want to free up resources
-				// associated with the current flight plans.
-				fpInterface.Delete(flightPlans.front());
-
-				// Delete the actual flight plan data from the application.
-				FlightPlanTypeSupport::delete_data(flightPlans.front());
-				flightPlans.pop_front();
-				NDDSUtility::sleep(send_period);
-			}
-
+		while (1) 
+		{
+			NDDSUtility::sleep(send_period);
 		}
 	}
 	catch (string message)

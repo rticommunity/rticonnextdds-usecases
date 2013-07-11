@@ -440,15 +440,6 @@ FlightPlanReader::~FlightPlanReader()
 // This example is using an application thread to be notified when flight plans
 // arrive.  
 // 
-// In this example, we remove the data from the middleware's queue by calling
-// take().  We do this to illustrate the common case where the data must be
-// changed from one format (the network format) to another (the format that the
-// radar library expects to receive its flight plan data).
-// If the application is able to use the data directly without converting it to
-// a different format, you can call read().  This leaves the data in the queue,
-// and lets the application access it without having to copy it.
-//
-//
 // There are three options for getting data from RTI Connext DDS:
 // 1. Being notified in the application's thread of data arriving (as here).
 //    This mechanism has slightly higher latency than option #2, but low
@@ -467,17 +458,24 @@ FlightPlanReader::~FlightPlanReader()
 //    A simple example of this can be found at:
 //    http://community.rti.com/examples/polling-read
 
-void FlightPlanReader::WaitForFlightPlans(std::vector<FlightPlan *> *plans) 
+void FlightPlanReader::WaitForFlightPlans(std::vector<DdsAutoType<FlightPlan>> *plans) 
 {
 
 	ConditionSeq activeConditions;
 	// How long to block for data at a time
 	DDS_Duration_t timeout = {1,0};
 
+	// Process flight plans if they exist, and do not wait for another
+	// notification of new data
+	if (true == ProcessFlightPlans(plans))
+	{
+		return;
+	}
+
 	// Block thread for flight plan data to arrive
 	DDS_ReturnCode_t retcode = _waitSet->wait(activeConditions, timeout);
 
-	// May be normal to time out
+	// Normal to time out 
 	if (retcode == DDS_RETCODE_TIMEOUT) 
 	{
 		return;
@@ -485,10 +483,31 @@ void FlightPlanReader::WaitForFlightPlans(std::vector<FlightPlan *> *plans)
 	if (retcode != DDS_RETCODE_OK) 
 	{
 		std::stringstream errss;
-		errss << "WaitForFlightPlans(): error " << retcode << " when receiving flight plans.";
+		errss << "WaitForFlightPlans(): error " << retcode << 
+			" when receiving flight plans.";
 		throw errss.str();
 	}
 
+	// If we have been woken up and notified that there was an event, we can
+	// try to process flight plans.  Errors in processing flight plans will 
+	// throw an exception
+	ProcessFlightPlans(plans);
+
+
+}
+
+// This method is taking data from the middleware's queue.
+//
+// In this example, we remove the data from the middleware's queue by calling
+// take().  We do this to illustrate the common case where the data must be
+// changed from one format (the network format) to another (the format that the
+// radar library expects to receive its flight plan data).
+// If the application is able to use the data directly without converting it to
+// a different format, you can call read().  This leaves the data in the queue,
+// and lets the application access it without having to copy it.
+
+bool FlightPlanReader::ProcessFlightPlans(std::vector<DdsAutoType<FlightPlan>> *plans) 
+{
 	// Note: These two sequences are being created with a length = 0.
 	// this means that the middleware is loaning memory to them, which
 	// the application must return to the middleware.  This avoids 
@@ -496,38 +515,55 @@ void FlightPlanReader::WaitForFlightPlans(std::vector<FlightPlan *> *plans)
 	FlightPlanSeq flightPlans;
 	SampleInfoSeq sampleInfos;
 
-	// This call removes the data from the middleware's queue
-	retcode = _reader->take(flightPlans, sampleInfos, 
-		_communicator->GetMaxFlightsToHandle());
+	bool havePlans = false;
 
-	if ((retcode != DDS_RETCODE_OK) && 
-                (retcode != DDS_RETCODE_NO_DATA)) 
-	{
-		std::stringstream errss;
-		errss << "WaitForFlightPlans(): error " << retcode << " when retrieving flight plans.";
-		throw errss.str();
-	}
+	DDS_ReturnCode_t retcode = DDS_RETCODE_OK;
 
-	// Note, based on the QoS profile (history = keep last, depth = 1) and the 
-	// fact that we modeled flights as separate instances, we can assume there
-	// is only one entry per flight.  So if a flight plan for a particular 
-	// flight has been changed 10 times, we will  only be maintaining the most 
-	// recent update to that flight plan in the middleware queue.
-	for (int i = 0; i < flightPlans.length(); i++) 
+	while (retcode != DDS_RETCODE_NO_DATA)
 	{
-		if (sampleInfos[i].valid_data) 
+		// This call removes the data from the middleware's queue
+		retcode = _reader->take(flightPlans, sampleInfos, 
+			_communicator->GetMaxFlightsToHandle());
+
+		// If an error has occurred, throw an exception.  No data being
+		// available is not an error condition
+		if ((retcode != DDS_RETCODE_OK) && 
+					(retcode != DDS_RETCODE_NO_DATA)) 
 		{
-
-			// Making copies of this type for clean API because we do not need lowest latency for flight plan data
-			plans->push_back(new FlightPlan(flightPlans[i]));
+			std::stringstream errss;
+			errss << "WaitForFlightPlans(): error " << retcode << 
+				" when retrieving flight plans.";
+			throw errss.str();
 		}
 
+		// Note, based on the QoS profile (history = keep last, depth = 1) and the 
+		// fact that we modeled flights as separate instances, we can assume there
+		// is only one entry per flight.  So if a flight plan for a particular 
+		// flight has been changed 10 times, we will  only be maintaining the most 
+		// recent update to that flight plan in the middleware queue.
+		for (int i = 0; i < flightPlans.length(); i++) 
+		{
+			// Data may not be valid if this is a notification that an instance
+			// has changed state.  In other words, this could be a notification 
+			// that a writer called "dispose" to notify the other applications 
+			// that the flight plan has moved to a dispose state.
+			if (sampleInfos[i].valid_data) 
+			{
+				// Return a value of true that flight plans have been received
+				havePlans = true;
+
+				// Making copies of this type for clean API because we do not need 
+				// lowest latency for flight plan data
+				DdsAutoType<FlightPlan> plan = flightPlans[i];
+				plans->push_back(plan);
+			}
+
+		}
+
+		// This returns the loaned memory to the middleware.
+		_reader->return_loan(flightPlans, sampleInfos);
+
 	}
 
-	// This returns the loaned memory to the middleware.
-	_reader->return_loan(flightPlans, sampleInfos);
-
+	return havePlans;
 }
-
-
-

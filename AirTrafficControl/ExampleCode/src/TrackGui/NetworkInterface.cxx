@@ -8,6 +8,7 @@ support the Software.  RTI shall not be liable for any incidental or consequenti
 damages arising out of the use or inability to use the software.
 **********************************************************************************************/
 #include "NetworkInterface.h"
+#include "../CommonInfrastructure/DDSTypeWrapper.h"
 #include "../CommonInfrastructure/OSAPI.h"
 
 
@@ -153,27 +154,12 @@ FlightPlanReader::FlightPlanReader(NetworkInterface *app,
 		throw errss.str();
 	}
 
-	// Create a query condition that will be used later to access a specific 
-	// flight plan in the DataReader's queue
-	DDS_StringSeq queryParameters;
-	queryParameters.ensure_length(1,1);
-	queryParameters[0] = DDS_String_dup("''");
-	_queryForFlights = _fpReader->create_querycondition(DDS_ANY_SAMPLE_STATE, 
-		DDS_ANY_VIEW_STATE, DDS_ALIVE_INSTANCE_STATE,
-		"flightId MATCH %0", queryParameters);
-	if (_queryForFlights == NULL)
-	{
-		std::stringstream errss;
-		errss << "FlightPlanReader(): failure to initialize query condition.";
-		throw errss.str();
-	}
 	// Use this guard condition to wake up this reader if it is waiting later
 	_shutDownNotifyCondition = new GuardCondition;
 	_waitSet->attach_condition(_shutDownNotifyCondition);
 
 	_condition = _fpReader->get_statuscondition();
-	_condition->set_enabled_statuses(DDS_SAMPLE_LOST_STATUS | 
-		DDS_SAMPLE_REJECTED_STATUS | DDS_DATA_AVAILABLE_STATUS);
+	_condition->set_enabled_statuses(DDS_DATA_AVAILABLE_STATUS);
 	if (_condition == NULL) 
 	{
 		std::stringstream errss;
@@ -199,13 +185,10 @@ FlightPlanReader::~FlightPlanReader()
 	_mutex->Lock();
 
 	_waitSet->detach_condition(_condition);
-	_waitSet->detach_condition(	_shutDownNotifyCondition);
+	_waitSet->detach_condition(_shutDownNotifyCondition);
 	delete _shutDownNotifyCondition;
 	delete _waitSet;
 
-	// Deleted when calling delete_contained_entities
-	// delete _queryForFlights;
-	// delete _condition
 
 	_fpReader->delete_contained_entities();
 
@@ -229,27 +212,35 @@ FlightPlanReader::~FlightPlanReader()
 //      passed in.  Due to the QoS settings, we know this has a history depth 
 //      of one, so only the latest flight plan information will be in the 
 //      DataReader's queue.
-void FlightPlanReader::GetFlightPlan(char *flightId, FlightPlan *plan)
+void FlightPlanReader::GetFlightPlan(char *flightId, 
+	DdsAutoType<FlightPlan> plan)
 {
-	DDS_StringSeq queryParameters;
-	queryParameters.ensure_length(1,1);
 
-	// Note that a QueryCondition requires that the single quotes around
-	// a string are inside the query condition parameter, so this creates
-	// a string with single-quotes around the flight ID
-	sprintf(_flightIdQueried, "'%s'", flightId);
-	queryParameters[0] = DDS_String_dup(_flightIdQueried);
-	_queryForFlights->set_query_parameters(queryParameters);
+	// Create a placeholder with only the key field filled in.  This will be
+	// used to retrieve the flight plan instance (if it exists).
+	DdsAutoType<FlightPlan> flightPlan;
+	strcpy(flightPlan.flightId, flightId);
 
-	if (0 == strcmp(flightId, "")) 
+	// Look up the particular instance
+	const DDS_InstanceHandle_t handle =
+		_fpReader->lookup_instance(flightPlan);
+
+	// Not having a flight plan associated with this radar track is a normal 
+	// case in this example application.  In a real-world application you may
+	// want to throw an exception or return an error in the case where a flight
+	// appears that has no associated flight plan.
+	if (DDS_InstanceHandle_is_nil(&handle))
 	{
 		return;
 	}
 
 	FlightPlanSeq flightSeq;
 	SampleInfoSeq infoSeq;
-	_fpReader->read_w_condition(flightSeq, infoSeq, DDS_LENGTH_UNLIMITED,
-		_queryForFlights);
+
+	// Reading just the data for the flight plan we are interested in
+	_fpReader->read_instance(flightSeq, infoSeq, 
+			DDS_LENGTH_UNLIMITED,
+			handle);
 
 
 	if (flightSeq.length() > 0)
@@ -257,7 +248,9 @@ void FlightPlanReader::GetFlightPlan(char *flightId, FlightPlan *plan)
 
 		if (infoSeq[0].valid_data)
 		{
-			FlightPlanTypeSupport::copy_data(plan, &flightSeq[0]);
+			// DdsAutoType has a copy constructor that calls 
+			// the appropriate TypeSupport::copy_data method
+			plan = flightSeq[0];
 		}
 	}
 	_fpReader->return_loan(flightSeq, infoSeq);
@@ -419,17 +412,13 @@ TrackReader::~TrackReader()
 //    A simple example of this can be found at:
 //    http://community.rti.com/examples/polling-read
 
-void TrackReader::WaitForTracks(std::vector<Track *> *tracks) 
+void TrackReader::WaitForTracks(std::vector<DdsAutoType<Track>> *tracks) 
 {
 
 	ConditionSeq activeConditions;
 	DDS_Duration_t timeout = {0,300000000};
 
 	_mutex->Lock();
-
-	while (retcode != DDS_RETCODE_NO_DATA)
-	{
-	}
 
 	// Block this thread until track data becomes available.
 	DDS_ReturnCode_t retcode = _waitSet->wait(activeConditions, timeout);
@@ -455,47 +444,53 @@ void TrackReader::WaitForTracks(std::vector<Track *> *tracks)
 	TrackSeq trackSeq;
 	SampleInfoSeq sampleInfos;
 
-	// This leaves the data in the DataReader's queue.  Alternately, can call
-	// take() which will remove it from the queue.  Leaving data in the 
-	// makes sense in this application for two reasons:  
-	// 1) the QoS allows the overwriting of data in the queue
-	// 2) the application wants to always see the latest update of each 
-	//    instance
-	retcode = _reader->read(trackSeq, sampleInfos);
-
-	if (retcode != DDS_RETCODE_NO_DATA &&
-		retcode != DDS_RETCODE_OK) 
+	// Call read in a loop until there is no data left to read.  Note that
+	// retcode must be okay, or an exception would have been thrown above
+	while (retcode != DDS_RETCODE_NO_DATA)
 	{
-		std::stringstream errss;
-		errss << "WaitForTracks(): error when retrieving flight plans.";
-		_mutex->Unlock();
-		throw errss.str();
-	}
+		// This leaves the data in the DataReader's queue.  Alternately, can 
+		// call take() which will remove it from the queue.  Leaving data in  
+		// the makes sense in this application for two reasons:  
+		// 1) the QoS allows the overwriting of data in the queue
+		// 2) the application wants to always see the latest update of each 
+		//    instance
+		retcode = _reader->read(trackSeq, sampleInfos);
 
-	// Note, based on the QoS profile (history = keep last, depth = 1) and the 
-	// fact that we modeled flights as separate instances, we can assume there
-	// is only one entry per flight.  So if a flight plan for a particular 
-	// flight has been changed 10 times, we will  only be maintaining the most 
-	// recent update to that flight plan in the middleware queue.
-	for (int i = 0; i < trackSeq.length(); i++) 
-	{
-		if (sampleInfos[i].valid_data) 
+		if (retcode != DDS_RETCODE_NO_DATA &&
+			retcode != DDS_RETCODE_OK) 
 		{
-			SampleInfo info = sampleInfos[i];
-
-			// Making copies of this type for clean API because we do not need 
-			//lowest latency for flight plan data
-			Track *trackReturned = TrackTypeSupport::create_data();
-			TrackTypeSupport::copy_data(trackReturned, &trackSeq[i]);
-			tracks->push_back(trackReturned);
+			std::stringstream errss;
+			errss << "WaitForTracks(): error when retrieving flight plans.";
+			_mutex->Unlock();
+			throw errss.str();
 		}
 
+		// Note, based on the QoS profile (history = keep last, depth = 1) and  
+		// the fact that we modeled flights as separate instances, we can 
+		// assume there is only one entry per flight.  So if a flight plan for 
+		// a particular flight has been changed 10 times, we will  only be 
+		// maintaining the most recent update to that flight plan in the 
+		// middleware queue.
+		for (int i = 0; i < trackSeq.length(); i++) 
+		{
+			if (sampleInfos[i].valid_data) 
+			{
+				SampleInfo info = sampleInfos[i];
+
+				// Making copies of this type for clean API because we do not  
+				// need lowest latency for flight plan data
+				DdsAutoType<Track> trackType = trackSeq[i];
+				tracks->push_back(trackType);
+			}
+
+		}
+
+		// The original track sequence was loaned from the middleware to the
+		// application.  We have copied the data out of it, so we can now 
+		// return the loan to the middleware.
+		_reader->return_loan(trackSeq, sampleInfos);
 	}
 
-	// The original track sequence was loaned from the middleware to the
-	// application.  We have copied the data out of it, so we can now return
-	// the loan to the middleware.
-	_reader->return_loan(trackSeq, sampleInfos);
 	_mutex->Unlock();
 
 }
@@ -503,7 +498,7 @@ void TrackReader::WaitForTracks(std::vector<Track *> *tracks)
 // ----------------------------------------------------------------------------
 // This example is using an application thread to poll for all the existing 
 // track data inside the middleware's queue.
-void TrackReader::GetCurrentTracks(std::vector<Track *> *tracks)
+void TrackReader::GetCurrentTracks(std::vector<DdsAutoType<Track>> *tracks)
 {
 	_mutex->Lock();
 
@@ -533,11 +528,11 @@ void TrackReader::GetCurrentTracks(std::vector<Track *> *tracks)
 		if (sampleInfos[i].valid_data) 
 		{
 			SampleInfo info = sampleInfos[i];
+
 			// Currently we are allocating and copying the data, though in the 
 			// future, we may change to pre-allocating.
-			Track *trackReturned = TrackTypeSupport::create_data();
-			TrackTypeSupport::copy_data(trackReturned, &trackSeq[i]);
-			tracks->push_back(trackReturned);
+			DdsAutoType<Track> track = trackSeq[i];
+			tracks->push_back(track);
 		}
 
 	}

@@ -24,6 +24,14 @@ damages arising out of the use or inability to use the software.
 
 typedef DDS_ReturnCode_t (*unregister_fn)(DDSDomainParticipant *, const char *);
 
+// ------------------------------------------------------------------------- //
+// 
+// UnregisterInfo:
+// This structure maintains a mapping between a data type and its unregister
+// function, which can be used at shutdown when cleaning up the the 
+// DomainParticipant and all of its registered data types.
+//
+// ------------------------------------------------------------------------- //
 struct UnregisterInfo 
 {
   std::string typeName;
@@ -132,6 +140,10 @@ public:
 	}
 
 	// --- Create a Topic --- 
+
+	// Creates a Topic.  Templatized with the type name to 
+	// allow storage and deletion of the data type at 
+	// shutdown.
 	template <typename T>
 	DDS::Topic *CreateTopic(std::string topicName)
 	{

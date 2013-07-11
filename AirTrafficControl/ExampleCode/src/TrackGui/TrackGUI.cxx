@@ -50,24 +50,37 @@ AppFrame::AppFrame(TrackApp *app,
 	CreateStatusBar();
 	SetStatusText( _("Track Viewer") );
 
+
 	// Note: 
 	// May want to parse shape file earlier and set the panel size based on the relative 
 	// size of the geography, or change the radar circle to an ellipse to match the 
 	// view.
+	wxSplitterWindow *splitter = new 
+		wxSplitterWindow(this, -1, wxDefaultPosition, wxDefaultSize, wxSP_LIVE_UPDATE);
+	splitter->SetSashGravity(0.5);
 
 	// Open up the panel that shows tracks, and the panel that shows a grid of
 	// flight data.
-	_panel = new TrackPanel( this, 1, _("Track Viewer"), 
+	_panel = new TrackPanel( splitter, 1, _("Track Viewer"), 
 		wxPoint(0, 0), wxSize(450, 480), filePath);
-	_tablePanel = new TablePanel(this, 2, _("Flight Info"), 
-		wxPoint(0, 451),
-		wxSize(450, 250));
+
+	_tablePanel = new TablePanel(splitter, 2, _("Flight Info"), 
+		wxPoint(0, _panel->GetSize().GetY()),
+		wxSize(450, 100));
 
 	// Make the panels resize when the window resizes
-	wxSizer *sizer = new wxBoxSizer(wxVERTICAL);
-	sizer->Add(_panel, 1, wxEXPAND);
-	sizer->Add(_tablePanel,  1, wxEXPAND);
-	SetSizer(sizer);
+	wxSizer *sizerMain = new wxBoxSizer(wxVERTICAL);
+	sizerMain->Add(splitter, 1, wxEXPAND, 0);
+
+	wxSizer *sizerTop = new wxBoxSizer(wxVERTICAL);
+	sizerTop->Add(_panel, 1, wxEXPAND);
+
+	wxSizer *sizerBottom = new wxBoxSizer(wxVERTICAL);
+	sizerBottom->Add(_tablePanel,  1, wxEXPAND);
+
+	splitter->SplitHorizontally(_panel, _tablePanel);
+	SetSizer(sizerMain);
+	sizerMain->SetSizeHints(this);
 
 
 }
@@ -105,6 +118,7 @@ TrackPanel::TrackPanel(wxWindow *parent, wxWindowID id, const wxString& title,
 	CalculateCoordinateForWindowSize();
 
 }
+
 
 // Clears the current list of points, since they are likely to all change
 // before the next repainting.
@@ -281,9 +295,7 @@ void TrackPanel::CalculateGeoMinMax()
 }
 
 // Map from the coordinates in UTM or Lat/Long into a set of points that are
-// used when drawing in the actual window.  If the window size does not conform
-// to the height/width ratio of the map geometry, it may appear distorted, but
-// it will still draw a distorted version of the map.
+// used when drawing in the actual window.  
 // This is only called initially, or when resizing the window.
 void TrackPanel::CalculateCoordinateForWindowSize()
 {
@@ -405,7 +417,7 @@ void TrackPanel::OnSize(wxSizeEvent &event)
 TrackPanel::~TrackPanel() 
 {
 	_mutex->Lock();
-	AppFrame *appFrame = (AppFrame *)GetParent();
+	AppFrame *appFrame = (AppFrame *)GetParent()->GetParent();
 	appFrame->GetApp()->RemoveDataSource((wxPanel *)this);
 
 	for (unsigned int i = 0; i < _pointsLists.size(); i++) 
@@ -481,7 +493,7 @@ TablePanel::TablePanel(wxWindow *parent, wxWindowID id, const wxString& title,
 // panel is deleted, it can lead to bad pointers.  
 TablePanel::~TablePanel()
 {
-	AppFrame *appFrame = (AppFrame *)GetParent();
+	AppFrame *appFrame = (AppFrame *)GetParent()->GetParent();
 	appFrame->GetApp()->RemoveDataSource((wxPanel *)this);
 
 	delete _grid;
@@ -516,31 +528,31 @@ void TablePanel::UpdateRow(const FlightInfo &flight)
 			_grid->GetCellValue(i,1).ToLong(&trackIdCell);
 		}
 
-		if (radarIdCell == flight._track->radarId && trackIdCell == 
-			flight._track->trackId) 
+		if (radarIdCell == flight._track.radarId && trackIdCell == 
+			flight._track.trackId) 
 		{
 			exists = true;
 
 			// Only update the cell value if this has changed
 			if (0 != strcmp(_grid->GetCellValue(i,2).c_str(), 
-				flight._track->flightId))
+				flight._track.flightId))
 			{
-				_grid->SetCellValue(i, 2, wxString(flight._track->flightId));
+				_grid->SetCellValue(i, 2, wxString(flight._track.flightId));
 			}
 
-			_grid->SetCellValue(i, 3, wxString::Format(wxT("%f"), flight._track->latitude));
-			_grid->SetCellValue(i, 4, wxString::Format(wxT("%f"), flight._track->longitude));
-			if (_grid->GetCellValue(i, 5) != flight._plan->departureAerodrome)
+			_grid->SetCellValue(i, 3, wxString::Format(wxT("%f"), flight._track.latitude));
+			_grid->SetCellValue(i, 4, wxString::Format(wxT("%f"), flight._track.longitude));
+			if (_grid->GetCellValue(i, 5) != flight._plan.departureAerodrome)
 			{
-				_grid->SetCellValue(i, 5, wxString(flight._plan->departureAerodrome));
+				_grid->SetCellValue(i, 5, wxString(flight._plan.departureAerodrome));
 			}
-			if (_grid->GetCellValue(i, 5) != flight._plan->destinationAerodrome)
+			if (_grid->GetCellValue(i, 5) != flight._plan.destinationAerodrome)
 			{
-				_grid->SetCellValue(i, 6, wxString(flight._plan->destinationAerodrome));
+				_grid->SetCellValue(i, 6, wxString(flight._plan.destinationAerodrome));
 			}
 			char date[6];
-			sprintf(date, "%02i:%02i", flight._plan->estimatedHours,
-				flight._plan->estimatedMinutes);
+			sprintf(date, "%02i:%02i", flight._plan.estimatedHours,
+				flight._plan.estimatedMinutes);
 			if (_grid->GetCellValue(i, 7) != date)
 			{
 				_grid->SetCellValue(i, 7, wxString(date) );
@@ -558,20 +570,20 @@ void TablePanel::UpdateRow(const FlightInfo &flight)
 			{
 
 				_grid->SetCellValue(i,0, wxString::Format(wxT("%i"), 
-					flight._track->radarId));
+					flight._track.radarId));
 				_grid->SetCellValue(i,1, wxString::Format(wxT("%i"), 
-					flight._track->trackId));
+					flight._track.trackId));
 				_grid->SetCellValue(i,2, wxString( 
-					flight._track->flightId));
+					flight._track.flightId));
 				_grid->SetCellValue(i,3, wxString::Format(wxT("%f"), 
-					flight._track->latitude));
+					flight._track.latitude));
 				_grid->SetCellValue(i,4, wxString::Format(wxT("%f"), 
-					flight._track->longitude));
-				_grid->SetCellValue(i, 5, wxString(flight._plan->departureAerodrome));
-				_grid->SetCellValue(i, 6, wxString(flight._plan->destinationAerodrome));
+					flight._track.longitude));
+				_grid->SetCellValue(i, 5, wxString(flight._plan.departureAerodrome));
+				_grid->SetCellValue(i, 6, wxString(flight._plan.destinationAerodrome));
 				char date[6];
-				sprintf(date, "%02i:%02i", flight._plan->estimatedHours,
-					flight._plan->estimatedMinutes);
+				sprintf(date, "%02i:%02i", flight._plan.estimatedHours,
+					flight._plan.estimatedMinutes);
 				_grid->SetCellValue(i, 7, wxString(date) );
 				break;
 			}

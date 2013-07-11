@@ -130,8 +130,8 @@ void FlightInfoNetworkReceiver::ReceiveTracks(void *param)
 	NetworkInterface *netInterface = app->GetNetworkInterface();
 	TrackReader *reader = netInterface->GetTrackReader();
 	FlightPlanReader *planReader = netInterface->GetFlightPlanReader();
-	vector<Track *>tracks;
-	vector <FlightInfo *>flights;
+	vector<DdsAutoType<Track>> tracks;
+	vector <FlightInfo *> flights;
 
 	// This periodically wakes up and updates the UI with the latest track
 	// information that is available from the middleware, which has been 
@@ -144,7 +144,6 @@ void FlightInfoNetworkReceiver::ReceiveTracks(void *param)
 		// Note that this API allocates tracks that are a copy of tracks
 		// in the queue.  This allows us to pass in an empty vector and
 		// use the data in it however we want.
-//		reader->WaitForTracks(&tracks);
 		reader->GetCurrentTracks(&tracks);
 
 		if (app->ShuttingDown())
@@ -163,11 +162,10 @@ void FlightInfoNetworkReceiver::ReceiveTracks(void *param)
 				FlightInfo *flightInfo = new FlightInfo;
 				flightInfo->_track = tracks[i];
 
-				flightInfo->_plan = FlightPlanTypeSupport::create_data();
 
 				// This copies a flight plan from the middleware into 
 				// the object passed in
-				planReader->GetFlightPlan(tracks[i]->flightId, 
+				planReader->GetFlightPlan(tracks[i].flightId, 
 					flightInfo->_plan);
 				flights.push_back(flightInfo);
 
@@ -181,15 +179,14 @@ void FlightInfoNetworkReceiver::ReceiveTracks(void *param)
 
 		tracks.clear();
 
-		// Delete the tracks we have just allocated.  There are more efficient
-		// ways to do this by preallocating, but here we simply create and 
-		// destroy the track information at each iteration.
+		// Delete the "FlightInfo" structures we have just generated.  There
+		// are more efficient ways to do this by preallocating, but this is okay
+		// for this simple use case
 		for (unsigned int i = 0; i < flights.size(); i++)
 		{
-			FlightPlanTypeSupport::delete_data(flights[i]->_plan);
-			TrackTypeSupport::delete_data(flights[i]->_track);
 			delete flights[i];
 		}
+
 		flights.clear();
 
 		// Sleep until the next UI refresh

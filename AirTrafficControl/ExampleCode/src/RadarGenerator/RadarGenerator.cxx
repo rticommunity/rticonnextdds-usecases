@@ -159,11 +159,11 @@ int main(int argc, char *argv[])
 		{
 			// Listen for updates to flight plans, and add them to the track 
 			// generator as they arrive
-			vector<com::rti::atc::generated::FlightPlan *> flightPlans;
+			vector<DdsAutoType<FlightPlan>> flightPlans;
 			radarNetInterface->
 				GetFlightPlanReader()->WaitForFlightPlans(&flightPlans);
 
-			for (vector<FlightPlan *>::iterator it = flightPlans.begin(); 
+			for (vector<DdsAutoType<FlightPlan>>::iterator it = flightPlans.begin(); 
 				it != flightPlans.end(); it++) 
 			{
 
@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
 				// Adapt between the network format of data and the generator
 				// format for flight plan data (in this example, we use only
 				// the flight ID from the flight plan)
-				RadarAdapter::AdaptToGeneratorFlightPlan(flightPlan, *(*it));
+				RadarAdapter::AdaptToGeneratorFlightPlan(flightPlan, (*it));
 
 				// Tell the track generator that this flight plan exists
 				trackGenerator->AddFlightPlan(&flightPlan);
