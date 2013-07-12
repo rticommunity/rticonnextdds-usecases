@@ -1,8 +1,7 @@
 @echo off
 setlocal
 
-IF ""==%ROUTER_HOME% (
-@echo %ROUTER_HOME%
+IF []==[%ROUTER_HOME%] (
   @echo The ROUTER_HOME environment variable must be set to Connext_install_dir/RTI_Routing_Service_5.0.0 to run this example
 )
 

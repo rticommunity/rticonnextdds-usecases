@@ -1,8 +1,8 @@
 @echo off
 setlocal
 
-IF ""=="%PROTOTYPER_HOME%" (
-  @echo PROTOTYPER_HOME must be set to prototyper_install_dir to run this example
+IF []==[%PROTOTYPER_HOME%] (
+  @echo PROTOTYPER_HOME must be set to the prototyper install dir to run this example
 )
 
 set dir=%~dp0
