@@ -337,7 +337,6 @@ void TrackGenerator::GenerateTracks()
 
 	double sendRateSec = _sampleRateSec / _runRate;
 	double sendRateNanosec = _sampleRateNanosec / _runRate;
-
 	DDS::Duration_t actualSleepTime = {(long)sendRateSec,
 		(unsigned long)sendRateNanosec};
 
@@ -611,11 +610,12 @@ bool TrackGenerator::PassedPoint(LatLong origLatLong,
 	FlightState state)
 {
 
-	if ((abs(newLatLong.latitude - destination.latitude) < .0005)
-		&& (abs(newLatLong.longitude - destination.longitude) < .0005))
+	if ((fabs(newLatLong.latitude - destination.latitude) < .0005)
+		&& (fabs(newLatLong.longitude - destination.longitude) < .0005))
 	{
 		return true;
 	}
 	return false;
 
 }
+
