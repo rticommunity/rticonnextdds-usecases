@@ -102,7 +102,7 @@
                             <!-- CHANGE THIS TO THE MACHINE YOU WANT TO     -->
                             <!-- CONTACT                                    -->
                             <!--                                            -->
-                            <element>tcpv4_wan://18.181.0.32:8500</element>
+                            <element>tcpv4_lan://10.211.55.3:9400</element>
                         </initial_peers>
                     </discovery>
                     <!-- These are the settings to enable TCP for your      -->
@@ -123,18 +123,9 @@
                             </element>
                             <element>
                                 <name>dds.transport.TCPv4.tcp1.parent.classid</name>
-                                <value>NDDS_TRANSPORT_CLASSID_TCPV4_WAN</value>
+                                <value>NDDS_TRANSPORT_CLASSID_TCPV4_LAN</value>
                             </element>
-                            <!-- CHANGE THIS TO THE PUBLIC ADDRESS OF YOUR  -->
-                            <!-- LOCAL MACHINE.  YOU WILL HAVE TO FORWARD A -->
-                            <!-- PORT THROUGH YOUR FIREWALL/ROUTER TO MAP   -->
-                            <!-- FROM THIS PUBLIC PORT TO LOCAL PORT 9401   -->
-                            <element>
-                                <name>dds.transport.TCPv4.tcp1.public_address</name>
-                                <value>18.181.0.31:8500</value>
-                            </element>
-                            <!-- Change this to the local port you          --> 
-                            <!-- configure in your router/firewall          -->
+                            <!-- Change this to the port you want to open   --> 
                             <element>
                                 <name>dds.transport.TCPv4.tcp1.server_bind_port</name>
                                 <value>9401</value>
@@ -327,7 +318,7 @@
                             <!--                                                -->
                             <!-- CHANGE THIS TO THE MACHINE YOU WANT TO CONTACT -->
                             <!--                                                -->
-                            <element>tcpv4_wan://18.181.0.32:8500</element>
+                            <element>tcpv4_lan://10.211.55.3:9401</element>
                         </initial_peers>
                     </discovery>
                     <property>
@@ -346,18 +337,9 @@
                             </element>
                             <element>
                                 <name>dds.transport.TCPv4.tcp1.parent.classid</name>
-                                <value>NDDS_TRANSPORT_CLASSID_TCPV4_WAN</value>
+                                <value>NDDS_TRANSPORT_CLASSID_TCPV4_LAN</value>
                             </element>
-                            <!-- CHANGE THIS TO THE PUBLIC ADDRESS OF YOUR  -->
-                            <!-- LOCAL MACHINE.  YOU WILL HAVE TO FORWARD A -->
-                            <!-- PORT THROUGH YOUR FIREWALL/ROUTER TO MAP   -->
-                            <!-- FROM THIS PUBLIC PORT TO LOCAL PORT 9400   -->
-                            <element>
-                                <name>dds.transport.TCPv4.tcp1.public_address</name>
-                                <value>18.181.0.31:8500</value>
-                            </element>
-                            <!-- Change this to the local port you          -->
-                            <!-- configure in your router/firewall          -->
+                            <!-- Change to the local port you want to use   -->
                             <element>
                                 <name>dds.transport.TCPv4.tcp1.server_bind_port</name>
                                 <value>9400</value>
