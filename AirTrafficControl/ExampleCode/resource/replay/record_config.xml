@@ -1,0 +1,126 @@
+<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="c:\program files\rti\5.0.0\RTI Recording Service 5.0.0\resource\schema\rti_record.xsd">
+
+<!-- 
+(c) 2005-2013 Copyright, Real-Time Innovations, Inc.  All rights reserved.    	                             
+RTI grants Licensee a license to use, modify, compile, and create derivative works 
+of the Software.  Licensee has the right to distribute object form only for use with RTI 
+products.  The Software is provided “as is”, with no warranty of any type, including 
+any warranty for fitness for any purpose. RTI is under no obligation to maintain or 
+support the Software.  RTI shall not be liable for any incidental or consequential 
+damages arising out of the use or inability to use the software.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Description
+XML configuration for recording all network data using high-throughput transport
+settings
+
+-->
+    <!-- This simple configuration records all topics from domain ID 0 -->
+    <recorder name="flightdata">
+        <!-- Specify where to store the recorded data. -->
+        <recorder_database>
+            <database_name> flight_data.dat </database_name>
+        </recorder_database>
+        
+        <!-- Create a DDS DomainParticipant in domain 0 with QoS configured
+             for high throughput data. -->
+        <domain name="domain0">
+            
+            <participant_qos>
+                <receiver_pool>
+                    <buffer_size>65507</buffer_size>
+                </receiver_pool>
+                <property>
+                    <value>
+
+                        <!--
+                            Configure UDP transport for higher throughput:
+                          -->
+                        <element>
+                            <name>dds.transport.UDPv4.builtin.parent.message_size_max</name>
+                            <value>65507</value>
+                        </element>
+
+                        <!--
+                          The next setting is to setup the buffers for sending and recieving data 
+                          on the transport to be at least double what our expected message size will be.
+                          In this case our expected message size is 1MB, so therefore we are setting
+                          the buffer sizes to 2MB.
+                          -->
+                        <element>
+                            <name>dds.transport.UDPv4.builtin.send_socket_buffer_size</name>
+                            <value>2097152</value>
+                        </element>
+                        <element>
+                            <name>dds.transport.UDPv4.builtin.recv_socket_buffer_size</name>
+                            <value>2097152</value>
+                        </element>
+                        <!-- Configure shared memory transport for higher 
+                             throughput: -->
+                        <element>
+                            <!--  Set the shared memory maximum message size to
+                                  the same value that was set for UDP.   -->
+                            <name>dds.transport.shmem.builtin.parent.message_size_max</name>
+                            <value>65507</value>
+                            <!-- 64 KB - header sizes -->
+                        </element>
+                        <element>
+                            <!-- Set the size of the shared memory transport's
+                                 receive buffer to some large value.  -->
+                            <name>dds.transport.shmem.builtin.receive_buffer_size</name>
+                            <value>2097152</value>
+                            <!-- 2 MB -->
+                        </element>
+                        <element>
+                            <!--  Set the maximum number of messages that the 
+                                  shared memory transport can cache while 
+                                  waiting for them to be read and deserialized.
+                             -->
+                            <name>dds.transport.shmem.builtin.received_message_count_max</name>
+                            <value>2048</value>
+                        </element>
+
+                    </value>
+                </property>
+
+
+            </participant_qos>
+            
+            <domain_id> 0 </domain_id>
+            <deserialize_mode>RTIDDS_DESERIALIZEMODE_NEVER</deserialize_mode>
+        </domain>
+
+        
+        <!-- Create a TopicGroup. A TopicGroup is a collection of Topics 
+         whose names match the topic_expr. The field_expr specifies 
+         which fields in the Topics to record. Note that a TopicGroup is 
+         not bound to a particular domain yet. 
+         In this example, the TopicGroup All means all fields in all Topics -->
+        <topic_group name="All">
+	    <topics>
+            	<topic_expr> * </topic_expr>
+	    </topics>
+            <field_expr> * </field_expr>
+        </topic_group>
+
+        <!-- Create a RecordGroup. A RecordGroup controls which TopicGroups
+         are recorded for a set of domains. Each recorded Topic is stored in 
+         a table with the format "record_group.domain.Topic" 
+         In this example, we want to record data from topics in TopicGroup "All"
+         from "domain0." -->
+        <record_group name="RecordAll">
+            <!-- specify which domains to record from -->
+            <domain_ref>
+                <element> domain0 </element>
+            </domain_ref>
+
+            <!-- specify which topics to record -->
+            <topic_ref>
+                <element> All </element>
+            </topic_ref>
+        </record_group>
+    </recorder>
+    
+
+</dds>

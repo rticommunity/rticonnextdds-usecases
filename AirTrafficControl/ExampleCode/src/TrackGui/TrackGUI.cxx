@@ -85,11 +85,30 @@ AppFrame::AppFrame(TrackApp *app,
 
 }
 
+AppFrame::~AppFrame()
+{
+	// Stop the update thread as soon as we get the message that the windows 
+	// are shutting down
+	GetApp()->SetShuttingDown(true);
+
+	// The data sources must be removed before the child panels are destroyed,
+	// or the application may hang at shutdown as it tries to send a command to
+	// update a window that is in process of being deleted.
+	GetApp()->RemoveDataSource(_tablePanel);
+	GetApp()->RemoveDataSource(_panel);
+}
+
 void AppFrame::OnQuit(wxCommandEvent& event) 
 {
-	GetApp()->RemoveDataSource(_tablePanel);
+	// Stop the update thread as soon as we get the message that the windows 
+	// are shutting down
+	GetApp()->SetShuttingDown(true);
 
-	delete _panel;
+	// The data sources must be removed before the child panels are destroyed,
+	// or the application may hang at shutdown as it tries to send a command to
+	// update a window that is in process of being deleted.
+	GetApp()->RemoveDataSource(_tablePanel);
+	GetApp()->RemoveDataSource(_panel);
 }
 
 TrackPanel::TrackPanel(wxWindow *parent, wxWindowID id, const wxString& title, 
@@ -416,9 +435,11 @@ void TrackPanel::OnSize(wxSizeEvent &event)
 // projection data, and free the map data itself.
 TrackPanel::~TrackPanel() 
 {
-	_mutex->Lock();
 	AppFrame *appFrame = (AppFrame *)GetParent()->GetParent();
-	appFrame->GetApp()->RemoveDataSource((wxPanel *)this);
+	appFrame->GetApp()->SetShuttingDown(true);
+
+	_mutex->Lock();
+//	appFrame->GetApp()->RemoveDataSource((wxPanel *)this);
 
 	for (unsigned int i = 0; i < _pointsLists.size(); i++) 
 	{	
@@ -494,7 +515,7 @@ TablePanel::TablePanel(wxWindow *parent, wxWindowID id, const wxString& title,
 TablePanel::~TablePanel()
 {
 	AppFrame *appFrame = (AppFrame *)GetParent()->GetParent();
-	appFrame->GetApp()->RemoveDataSource((wxPanel *)this);
+//	appFrame->GetApp()->RemoveDataSource((wxPanel *)this);
 
 	delete _grid;
 }

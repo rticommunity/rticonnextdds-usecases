@@ -43,19 +43,15 @@ class TrackPanel : public wxPanel
 {
 
 public:
+
+	// --- Constructor and Destructor --- 
 	TrackPanel(wxWindow *parent, wxWindowID id, const wxString& title, 
 		const wxPoint& pos, const wxSize& size, std::string filePath);
+
 	~TrackPanel();
 
-	void ClearPoints()
-	{
-		_mutex->Lock();
 
-		_trackPoints.clear();
-
-		_mutex->Unlock();
-	}
-
+	// --- Update the position of a point (aircraft) --- 
 	void UpdatePoint(long trackId, wxRealPoint point)
 	{
 		_mutex->Lock();
@@ -69,6 +65,11 @@ public:
 		_mutex->Unlock();
 	}
 
+	// --- Add/Update the position of a point (aircraft) --- 
+
+	//
+	// If the point already exists, update its position.  If it does not, add
+	// a new point to the list.
 	void AddOrUpdatePoint(long trackId, wxRealPoint point)
 	{
 
@@ -91,36 +92,61 @@ public:
 		_mutex->Unlock();
 	}
 
+	// --- Paint events for drawing aircraft movement --- 
 	void OnPaint(wxPaintEvent& paintEvt);
-	void DrawRadarCircleSFO(wxBufferedPaintDC &dc);
-
-	void CalculateCoordinateForWindowSize();
-	void ClearPointsLists();
-
 	void OnSize(wxSizeEvent &event);	
 
+	// --- Draw a circle around a radius of SFO --- 
+	void DrawRadarCircleSFO(wxBufferedPaintDC &dc);
 
+	// --- Translate from lat/long to window position --- 
+	void CalculateCoordinateForWindowSize();
 
+	// --- Clear the lists of points of the map ---
+	void ClearPointsLists();
+
+	// --- Decide the max and minimum lat/long or UTM in the view ---
 	void CalculateGeoMinMax();
-	
+
+	// --- Convert between lat/long values and UTM values ---
+	// The map is in UTM, so must do a conversion between lat/long and UTM
 	void ConvertLatLongToUTM(double *northing, double *easting, 
 						double latitude, double longitude);
 
+	// --- Convert between lat/long or UTM values and window points ---
 	void ConvertMapCoordToWindow(wxRealPoint *coord, 
 		wxRealPoint latLong, double maxX,
 		double maxY, double minX, double minY,
 		int windowSizeX, int windowSizeY);
 
+	// --- Calculate point representing 80 KM from SFO ---
+	// Have chosen the radius around SFO as 80KM.  This is hard-coded
+	// for the example.
 	void Calculate80KmNorthFromSFO(wxRealPoint *latLong);
 
+	// --- Private members ---
 
+	// Mutex for handling multi-threaded access to the GUI drawing
 	OSMutex *_mutex;
+
+	// The shape objects read from a shapefile that are used to draw a map
 	std::vector<SHPObject *> _shapeObjects;
+
+	// The points where each aircraft is currently located, in window 
+	// coordinates
 	std::map<long, wxPoint> _trackPoints;
+
+	// The points representing the geometry of the map, in window coordinates
 	std::vector<wxPointList *> _pointsLists;
+
+	// Maximum X/Y values of the map
 	double _minX, _minY, _maxX, _maxY;
+
+	// Information about the projection used for the map 
 	projPJ _latlongProjection;
 	projPJ _mercatorProjection;
+
+	// wxWidgets macro for events
 	DECLARE_EVENT_TABLE()
 };
 
@@ -134,25 +160,41 @@ public:
 class TablePanel : public wxPanel
 {
 public:	
+
+	// --- Constructor and Destructor --- 
 	TablePanel(wxWindow *parent, wxWindowID id, const wxString& title, 
 		const wxPoint& pos, 
 		const wxSize& size);
 	~TablePanel();
+
+	// --- Size event --- 
 	void OnSize(wxSizeEvent &event);
+
+	// --- Quit event --- 
+	void OnQuit(wxCommandEvent &event);
+
+
+	// --- Grid update methods --- 
 	void PrepareUpdate() 
 	{
 		_grid->BeginBatch();
 	}
+
 	void UpdateComplete()
 	{
 		_grid->EndBatch();
 	}
+
 	void UpdateRow(const FlightInfo &track);
+
 	void AddPoint(wxRealPoint point);
-	void OnQuit(wxCommandEvent &event);
 
 private:
+
+	// --- Private members ---
 	wxGrid *_grid;
+
+	// wxWidgets macro for events
 	DECLARE_EVENT_TABLE()
 
 };
@@ -169,12 +211,16 @@ class AppFrame : public wxFrame
 {
 public:
 
+	// --- Constructor and Destructor ---  --- 
 	AppFrame(TrackApp *app, 
 		const wxString& title, 
 		const wxPoint& pos, 
 		const wxSize& size,
 		std::string filePath);	
 
+	~AppFrame();
+
+	// --- Accessor for panels --- 
 	TrackPanel *GetTrackPanel()
 	{
 		return _panel; 
@@ -183,18 +229,27 @@ public:
 	{
 		return _tablePanel; 
 	}
+
+	// --- Accessor for TrackApp --- 
 	TrackApp *GetApp()
 	{ 
 		return _app;
 	}
+
+	// --- Size event --- 
 	void OnSize(wxSizeEvent &event);
+
+	// --- Quit event --- 
 	void OnQuit(wxCommandEvent &event);
 
 private:
+
+	// --- Private members ---
 	TrackPanel *_panel;
 	TablePanel *_tablePanel;
 	TrackApp *_app;
 
+	// wxWidgets macro for events
 	DECLARE_EVENT_TABLE()
 
 };
@@ -215,18 +270,23 @@ private:
 class TrackViewListener : public FlightInfoListener
 {
 public:
+
+	// --- Constructor --- 
 	TrackViewListener(TrackPanel *panel)
 	{
 		_panel = panel;
 	}
+
+	// --- Callback to update track data when it changes --- 
+	// This accesses the track drawing panel and notifies the panel
+	// that the points have been updated.  This also forces it to 
+	// redraw. 
 	virtual bool TrackUpdate(const std::vector<FlightInfo *> flights) 
 	{
 
-//		_panel->ClearPoints();
 		for (unsigned int i = 0; i < flights.size(); i++)
 		{
 			double x,y;
-
 
 			_panel->ConvertLatLongToUTM(&y,&x,
 				flights[i]->_track.latitude, 
@@ -234,27 +294,40 @@ public:
 			_panel->AddOrUpdatePoint(flights[i]->_track.trackId, 
 				wxRealPoint(x,y));
 		}
+
 		_panel->Refresh();
+
 		return true;
 	}
 
+	// --- Callback to delete track data when it changes --- 
 	virtual bool TrackDelete(const std::vector<FlightInfo *> flights) 
 	{
+//		TODO
 		return true;
 	}
 
 
 private:
+
+	// --- Private members ---
 	TrackPanel *_panel;
 };
 
 class TablePanelListener : public FlightInfoListener
 {
 public:
+
+	// --- Constructor --- 
 	TablePanelListener(TablePanel *panel)
 	{
 		_panel = panel;
 	}
+
+	// --- Callback to update track data when it changes --- 
+	// This accesses the track grid panel and notifies the panel
+	// that the track data have been updated.  This also forces it to 
+	// redraw. 
 	virtual bool TrackUpdate(const std::vector<FlightInfo *> flights) 
 	{
 		_panel->PrepareUpdate();
@@ -263,16 +336,22 @@ public:
 			_panel->UpdateRow(*flights[i]);
 		}
 		_panel->UpdateComplete();
+
 		return true;
 
 	}
+
+	// --- Callback to delete track data when it changes --- 
 	virtual bool TrackDelete(const std::vector<FlightInfo *> flights) 
 	{
+// TODO
 		return true;
 	}
 
 
 private:
+
+	// --- Private members ---
 	TablePanel *_panel;
 };
 

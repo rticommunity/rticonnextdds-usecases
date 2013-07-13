@@ -79,13 +79,36 @@ int main(int argc, char *argv[])
 			++i;
 			if (i == argc)
 			{
-				cout << "Bad parameter: Did not pass time between landing" << endl;
+				cout << "Bad parameter: Did not pass time between landing" 
+					<< endl;
 				return -1;
 			}
 			timeBetweenLandings =  atoi(argv[i]);
 		} else if (0 == strcmp(argv[i], "--no-multicast"))
 		{
 			multicastAvailable = false;
+		} else if (i > 0)
+		{
+			// If we have a parameter that is not the first one, and is not 
+			// recognized, return an error.
+			cout << "Bad parameter: " << argv[i] << endl;
+			cout << "Valid options are: " << endl;
+			cout << 
+				"    --num-plans [num]" <<
+				"              number of flight plans to send" 
+				<< endl;
+			cout << 
+				"    --time-between [time in ms]" <<
+				"    time between sending flight plans"
+				<< endl;
+			cout << 
+				"    --no-multicast" <<
+				"                 do not use multicast " << 
+				"(note you must edit XML" << endl <<
+				"                                   " <<
+				"config to include IP addresses)" 
+				<< endl;
+			return -1;
 		}
 
 	}
