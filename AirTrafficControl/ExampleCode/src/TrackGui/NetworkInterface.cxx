@@ -338,8 +338,7 @@ TrackReader::TrackReader(NetworkInterface *app,
 	}
 
 	_condition = _reader->get_statuscondition();
-	_condition->set_enabled_statuses(DDS_SAMPLE_LOST_STATUS | 
-		DDS_SAMPLE_REJECTED_STATUS | DDS_DATA_AVAILABLE_STATUS);
+	_condition->set_enabled_statuses(DDS_DATA_AVAILABLE_STATUS);
 	if (_condition == NULL) 
 	{
 		std::stringstream errss;
@@ -412,7 +411,9 @@ TrackReader::~TrackReader()
 //    A simple example of this can be found at:
 //    http://community.rti.com/examples/polling-read
 
-void TrackReader::WaitForTracks(std::vector< DdsAutoType<Track> > *tracks) 
+void TrackReader::WaitForTracks(
+	std::vector< DdsAutoType<Track> > *tracksUpdated,
+	std::vector< DdsAutoType<Track> > *tracksDeleted) 
 {
 
 	ConditionSeq activeConditions;
@@ -480,7 +481,18 @@ void TrackReader::WaitForTracks(std::vector< DdsAutoType<Track> > *tracks)
 				// Making copies of this type for clean API because we do not  
 				// need lowest latency for flight plan data
 				DdsAutoType<Track> trackType = trackSeq[i];
-				tracks->push_back(trackType);
+				tracksUpdated->push_back(trackType);
+			}
+			else if (!sampleInfos[i].valid_data)
+			{
+				if (sampleInfos[i].instance_state != ALIVE_INSTANCE_STATE)
+				{
+					DdsAutoType<Track> trackType = trackSeq[i];
+					trackType.trackId = 
+						_reader->get_key_value(trackType, 
+									sampleInfos[i].instance_handle);
+					tracksDeleted->push_back(trackType);
+				}
 			}
 
 		}
@@ -498,7 +510,9 @@ void TrackReader::WaitForTracks(std::vector< DdsAutoType<Track> > *tracks)
 // ----------------------------------------------------------------------------
 // This example is using an application thread to poll for all the existing 
 // track data inside the middleware's queue.
-void TrackReader::GetCurrentTracks(std::vector< DdsAutoType<Track> > *tracks)
+void TrackReader::GetCurrentTracks(
+	std::vector< DdsAutoType<Track> > *tracksUpdated,
+	std::vector< DdsAutoType<Track> > *tracksDeleted)
 {
 	_mutex->Lock();
 
@@ -532,7 +546,28 @@ void TrackReader::GetCurrentTracks(std::vector< DdsAutoType<Track> > *tracks)
 			// Currently we are allocating and copying the data, though in the 
 			// future, we may change to pre-allocating.
 			DdsAutoType<Track> track = trackSeq[i];
-			tracks->push_back(track);
+			tracksUpdated->push_back(track);
+		}
+		else if (!sampleInfos[i].valid_data)
+		{
+			if (sampleInfos[i].instance_state != ALIVE_INSTANCE_STATE)
+			{
+				DdsAutoType<Track> trackType = trackSeq[i];
+
+				trackType.trackId = 
+					_reader->get_key_value(trackType, 
+								sampleInfos[i].instance_handle);
+				tracksDeleted->push_back(trackType);
+
+				// Remove the deleted track info from the queue
+				TrackSeq deletedSeq;
+				SampleInfoSeq sampleInfosDeleted;
+				_reader->take_instance(deletedSeq,
+					sampleInfosDeleted, DDS_LENGTH_UNLIMITED, 
+					sampleInfos[i].instance_handle);
+
+
+			}
 		}
 
 	}

@@ -430,6 +430,8 @@ void TrackPanel::OnSize(wxSizeEvent &event)
 
 }
 
+// ------------------------------------------------------------------------- //
+//
 // Delete the track panel, and clear the list of points that it has been
 // storing that indicate the geometry of the map.  Free the mercator
 // projection data, and free the map data itself.
@@ -439,7 +441,6 @@ TrackPanel::~TrackPanel()
 	appFrame->GetApp()->SetShuttingDown(true);
 
 	_mutex->Lock();
-//	appFrame->GetApp()->RemoveDataSource((wxPanel *)this);
 
 	for (unsigned int i = 0; i < _pointsLists.size(); i++) 
 	{	
@@ -470,7 +471,66 @@ TrackPanel::~TrackPanel()
 	Close(true);
 }
 
-// A panel that is used to 
+// ------------------------------------------------------------------------- //
+//
+// Update the position of an existing aircraft in the Track window
+//
+void TrackPanel::UpdatePoint(long trackId, wxRealPoint point)
+{
+	_mutex->Lock();
+	wxRealPoint coord(0,0);
+	wxRealPoint latLong(point.x, point.y);
+
+	ConvertMapCoordToWindow(&coord, latLong, _maxX, _maxY, _minX, _minY, 
+		GetClientRect().width, GetClientRect().height);
+
+	_trackPoints[trackId] = coord;
+	_mutex->Unlock();
+}
+
+// ------------------------------------------------------------------------- //
+//
+// Check if this track update represents an existing track.  If so, update the
+// track (point) position.  If not, add a new point (representing a new 
+// aircraft).
+//
+void TrackPanel::AddOrUpdatePoint(long trackId, wxRealPoint point)
+{
+
+	wxRealPoint coord(0,0);
+
+	if (_trackPoints.find(trackId) != _trackPoints.end())
+	{
+		UpdatePoint(trackId, point);
+		return;
+	}
+			
+	_mutex->Lock();
+	wxRealPoint latLong(point.x, point.y);
+
+	ConvertMapCoordToWindow(&coord, latLong, _maxX, _maxY, _minX, _minY, 
+		GetClientRect().width, GetClientRect().height);
+		
+	_trackPoints[trackId] = coord;
+
+	_mutex->Unlock();
+}
+
+// ------------------------------------------------------------------------- //
+void TrackPanel::DeletePoint(long trackId)
+{
+	if (_trackPoints.find(trackId) != _trackPoints.end())
+	{
+		_trackPoints.erase(trackId);
+	}
+
+}
+
+// ------------------------------------------------------------------------- //
+//
+// A panel that displays a table (grid) view of all the existing flights, 
+// including the airline, lat/long, departure aerodrome, destination aerodrome
+// 
 TablePanel::TablePanel(wxWindow *parent, wxWindowID id, const wxString& title, 
 		const wxPoint& pos, 
 		const wxSize& size)

@@ -150,15 +150,22 @@ public:
 
 	// --- Waiting for tracks --- 
 	// This waits for new tracks to become available, and notifies the 
-	// application that there are new tracks.
+	// application that there are new tracks or deleted tracks.
 	void WaitForTracks(
-		std::vector< DdsAutoType<com::rti::atc::generated::Track> > *tracks);
+		std::vector< DdsAutoType<com::rti::atc::generated::Track> > 
+										*tracksUpdated,
+		std::vector< DdsAutoType<com::rti::atc::generated::Track> > 
+										*tracksDeleted);
 
 	// --- Retreiving current track updates --- 
 	// This retrieves track updates from the middleware queue.  This is used
-	// to poll for all the current track updates from the middleware.
+	// to poll for all the current track updates from the middleware.  This
+	// keeps a second vector that includes all tracks that have been deleted.
 	void GetCurrentTracks(
-		std::vector< DdsAutoType<com::rti::atc::generated::Track> > *tracks);
+		std::vector< DdsAutoType<com::rti::atc::generated::Track> > 
+										*tracksUpdated,
+		std::vector< DdsAutoType<com::rti::atc::generated::Track> > 
+										*tracksDeleted);
 
 	// --- Wake up the reader thread if it is waiting on data ---
 	void NotifyWakeup();

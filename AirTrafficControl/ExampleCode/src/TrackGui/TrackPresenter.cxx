@@ -56,7 +56,8 @@ void FlightInfoNetworkReceiver::NotifyListenersDeleteTrack(
 
 	_mutex->Unlock();
 }
-
+// TODO: cleanup comments in this file
+// ------------------------------------------------------------------------- //
 // Observer pattern for notifications. The track presenter will notify various
 // UI listeners that a track has been updated, and the UI listeners can redraw
 // the UI as necessary.  This allows a single update to notify multiple windows
@@ -81,6 +82,7 @@ void FlightInfoNetworkReceiver::NotifyListenersUpdateTrack(
 	_mutex->Unlock();
 }
 
+// ------------------------------------------------------------------------- //
 // Remove listeners.  This must be called before shutdown, because the frames that
 // are updating may be deleted before the data source.  So, the listeners must be
 // removed from the UI before it shuts down.
@@ -107,6 +109,7 @@ void FlightInfoNetworkReceiver::RemoveListener(
 }
 
 
+// ------------------------------------------------------------------------- //
 // This starts receiving the network data - or, more accurately, this starts
 // the process of accessing data that is already being received asynchronously
 // over the network as soon as the DDS discovery process is complete.
@@ -120,6 +123,36 @@ void FlightInfoNetworkReceiver::StartReceiving()
 	delete thread;
 }
 
+// ------------------------------------------------------------------------- //
+void FlightInfoNetworkReceiver::PrepareUpdate(
+	TrackApp *app,
+	vector< DdsAutoType<Track> > *updateData, 
+	vector<FlightInfo *> *flightData)
+{
+	FlightPlanReader *planReader =  
+		app->GetNetworkInterface()->GetFlightPlanReader();
+
+	for (unsigned int i = 0; i < updateData->size(); i++) 
+	{
+
+		// Allocate a flight info object.  This will be filled in with
+		// the flight plan information.
+		FlightInfo *flightInfo = new FlightInfo;
+		flightInfo->_track = (*updateData)[i];
+
+
+		// This copies a flight plan from the middleware into 
+		// the object passed in
+		planReader->GetFlightPlan((*updateData)[i].flightId, 
+			&flightInfo->_plan);
+		flightData->push_back(flightInfo);
+				
+	}
+
+}
+
+// ------------------------------------------------------------------------- //
+
 // Update UI when track data changes.
 void FlightInfoNetworkReceiver::ReceiveTracks(void *param)
 {
@@ -131,7 +164,9 @@ void FlightInfoNetworkReceiver::ReceiveTracks(void *param)
 	TrackReader *reader = netInterface->GetTrackReader();
 	FlightPlanReader *planReader = netInterface->GetFlightPlanReader();
 	vector< DdsAutoType<Track> > tracks;
+	vector< DdsAutoType<Track> > tracksDeleted;
 	vector <FlightInfo *> flights;
+	vector <FlightInfo *> flightsDeleted;
 
 	// This periodically wakes up and updates the UI with the latest track
 	// information that is available from the middleware, which has been 
@@ -144,7 +179,7 @@ void FlightInfoNetworkReceiver::ReceiveTracks(void *param)
 		// Note that this API allocates tracks that are a copy of tracks
 		// in the queue.  This allows us to pass in an empty vector and
 		// use the data in it however we want.
-		reader->GetCurrentTracks(&tracks);
+		reader->GetCurrentTracks(&tracks, &tracksDeleted);
 
 		if (app->ShuttingDown())
 		{
@@ -154,30 +189,19 @@ void FlightInfoNetworkReceiver::ReceiveTracks(void *param)
 		if (!tracks.empty()) 
 		{
 
-			for (unsigned int i = 0; i < tracks.size(); i++) 
-			{
-
-				// Allocate a flight info object.  This will be filled in with
-				// the flight plan information.
-				FlightInfo *flightInfo = new FlightInfo;
-				flightInfo->_track = tracks[i];
-
-
-				// This copies a flight plan from the middleware into 
-				// the object passed in
-				planReader->GetFlightPlan(tracks[i].flightId, 
-					&flightInfo->_plan);
-				flights.push_back(flightInfo);
-
-				
-			}
-
+			PrepareUpdate(app, &tracks, &flights);
 			// Notify the listeners that there is an upate to the track list
 			app->GetPresenter()->NotifyListenersUpdateTrack(flights);
 
 		}
+		if (!tracksDeleted.empty())
+		{
+			PrepareUpdate(app, &tracksDeleted, &flightsDeleted);
+			app->GetPresenter()->NotifyListenersDeleteTrack(flightsDeleted);
+		}
 
 		tracks.clear();
+		tracksDeleted.clear();
 
 		// Delete the "FlightInfo" structures we have just generated.  There
 		// are more efficient ways to do this by preallocating, but this is okay

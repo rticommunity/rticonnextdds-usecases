@@ -52,45 +52,17 @@ public:
 
 
 	// --- Update the position of a point (aircraft) --- 
-	void UpdatePoint(long trackId, wxRealPoint point)
-	{
-		_mutex->Lock();
-		wxRealPoint coord(0,0);
-		wxRealPoint latLong(point.x, point.y);
+	void UpdatePoint(long trackId, wxRealPoint point);
 
-		ConvertMapCoordToWindow(&coord, latLong, _maxX, _maxY, _minX, _minY, 
-			GetClientRect().width, GetClientRect().height);
-
-		_trackPoints[trackId] = coord;
-		_mutex->Unlock();
-	}
-
+	//TODO: move this to the .cxx file
 	// --- Add/Update the position of a point (aircraft) --- 
-
 	//
 	// If the point already exists, update its position.  If it does not, add
 	// a new point to the list.
-	void AddOrUpdatePoint(long trackId, wxRealPoint point)
-	{
+	void AddOrUpdatePoint(long trackId, wxRealPoint point);
 
-		wxRealPoint coord(0,0);
-
-		if (_trackPoints.find(trackId) != _trackPoints.end())
-		{
-			UpdatePoint(trackId, point);
-			return;
-		}
-			
-		_mutex->Lock();
-		wxRealPoint latLong(point.x, point.y);
-
-		ConvertMapCoordToWindow(&coord, latLong, _maxX, _maxY, _minX, _minY, 
-			GetClientRect().width, GetClientRect().height);
-		
-		_trackPoints[trackId] = coord;
-
-		_mutex->Unlock();
-	}
+	// --- Delete a point (aircraft) --- 
+	void DeletePoint(long trackId);
 
 	// --- Paint events for drawing aircraft movement --- 
 	void OnPaint(wxPaintEvent& paintEvt);
@@ -304,6 +276,10 @@ public:
 	virtual bool TrackDelete(const std::vector<FlightInfo *> flights) 
 	{
 //		TODO
+		for (unsigned int i = 0; i < flights.size(); i++)
+		{
+			_panel->DeletePoint(flights[i]->_track.trackId);
+		}
 		return true;
 	}
 

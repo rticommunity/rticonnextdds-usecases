@@ -50,7 +50,12 @@ int main(int argc, char *argv[])
 {
     int radarId = 0;
 	int sec = 0;
-	int sendRate = 1;
+	// Run in real time, faster, or slower
+	double runRate = 1;
+	// How often are new tracks added?
+	int creationRateSec = 120;
+	// How many tracks should I start generating initially?
+	int startTracks = 20;
 	int maxTracks = 64;
 	string setting;
 	RadarProfile profileToUse = LOW_LATENCY;
@@ -73,6 +78,20 @@ int main(int argc, char *argv[])
 				return -1;
 			}
 			radarId = atoi(argv[i]);
+		} else if (0 == strcmp(argv[i], "--start-tracks"))
+		{
+			// How many tracks can I handle?  Increasing this number will allow the 
+			// generator and the middleware to process more tracks.
+			++i;
+			if (i == argc)
+			{
+				cout << "Bad parameter: Did not pass a number of tracks to " <<
+					"generate at startup." 
+						<< endl;
+				return -1;
+			}
+			startTracks = atoi(argv[i]);
+
 		} else if (0 == strcmp(argv[i], "--max-tracks"))
 		{
 			// How many tracks can I handle?  Increasing this number will allow the 
@@ -85,20 +104,51 @@ int main(int argc, char *argv[])
 				return -1;
 			}
 			maxTracks = atoi(argv[i]);
-		} else if (0 == strcmp(argv[i], "--send-rate"))
+		} else if (0 == strcmp(argv[i], "--run-rate"))
 		{
 			// Should I be sending these in real time, faster, or slower?
 			++i;
 			if (i == argc)
 			{
-				cout << "Bad parameter: Did not pass a send rate" 
+				cout << "Bad parameter: Did not pass a run rate" 
 						<< endl;
 				return -1;
 			}
-			sendRate = atoi(argv[i]);
+			runRate = atof(argv[i]);
+		}  else if (0 == strcmp(argv[i], "--creation-rate"))
+		{
+			++i;
+			if (i == argc)
+			{
+				cout << "Bad parameter: Did not pass creation rate" << endl;
+				return -1;
+			}
+			creationRateSec = atoi(argv[i]);
 		} else if (0 == strcmp(argv[i], "--no-multicast"))
 		{
 			multicastAvailable = false;
+		} else if (i > 0)
+		{
+			// If we have a parameter that is not the first one, and is not 
+			// recognized, return an error.
+			cout << "Bad parameter: " << argv[i];
+			cout << "Valid options are: " << endl;
+			cout << 
+				"    --high-throughput" <<
+				"          Use the high throughput XML configuration" 
+				<< endl;
+			cout << 
+				"    --low-latency " <<
+				"             Use the low latency XML configuration (default)"
+				<< endl;
+			cout << 
+				"    --radar-id [number]" <<
+				"        ID of the radar used to differentiate if there" << 
+				"" << endl <<
+				"                               " <<
+				"are multiple radar generator applications" 
+				<< endl;
+			return -1;
 		}
 
 	}
@@ -140,7 +190,8 @@ int main(int argc, char *argv[])
 
 
 		// What is the maximum number of tracks you want to generate?  At what 
-		trackGenerator = new TrackGenerator(radarId, maxTracks, sendRate);
+		trackGenerator = new TrackGenerator(radarId, startTracks, maxTracks, 
+			creationRateSec, runRate);
 
 		// Create a listener that will react when the track generator gives us
 		// track data. In this case, the listener will use the radar writer to
