@@ -507,6 +507,7 @@ void TrackReader::WaitForTracks(
 
 }
 
+// TODO: simplify and comment
 // ----------------------------------------------------------------------------
 // This example is using an application thread to poll for all the existing 
 // track data inside the middleware's queue.
@@ -521,7 +522,10 @@ void TrackReader::GetCurrentTracks(
 
 	// This reads the data from the queue, and loans it to the application
 	// in the trackSeq sequence.  See below that you have to return the loan.
-	DDS_ReturnCode_t retcode = _reader->read(trackSeq, sampleInfos);
+	DDS_ReturnCode_t retcode = _reader->read(
+		trackSeq, sampleInfos, 
+		DDS_LENGTH_UNLIMITED, DDS_ANY_SAMPLE_STATE, 
+		DDS_ANY_VIEW_STATE, DDS_ALIVE_INSTANCE_STATE);
 
 	if (retcode != DDS_RETCODE_NO_DATA &&
 		retcode != DDS_RETCODE_OK) 
@@ -548,25 +552,51 @@ void TrackReader::GetCurrentTracks(
 			DdsAutoType<Track> track = trackSeq[i];
 			tracksUpdated->push_back(track);
 		}
-		else if (!sampleInfos[i].valid_data)
+
+	}
+
+	// The original track sequence was loaned from the middleware to the
+	// application.  We have copied the data out of it, so we can now return
+	// the loan to the middleware.
+	_reader->return_loan(trackSeq, sampleInfos);
+
+	// Now we access the queue to look for notifications that tracks have been
+	// deleted.  We do not leave this in the queue, but remove the deletion
+	// notifications.
+	retcode = _reader->take(
+		trackSeq, sampleInfos, 
+		DDS_LENGTH_UNLIMITED, DDS_ANY_SAMPLE_STATE, 
+		DDS_ANY_VIEW_STATE, 
+		DDS_NOT_ALIVE_NO_WRITERS_INSTANCE_STATE |
+		DDS_NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+
+	if (retcode != DDS_RETCODE_NO_DATA &&
+		retcode != DDS_RETCODE_OK) 
+	{
+		std::stringstream errss;
+		errss << "WaitForTracks(): error when retrieving deleted "
+			<< "flight plans.";
+		_mutex->Unlock();
+		throw errss.str();
+	}
+
+	// Note, based on the QoS profile (history = keep last, depth = 1) and the 
+	// fact that we modeled flights as separate instances, we can assume there
+	// is only one entry per flight.  So if a flight plan for a particular 
+	// flight has been changed 10 times, we will  only be maintaining the most 
+	// recent update to that flight plan in the middleware queue.
+	for (int i = 0; i < trackSeq.length(); i++) 
+	{
+		// The data itself should not be valid.
+		if (!sampleInfos[i].valid_data)
 		{
 			if (sampleInfos[i].instance_state != ALIVE_INSTANCE_STATE)
 			{
 				DdsAutoType<Track> trackType = trackSeq[i];
 
-				trackType.trackId = 
-					_reader->get_key_value(trackType, 
-								sampleInfos[i].instance_handle);
+				_reader->get_key_value(trackType, 
+							sampleInfos[i].instance_handle);
 				tracksDeleted->push_back(trackType);
-
-				// Remove the deleted track info from the queue
-				TrackSeq deletedSeq;
-				SampleInfoSeq sampleInfosDeleted;
-				_reader->take_instance(deletedSeq,
-					sampleInfosDeleted, DDS_LENGTH_UNLIMITED, 
-					sampleInfos[i].instance_handle);
-
-
 			}
 		}
 
@@ -576,6 +606,7 @@ void TrackReader::GetCurrentTracks(
 	// application.  We have copied the data out of it, so we can now return
 	// the loan to the middleware.
 	_reader->return_loan(trackSeq, sampleInfos);
+
 	_mutex->Unlock();
 
 }

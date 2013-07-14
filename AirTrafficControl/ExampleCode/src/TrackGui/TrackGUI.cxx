@@ -589,6 +589,7 @@ void TablePanel::OnSize(wxSizeEvent &event)
 
 }
 
+// TODO: Clean up comments in this file.
 // Update a row of the table when the data values of the flight information
 // has changed.
 void TablePanel::UpdateRow(const FlightInfo &flight)
@@ -671,6 +672,34 @@ void TablePanel::UpdateRow(const FlightInfo &flight)
 		}
 	}
 	_grid->EndBatch();
+}
+
+void TablePanel::DeleteRow(const FlightInfo &flight)
+{
+	for (int i = 0; i < _grid->GetNumberRows(); i++ )
+	{
+
+		long radarIdCell = -1;	
+		
+		if (!_grid->GetCellValue(i,0).IsEmpty()) 
+		{
+			_grid->GetCellValue(i,0).ToLong(&radarIdCell);
+		}
+
+		long trackIdCell = -1;
+		if (!_grid->GetCellValue(i,1).IsEmpty()) 
+		{
+			_grid->GetCellValue(i,1).ToLong(&trackIdCell);
+		}
+
+		if (radarIdCell == flight._track.radarId && trackIdCell == 
+			flight._track.trackId) 
+		{
+			_grid->DeleteRows(i);
+			_grid->AppendRows();
+			break;
+		}
+	}
 }
 
 // WxWidgets event table declarations.

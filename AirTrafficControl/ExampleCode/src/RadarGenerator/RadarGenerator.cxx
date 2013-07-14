@@ -48,7 +48,7 @@ using namespace com::rti::atc::generated;
 
 int main(int argc, char *argv[])	
 {
-    int radarId = 0;
+    int radarId = 42;
 	int sec = 0;
 	// Run in real time, faster, or slower
 	double runRate = 1;

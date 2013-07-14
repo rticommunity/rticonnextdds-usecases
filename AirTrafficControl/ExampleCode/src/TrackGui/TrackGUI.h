@@ -158,7 +158,7 @@ public:
 	}
 
 	void UpdateRow(const FlightInfo &track);
-
+	void DeleteRow(const FlightInfo &track);
 	void AddPoint(wxRealPoint point);
 
 private:
@@ -272,10 +272,10 @@ public:
 		return true;
 	}
 
+	//TODO: move this to the .cxx file
 	// --- Callback to delete track data when it changes --- 
 	virtual bool TrackDelete(const std::vector<FlightInfo *> flights) 
 	{
-//		TODO
 		for (unsigned int i = 0; i < flights.size(); i++)
 		{
 			_panel->DeletePoint(flights[i]->_track.trackId);
@@ -320,7 +320,12 @@ public:
 	// --- Callback to delete track data when it changes --- 
 	virtual bool TrackDelete(const std::vector<FlightInfo *> flights) 
 	{
-// TODO
+		_panel->PrepareUpdate();
+		for (unsigned int i = 0; i < flights.size(); i++)
+		{
+			_panel->DeleteRow(*flights[i]);
+		}
+		_panel->UpdateComplete();
 		return true;
 	}
 
