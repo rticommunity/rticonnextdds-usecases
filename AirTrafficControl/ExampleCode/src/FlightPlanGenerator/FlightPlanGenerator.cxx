@@ -23,6 +23,8 @@ using namespace std;
 #define SECONDS_PER_MIN 60
 #define HOURS_PER_DAY 24
 
+void PrintHelp();
+
 // ------------------------------------------------------------------------- //
 //
 //
@@ -87,27 +89,16 @@ int main(int argc, char *argv[])
 		} else if (0 == strcmp(argv[i], "--no-multicast"))
 		{
 			multicastAvailable = false;
+		} else if (0 == strcmp(argv[i], "--help"))
+		{
+			PrintHelp();
+			return 0;
 		} else if (i > 0)
 		{
 			// If we have a parameter that is not the first one, and is not 
 			// recognized, return an error.
 			cout << "Bad parameter: " << argv[i] << endl;
-			cout << "Valid options are: " << endl;
-			cout << 
-				"    --num-plans [num]" <<
-				"              number of flight plans to send" 
-				<< endl;
-			cout << 
-				"    --time-between [time in ms]" <<
-				"    time between sending flight plans"
-				<< endl;
-			cout << 
-				"    --no-multicast" <<
-				"                 do not use multicast " << 
-				"(note you must edit XML" << endl <<
-				"                                   " <<
-				"config to include IP addresses)" 
-				<< endl;
+			PrintHelp();
 			return -1;
 		}
 
@@ -228,3 +219,23 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
+void PrintHelp()
+{
+	cout << "Valid options are: " << endl;
+	cout << 
+		"    --num-plans [num]" <<
+		"              Number of flight plans to send" 
+		<< endl;
+	cout << 
+		"    --time-between [time in ms]" <<
+		"    Time between sending flight plans"
+		<< endl;
+	cout << 
+		"    --no-multicast" <<
+		"                 Do not use multicast " << 
+		"(note you must edit XML" << endl <<
+		"                                   " <<
+		"config to include IP addresses)" 
+		<< endl;
+
+}

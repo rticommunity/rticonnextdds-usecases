@@ -24,6 +24,8 @@ using namespace DDS;
 using namespace std;
 using namespace com::rti::atc::generated;
 
+void PrintHelp();
+
 // ------------------------------------------------------------------------- //
 //
 // Radar Generator Application:
@@ -127,27 +129,16 @@ int main(int argc, char *argv[])
 		} else if (0 == strcmp(argv[i], "--no-multicast"))
 		{
 			multicastAvailable = false;
+		} else if (0 == strcmp(argv[i], "--help"))
+		{
+			PrintHelp();
+			return 0;
 		} else if (i > 0)
 		{
 			// If we have a parameter that is not the first one, and is not 
 			// recognized, return an error.
-			cout << "Bad parameter: " << argv[i];
-			cout << "Valid options are: " << endl;
-			cout << 
-				"    --high-throughput" <<
-				"          Use the high throughput XML configuration" 
-				<< endl;
-			cout << 
-				"    --low-latency " <<
-				"             Use the low latency XML configuration (default)"
-				<< endl;
-			cout << 
-				"    --radar-id [number]" <<
-				"        ID of the radar used to differentiate if there" << 
-				"" << endl <<
-				"                               " <<
-				"are multiple radar generator applications" 
-				<< endl;
+			cout << "Bad parameter: " << argv[i] << endl;
+			PrintHelp();
 			return -1;
 		}
 
@@ -252,3 +243,52 @@ int main(int argc, char *argv[])
 }
 
 
+void PrintHelp()
+{
+	cout << "Valid options are: " << endl;
+	cout << 
+		"    --high-throughput" <<
+		"          Use the high throughput XML configuration" 
+		<< endl;
+	cout << 
+		"    --low-latency " <<
+		"             Use the low latency XML configuration (default)"
+		<< endl;
+	cout << 
+		"    --radar-id [number]" <<
+		"        ID of the radar used to differentiate if there" << 
+		"" << endl <<
+		"                               " <<
+		"are multiple radar generator applications" 
+		<< endl;
+	cout << 
+		"    --start-tracks [number]" <<
+		"    Number of tracks the generator should generate at "
+		<< "                              " 
+		<< "startup" 
+		<< endl;
+	cout << 
+		"    --max-tracks [number]" <<
+		"      Maximum of tracks the generator sends at once" 
+		<< endl;
+	cout << 
+		"    --run-rate [number]" <<
+		"        Run in real time, faster, or slower.  For "
+		<< "                                      " 
+		<< "example, 2 will run twice as fast.  .5 will run "
+		<< "                                " 
+		<< "half as fast."
+		<< endl;
+	cout << 
+		"    --creation-rate [number]" <<
+		"   How fast to create new tracks."
+		<< endl;
+	cout << 
+		"    --no-multicast" <<
+		"             Do not use multicast " << 
+		"(note you must edit XML" << endl <<
+		"                               " <<
+		"config to include IP addresses)" 
+		<< endl;
+
+}
