@@ -18,22 +18,35 @@ using namespace std;
 using namespace DDS;
 using namespace com::rti::atc::generated;
 
+// ------------------------------------------------------------------------- //
+// Class FlightInfoNetworkReceiver
+//
+// A class that is the Presenter part of a model-view-presenter architecture.
+// This is responsible for checking for changes to the model.  It contains a 
+// thread that checks for the current state of the flight data, and notifies
+// the UI that the data has changed.
+// ------------------------------------------------------------------------- //
+
+// ------------------------------------------------------------------------- //
 // Create a new network receiver class.  This class is the glue between
 // the UI and the data source - in this case, the DDS network data
 // that is arriving asynchronously.
 FlightInfoNetworkReceiver::FlightInfoNetworkReceiver(TrackApp *parent)
 	: _shuttingDown(false), 
-		_app(parent)
+	  _app(parent)
 {
 	_mutex = new OSMutex();
 
 }
 
+// ------------------------------------------------------------------------- //
+// Destructor
 FlightInfoNetworkReceiver::~FlightInfoNetworkReceiver()
 {
 	delete _mutex;
 }
 
+// ------------------------------------------------------------------------- //
 // Observer pattern for notifications. The track presenter will notify various
 // UI listeners that a track has been deleted, and the UI listeners can redraw
 // the UI as necessary.  This allows a single update to notify multiple windows
@@ -45,6 +58,7 @@ void FlightInfoNetworkReceiver::NotifyListenersDeleteTrack(
 	for (std::vector<FlightInfoListener *>::iterator it = _listeners.begin(); 
 		it != _listeners.end(); ++it) 
 	{
+		// Notify the UI listeners that the track has been deleted
 		if (false == (*it)->TrackDelete(flights)) 
 		{
 			std::stringstream errss;
@@ -56,7 +70,7 @@ void FlightInfoNetworkReceiver::NotifyListenersDeleteTrack(
 
 	_mutex->Unlock();
 }
-// TODO: cleanup comments in this file
+
 // ------------------------------------------------------------------------- //
 // Observer pattern for notifications. The track presenter will notify various
 // UI listeners that a track has been updated, and the UI listeners can redraw
@@ -69,7 +83,7 @@ void FlightInfoNetworkReceiver::NotifyListenersUpdateTrack(
 	for (std::vector<FlightInfoListener *>::iterator it = 
 		_listeners.begin(); it != _listeners.end(); ++it) 
 	{
-
+		// Notify the UI listeners that tracks have been updated
 		if (false == (*it)->TrackUpdate(flights)) 
 		{
 			std::stringstream errss;
@@ -124,6 +138,8 @@ void FlightInfoNetworkReceiver::StartReceiving()
 }
 
 // ------------------------------------------------------------------------- //
+// Converts from the network form of the data to the form that is used by the 
+// UI
 void FlightInfoNetworkReceiver::PrepareUpdate(
 	TrackApp *app,
 	vector< DdsAutoType<Track> > *updateData, 
@@ -152,7 +168,6 @@ void FlightInfoNetworkReceiver::PrepareUpdate(
 }
 
 // ------------------------------------------------------------------------- //
-
 // Update UI when track data changes.
 void FlightInfoNetworkReceiver::ReceiveTracks(void *param)
 {
@@ -188,15 +203,22 @@ void FlightInfoNetworkReceiver::ReceiveTracks(void *param)
 
 		if (!tracks.empty()) 
 		{
-
+			// Convert the data type from the network type to the type expected
+			// by the UI listeners.
 			PrepareUpdate(app, &tracks, &flights);
+
 			// Notify the listeners that there is an upate to the track list
 			app->GetPresenter()->NotifyListenersUpdateTrack(flights);
 
 		}
 		if (!tracksDeleted.empty())
 		{
+			// Convert the data type from the network type to the type expected
+			// by the UI listeners.
 			PrepareUpdate(app, &tracksDeleted, &flightsDeleted);
+
+			// Notify the listeners that there is an deletion from the track 
+			// list
 			app->GetPresenter()->NotifyListenersDeleteTrack(flightsDeleted);
 		}
 

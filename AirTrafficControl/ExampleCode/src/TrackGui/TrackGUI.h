@@ -30,13 +30,10 @@ damages arising out of the use or inability to use the software.
 class FlightInfoNetworkReceiver;
 
 
-
-
-
 // ------------------------------------------------------------------------- //
 //
 // TrackPanel:
-// A class that draws a map, and tracks on a wxWidgets panel
+// A class that draws a map, and aircraft positions on a wxWidgets panel
 //
 // ------------------------------------------------------------------------- //
 class TrackPanel : public wxPanel 
@@ -54,7 +51,6 @@ public:
 	// --- Update the position of a point (aircraft) --- 
 	void UpdatePoint(long trackId, wxRealPoint point);
 
-	//TODO: move this to the .cxx file
 	// --- Add/Update the position of a point (aircraft) --- 
 	//
 	// If the point already exists, update its position.  If it does not, add
@@ -253,35 +249,10 @@ public:
 	// This accesses the track drawing panel and notifies the panel
 	// that the points have been updated.  This also forces it to 
 	// redraw. 
-	virtual bool TrackUpdate(const std::vector<FlightInfo *> flights) 
-	{
+	virtual bool TrackUpdate(const std::vector<FlightInfo *> flights); 
 
-		for (unsigned int i = 0; i < flights.size(); i++)
-		{
-			double x,y;
-
-			_panel->ConvertLatLongToUTM(&y,&x,
-				flights[i]->_track.latitude, 
-				flights[i]->_track.longitude);
-			_panel->AddOrUpdatePoint(flights[i]->_track.trackId, 
-				wxRealPoint(x,y));
-		}
-
-		_panel->Refresh();
-
-		return true;
-	}
-
-	//TODO: move this to the .cxx file
 	// --- Callback to delete track data when it changes --- 
-	virtual bool TrackDelete(const std::vector<FlightInfo *> flights) 
-	{
-		for (unsigned int i = 0; i < flights.size(); i++)
-		{
-			_panel->DeletePoint(flights[i]->_track.trackId);
-		}
-		return true;
-	}
+	virtual bool TrackDelete(const std::vector<FlightInfo *> flights);
 
 
 private:
@@ -304,31 +275,10 @@ public:
 	// This accesses the track grid panel and notifies the panel
 	// that the track data have been updated.  This also forces it to 
 	// redraw. 
-	virtual bool TrackUpdate(const std::vector<FlightInfo *> flights) 
-	{
-		_panel->PrepareUpdate();
-		for (unsigned int i = 0; i < flights.size(); i++)
-		{
-			_panel->UpdateRow(*flights[i]);
-		}
-		_panel->UpdateComplete();
-
-		return true;
-
-	}
+	virtual bool TrackUpdate(const std::vector<FlightInfo *> flights);
 
 	// --- Callback to delete track data when it changes --- 
-	virtual bool TrackDelete(const std::vector<FlightInfo *> flights) 
-	{
-		_panel->PrepareUpdate();
-		for (unsigned int i = 0; i < flights.size(); i++)
-		{
-			_panel->DeleteRow(*flights[i]);
-		}
-		_panel->UpdateComplete();
-		return true;
-	}
-
+	virtual bool TrackDelete(const std::vector<FlightInfo *> flights);
 
 private:
 

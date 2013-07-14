@@ -28,7 +28,12 @@ enum
 
 #define EARTH_MEAN_RADIUS_KM 6371
 
+// ------------------------------------------------------------------------- //
+// Class AppFrame
+// ------------------------------------------------------------------------- //
 
+// ------------------------------------------------------------------------- //
+// Constructor that creates the menu, frame, and panels of the application.
 AppFrame::AppFrame(TrackApp *app, 
 	const wxString& title, 
 	const wxPoint& pos, 
@@ -85,6 +90,9 @@ AppFrame::AppFrame(TrackApp *app,
 
 }
 
+// ------------------------------------------------------------------------- //
+// Destructor that removes the data sources from the panels before the panels
+// are deleted.
 AppFrame::~AppFrame()
 {
 	// Stop the update thread as soon as we get the message that the windows 
@@ -98,6 +106,9 @@ AppFrame::~AppFrame()
 	GetApp()->RemoveDataSource(_panel);
 }
 
+// ------------------------------------------------------------------------- //
+// Handle the quit menu event.  Removes the data sources from the panels before
+// the panels are deleted.
 void AppFrame::OnQuit(wxCommandEvent& event) 
 {
 	// Stop the update thread as soon as we get the message that the windows 
@@ -111,6 +122,85 @@ void AppFrame::OnQuit(wxCommandEvent& event)
 	GetApp()->RemoveDataSource(_panel);
 }
 
+// ------------------------------------------------------------------------- //
+// Class TrackViewListener
+// ------------------------------------------------------------------------- //
+
+// ------------------------------------------------------------------------- //
+// Updates the track view's list of points.  Converts between lat/long and
+// UTM values, adds the point to the panel, and then makes the panel update
+// its view to cause a paint event.
+bool TrackViewListener::TrackUpdate(const std::vector<FlightInfo *> flights)
+{
+
+	for (unsigned int i = 0; i < flights.size(); i++)
+	{
+		double x,y;
+
+		_panel->ConvertLatLongToUTM(&y,&x,
+			flights[i]->_track.latitude, 
+			flights[i]->_track.longitude);
+		_panel->AddOrUpdatePoint(flights[i]->_track.trackId, 
+			wxRealPoint(x,y));
+	}
+
+	_panel->Refresh();
+
+	return true;
+}
+
+// ------------------------------------------------------------------------- //
+// Deletes a point from the track view
+bool TrackViewListener::TrackDelete(const std::vector<FlightInfo *> flights)
+{
+	for (unsigned int i = 0; i < flights.size(); i++)
+	{
+		_panel->DeletePoint(flights[i]->_track.trackId);
+	}
+	return true;
+}
+
+// ------------------------------------------------------------------------- //
+// Class TablePanelListener
+// ------------------------------------------------------------------------- //
+
+// ------------------------------------------------------------------------- //
+// Updates the table panel with new flight information that will be shown in
+// the grid.
+bool TablePanelListener::TrackUpdate(const std::vector<FlightInfo *> flights) 
+{
+	_panel->PrepareUpdate();
+	for (unsigned int i = 0; i < flights.size(); i++)
+	{
+		_panel->UpdateRow(*flights[i]);
+	}
+	_panel->UpdateComplete();
+
+	return true;
+
+}
+
+// ------------------------------------------------------------------------- //
+// Deletes a point from the grid panel
+bool TablePanelListener::TrackDelete(const std::vector<FlightInfo *> flights) 
+{
+	_panel->PrepareUpdate();
+	for (unsigned int i = 0; i < flights.size(); i++)
+	{
+		_panel->DeleteRow(*flights[i]);
+	}
+	_panel->UpdateComplete();
+	return true;
+}
+
+
+// ------------------------------------------------------------------------- //
+// Class TrackPanel
+// ------------------------------------------------------------------------- //
+
+// ------------------------------------------------------------------------- //
+// Constructor for the track panel.  Opens a shapefile that contains map data.
+// Stores points representing the geography points.
 TrackPanel::TrackPanel(wxWindow *parent, wxWindowID id, const wxString& title, 
 	const wxPoint& pos, const wxSize& size, std::string filePath)
 	: wxPanel(parent, -1, pos, size)
@@ -126,6 +216,7 @@ TrackPanel::TrackPanel(wxWindow *parent, wxWindowID id, const wxString& title,
 	int shapeType = 0;
 	double minBound[4], maxBound[4];
 	SHPGetInfo(handle, &numEntities, &shapeType, minBound, maxBound);
+
 	for (int i = 0; i < numEntities; i++) 
 	{
 		SHPObject *shapeObject = 
@@ -139,6 +230,7 @@ TrackPanel::TrackPanel(wxWindow *parent, wxWindowID id, const wxString& title,
 }
 
 
+// ------------------------------------------------------------------------- //
 // Clears the current list of points, since they are likely to all change
 // before the next repainting.
 void TrackPanel::ClearPointsLists()
@@ -157,10 +249,14 @@ void TrackPanel::ClearPointsLists()
 	_pointsLists.clear();
 }
 
+// ------------------------------------------------------------------------- //
+// Calculating a point that is 80Km north of SFO to draw the radius around SFO.
+// 80Km is hard coded in this example, and matches the value that is being 
+// generated by the RadarGenerator application.  It represents the radius in 
+// which the radar can track a flight.
 void TrackPanel::Calculate80KmNorthFromSFO(wxRealPoint *latLong)
 {
 	double finalKm = 80;
-//	double degreesInRads = degrees * M_PI / 180;
 	double degreesInRads = 0;
 
 	double latInRads = SFO_LAT * M_PI / 180;
@@ -180,45 +276,48 @@ void TrackPanel::Calculate80KmNorthFromSFO(wxRealPoint *latLong)
 	// Normalize to -180 - 180
 	newLongInRads = fmod((newLongInRads + 3 * M_PI), (2 * M_PI)) - M_PI; 
 
+	// Calculate a latitude and longitude 80 Km away from SFO
 	latLong->y = newLatInRads / M_PI * 180;
 	latLong->x = newLongInRads / M_PI * 180;
 
-
 }
+
+// ------------------------------------------------------------------------- //
 // Draw a circle centered on SFO to indicate the distance that the radar can
 // display
 void TrackPanel::DrawRadarCircleSFO(wxBufferedPaintDC &dc)
 {
-
-
 	double y1,x1;
 
 	// Convert the coordinates to UTM from Lat/Long
 	ConvertLatLongToUTM(&y1, &x1, SFO_LAT, SFO_LONG);
 
 	wxRealPoint coord;
-	// 
+
+	// Convert between the UTM coordinates of SFO to the window coordinates.
 	ConvertMapCoordToWindow(&coord, wxRealPoint(x1,y1), 			
 		_maxX,_maxY,_minX,_minY, 
 		GetClientRect().width, GetClientRect().height);
 
-	// Radar range: estimating ~80 km - a reasonable range
-	// for surveillance radar
+	// Radar range: estimating ~80 km - a reasonable range for surveillance 
+	// radar.  This number is hard-coded throughout this example.
 	wxRealPoint northLatLong;
 	Calculate80KmNorthFromSFO(&northLatLong);
 
+	// Convert from the lat/long values of the point on the circle to UTM
 	double y2,x2;
 	ConvertLatLongToUTM(&y2, &x2, northLatLong.y, northLatLong.x);
 
+	// Convert the point on the circle to window coordinates
 	wxRealPoint coord2;
-
-
 	ConvertMapCoordToWindow(&coord2, wxRealPoint(x2,y2), 			
 		_maxX,_maxY,_minX,_minY, 
 		GetClientRect().width, GetClientRect().height);
 
+	// Get the circle height
 	double circleHeight = coord.y - coord2.y;
-	
+
+	// Draw the circle
 	wxBrush oldBrush = dc.GetBrush();
 	wxPen oldPen = dc.GetPen();
 	dc.SetBrush(*wxTRANSPARENT_BRUSH);
@@ -229,6 +328,7 @@ void TrackPanel::DrawRadarCircleSFO(wxBufferedPaintDC &dc)
 	dc.SetPen(oldPen);
 }
 
+// ------------------------------------------------------------------------- //
 // Repaint the polygons and the points indicating aircraft on the map.  This 
 // might be more efficient if we invalidate only the parts of the rectangle
 // that actuall change.
@@ -242,18 +342,17 @@ void TrackPanel::OnPaint(wxPaintEvent& paintEvt)
 
 	dc.Clear();
 
-		
+	// Draw the map in the background
 	for (unsigned int i = 0; i < _pointsLists.size(); i++) 
 	{
-
 		dc.DrawPolygon(_pointsLists[i]);
-
 	}
 
+	// Draw the boundary circle
 	DrawRadarCircleSFO(dc);
 
-	for (
-		std::map<long, wxPoint>::iterator it = 
+	// Draw the aircraft as circles
+	for ( std::map<long, wxPoint>::iterator it = 
 		_trackPoints.begin(); it != _trackPoints.end(); ++it) 
 	{
 		wxPen pen(*wxRED);
@@ -263,10 +362,9 @@ void TrackPanel::OnPaint(wxPaintEvent& paintEvt)
 		dc.SetPen(prevPen);
 	}
 
-
-
 }
 
+// ------------------------------------------------------------------------- //
 // Calculate the minimum and maximum points in the geometry that is being
 // displayed. 
 void TrackPanel::CalculateGeoMinMax()
@@ -313,20 +411,30 @@ void TrackPanel::CalculateGeoMinMax()
 
 }
 
+// ------------------------------------------------------------------------- //
 // Map from the coordinates in UTM or Lat/Long into a set of points that are
 // used when drawing in the actual window.  
 // This is only called initially, or when resizing the window.
 void TrackPanel::CalculateCoordinateForWindowSize()
 {
-
+	// Iterate over all the shape objects that make up the map geometry
 	for (unsigned int i = 0; i < _shapeObjects.size(); i++) 
 	{
-
+		// Iterate over the parts of the shape objects.  Shape objects may have
+		// multiple parts, if they have inner and outer circles.
 		for (int j = 0; j < _shapeObjects[i]->nParts; j++) 
 		{
-
+			// A list of points that will be used to draw the polygons of the
+			// map in the background
 			wxPointList *points = new wxPointList;
 			int nVerticesPerPart = 0;
+
+			// The parts of multiple shapes are kept in a single array, so this
+			// must determine which points are part of which shape.
+
+			// If this is the end of the array, it is easy to determine the 
+			// number of the vertices for this part: number of vertices - 
+			// the beginning of this last shape.
 			if (j == _shapeObjects[i]->nParts - 1) 
 			{
 				int startOfPart = _shapeObjects[i]->panPartStart[j];
@@ -334,9 +442,15 @@ void TrackPanel::CalculateCoordinateForWindowSize()
 					_shapeObjects[i]->panPartStart[j];
 			} else 
 			{
+				// If this is not the end of the array, the number of vertices 
+				// is the beginning of the next shape - the beginning of this 
+				// shape
 				nVerticesPerPart = _shapeObjects[i]->panPartStart[j + 1] - 
 					_shapeObjects[i]->panPartStart[j];
 			}
+
+			// Iterate over each of the parts of the shape, and convert the 
+			// vertices of the shape into window coordinates.
 			for (int k = _shapeObjects[i]->panPartStart[j]; k < 
 						_shapeObjects[i]->panPartStart[j] + nVerticesPerPart;
 						k++) 
@@ -349,14 +463,18 @@ void TrackPanel::CalculateCoordinateForWindowSize()
 					GetClientRect().width, GetClientRect().height
 					);
 				
+				// Append the vertex to the list of points.
 				points->Append(new wxPoint(coord));
 			}
 
+			// Maintain one list of points per shape in the shapefile. Each
+			// of these shapes will be a separate polygon.
 			_pointsLists.push_back(points);
 		}	
 	}
 }
 
+// ------------------------------------------------------------------------- //
 // Use the proj library to convert between latitude/longitude and mercator 
 // projections.  This allows us to receive flight information in lat/long and 
 // to draw it on a map that is in mercator (UTM) coordinates.
@@ -396,6 +514,7 @@ void TrackPanel::ConvertLatLongToUTM(double *northing, double *easting,
 }
 
 
+// ------------------------------------------------------------------------- //
 // This does the actual conversion from map coordinates to window coordinates,
 // which: 
 //     a) assume that 0,0 is in the upper-left-hand corner of the window.
@@ -420,6 +539,7 @@ void TrackPanel::ConvertMapCoordToWindow(wxRealPoint *coord,
 
 }
 
+// ------------------------------------------------------------------------- //
 // When the window is resized, we remove all points, we calculate the points
 // for the new window size, and we refresh the window
 void TrackPanel::OnSize(wxSizeEvent &event)
@@ -472,9 +592,7 @@ TrackPanel::~TrackPanel()
 }
 
 // ------------------------------------------------------------------------- //
-//
 // Update the position of an existing aircraft in the Track window
-//
 void TrackPanel::UpdatePoint(long trackId, wxRealPoint point)
 {
 	_mutex->Lock();
@@ -489,11 +607,9 @@ void TrackPanel::UpdatePoint(long trackId, wxRealPoint point)
 }
 
 // ------------------------------------------------------------------------- //
-//
 // Check if this track update represents an existing track.  If so, update the
 // track (point) position.  If not, add a new point (representing a new 
 // aircraft).
-//
 void TrackPanel::AddOrUpdatePoint(long trackId, wxRealPoint point)
 {
 
@@ -517,6 +633,7 @@ void TrackPanel::AddOrUpdatePoint(long trackId, wxRealPoint point)
 }
 
 // ------------------------------------------------------------------------- //
+// Delete a point in the track panel
 void TrackPanel::DeletePoint(long trackId)
 {
 	if (_trackPoints.find(trackId) != _trackPoints.end())
@@ -527,10 +644,12 @@ void TrackPanel::DeletePoint(long trackId)
 }
 
 // ------------------------------------------------------------------------- //
-//
+// Class TablePanel
+// ------------------------------------------------------------------------- //
+
+// ------------------------------------------------------------------------- //
 // A panel that displays a table (grid) view of all the existing flights, 
 // including the airline, lat/long, departure aerodrome, destination aerodrome
-// 
 TablePanel::TablePanel(wxWindow *parent, wxWindowID id, const wxString& title, 
 		const wxPoint& pos, 
 		const wxSize& size)
@@ -569,17 +688,18 @@ TablePanel::TablePanel(wxWindow *parent, wxWindowID id, const wxString& title,
 
 }
 
+// ------------------------------------------------------------------------- //
 // Delete the table panel, and remove the data source so it can be
 // cleaned up nicely.  If you do not detach the data source before this
 // panel is deleted, it can lead to bad pointers.  
 TablePanel::~TablePanel()
 {
 	AppFrame *appFrame = (AppFrame *)GetParent()->GetParent();
-//	appFrame->GetApp()->RemoveDataSource((wxPanel *)this);
 
 	delete _grid;
 }
 
+// ------------------------------------------------------------------------- //
 // Resize the grid when it receives an on size event.
 void TablePanel::OnSize(wxSizeEvent &event)
 {
@@ -589,7 +709,7 @@ void TablePanel::OnSize(wxSizeEvent &event)
 
 }
 
-// TODO: Clean up comments in this file.
+// ------------------------------------------------------------------------- //
 // Update a row of the table when the data values of the flight information
 // has changed.
 void TablePanel::UpdateRow(const FlightInfo &flight)
@@ -674,6 +794,8 @@ void TablePanel::UpdateRow(const FlightInfo &flight)
 	_grid->EndBatch();
 }
 
+// ------------------------------------------------------------------------- //
+// Delete a row from the grid
 void TablePanel::DeleteRow(const FlightInfo &flight)
 {
 	for (int i = 0; i < _grid->GetNumberRows(); i++ )

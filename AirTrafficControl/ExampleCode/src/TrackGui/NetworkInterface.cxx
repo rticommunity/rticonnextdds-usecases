@@ -507,16 +507,27 @@ void TrackReader::WaitForTracks(
 
 }
 
-// TODO: simplify and comment
 // ----------------------------------------------------------------------------
 // This example is using an application thread to poll for all the existing 
 // track data inside the middleware's queue.
+//
+// This goes through two steps:
+// 1) read() all ALIVE data from the DataReader.  These are the updates of all
+//    the flights that have not landed.  By calling read() we leave the data in
+//    the queue, and can access it again later if it is not updated.  After
+//    reading the data, we return the loan to the DataReader()
+// 2) take() all the NOT_ALIVE data from the DataReader.  These are the updates
+//    of flights that have landed.  This removes the deletion notices from the
+//    queue.  After taking the data, we return the loan to the DataReader()
+//
 void TrackReader::GetCurrentTracks(
 	std::vector< DdsAutoType<Track> > *tracksUpdated,
 	std::vector< DdsAutoType<Track> > *tracksDeleted)
 {
 	_mutex->Lock();
 
+	// The sequences that will be filled in with the data.  These are empty,
+	// so the middleware will loan the data to the sequences.  
 	TrackSeq trackSeq;
 	SampleInfoSeq sampleInfos;
 
@@ -587,24 +598,25 @@ void TrackReader::GetCurrentTracks(
 	// recent update to that flight plan in the middleware queue.
 	for (int i = 0; i < trackSeq.length(); i++) 
 	{
-		// The data itself should not be valid.
+		// The data itself should not be valid, because this is a deletion 
+		// notice.
 		if (!sampleInfos[i].valid_data)
 		{
-			if (sampleInfos[i].instance_state != ALIVE_INSTANCE_STATE)
-			{
-				DdsAutoType<Track> trackType = trackSeq[i];
+			DdsAutoType<Track> trackType = trackSeq[i];
 
-				_reader->get_key_value(trackType, 
-							sampleInfos[i].instance_handle);
-				tracksDeleted->push_back(trackType);
-			}
+			// There is no valid data during a deletion, so we must look up
+			// the value of the key fields based on the instance handle
+			// of the deleted instance.
+			_reader->get_key_value(trackType, 
+						sampleInfos[i].instance_handle);
+			tracksDeleted->push_back(trackType);
 		}
 
 	}
 
-	// The original track sequence was loaned from the middleware to the
-	// application.  We have copied the data out of it, so we can now return
-	// the loan to the middleware.
+	// The track sequence was loaned from the middleware to the application
+	// We have copied the data out of it, so we can now return the loan to the
+	// middleware.
 	_reader->return_loan(trackSeq, sampleInfos);
 
 	_mutex->Unlock();
