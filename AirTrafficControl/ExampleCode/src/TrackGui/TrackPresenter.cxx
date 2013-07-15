@@ -138,8 +138,9 @@ void FlightInfoNetworkReceiver::StartReceiving()
 }
 
 // ------------------------------------------------------------------------- //
-// Converts from the network form of the data to the form that is used by the 
-// UI
+// 1. Retrieves the latest flight plan information from the model
+// 2. Converts the TrackData / FlightPlan data from the network form of the 
+// data to the form that is used by the  UI.
 void FlightInfoNetworkReceiver::PrepareUpdate(
 	TrackApp *app,
 	vector< DdsAutoType<Track> > *updateData, 

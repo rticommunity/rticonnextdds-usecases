@@ -177,6 +177,20 @@ class TrackGenerator
 public:
 
 	// --- Constructor --- 
+
+	// radarID: this should be unique for each running radar app
+	// startTracks: How many tracks should be generated at startup?
+	// maxTracks: What is the maximum number of tracks the app can publish?
+	// creationRateSec: How fast should new tracks be added?  (In seconds in 
+	//   clock time.  If you have increased the run rate, these will be added  
+	//   at creation time / run rate
+	// runRate: How fast should this be running?  Normal speeds, 2x speeds, etc
+	// Note that the "sample rate" is hard-coded.  This determines how fast the
+	// radar is theoretically getting updates about each aircraft, and 
+	// determines how much an aircraft has moved during each update.  To make data 
+	// rates faster, increase the run rate, which makes the clock run faster.
+	// Increasing the clock rate makes the track generator sleep less, and 
+	// generate data faster.
 	TrackGenerator(int radarID, int startTracks, int maxTracks, 
 					int creationRateSec, double runRate) : _shuttingDown(false),
 				_currentTrackId(0), 

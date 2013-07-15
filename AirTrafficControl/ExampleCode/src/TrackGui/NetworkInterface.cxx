@@ -531,8 +531,9 @@ void TrackReader::GetCurrentTracks(
 	TrackSeq trackSeq;
 	SampleInfoSeq sampleInfos;
 
-	// This reads the data from the queue, and loans it to the application
-	// in the trackSeq sequence.  See below that you have to return the loan.
+	// This reads all ALIVE track data from the queue, and loans it to the 
+	// application in the trackSeq sequence.  See below where you must return
+	// the loan.
 	DDS_ReturnCode_t retcode = _reader->read(
 		trackSeq, sampleInfos, 
 		DDS_LENGTH_UNLIMITED, DDS_ANY_SAMPLE_STATE, 

@@ -228,7 +228,8 @@ RTI Connext user manual.
                              multicast.  However, if somebody does enable 
                              multicast on a DataReader, this will prevent 
                              potential delays. -->
-                        <enable_multicast_periodic_heartbeat>true</enable_multicast_periodic_heartbeat>
+                        <enable_multicast_periodic_heartbeat>true
+                        </enable_multicast_periodic_heartbeat>
                     </rtps_reliable_writer>
                 </protocol>
 
