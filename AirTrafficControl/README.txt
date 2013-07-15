@@ -5,7 +5,6 @@
 Concept
 -------
 
-Conditions and WaitSets provide another way for Connext to communicate status 
 This use case example includes three applications that send and receive data
 related to an air traffic control system.
 
