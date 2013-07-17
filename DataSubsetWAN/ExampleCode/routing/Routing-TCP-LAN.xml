@@ -64,14 +64,20 @@
 
         <annotation>
             <documentation>
-                Routes all topics from one domain to second domain and the
-                other way around over TCP.
+                Routes Alarm and Temperature topics from one domain to second
+                domain and the other way around over UDP and TCP.
+
+                Suggested configuration with this Routing Service marked as
+                *RS1*:
+
+                UDP LAN apps ==[domain 6]== *RS1* ==[TCP + domain 0]== RS2 ==[domain 5]== UDP LAN apps
+
                 UDP side:  Sending to/receiving from everybody in domain 6
-                TCP side:  Local machine with public IP/port 18.181.0.31:8500
-                Assuming public port 8500 bound to local port 9401.
-                Sending to/receiving from machine with public IP address
-                18.181.0.32:8500 on domain 0.  Please change these IP addresses
-                to match your network settings.
+                TCP side:  Sending to/receiving from Routing Service #2 in 
+                domain 0, on LAN machine with IP/port 10.211.55.3:9400. 
+                Configured with local port 9401.
+
+                !!Please change these IP addresses to match your network settings.!!
             </documentation>
         </annotation>
 
@@ -102,7 +108,7 @@
                             <!-- CHANGE THIS TO THE MACHINE YOU WANT TO     -->
                             <!-- CONTACT                                    -->
                             <!--                                            -->
-                            <element>tcpv4_lan://10.211.55.9:9400</element>
+                            <element>tcpv4_lan://10.211.55.3:9400</element>
                         </initial_peers>
                     </discovery>
                     <!-- These are the settings to enable TCP for your      -->
@@ -284,14 +290,20 @@
 
         <annotation>
             <documentation>
-                Routes all topics from one domain to second domain and the other way
-                around over TCP.
+                Routes Alarm and Temperature topics from one domain to second
+                domain and the other way around over UDP and TCP.
+
+                Suggested configuration with this Routing Service marked as
+                *RS2*:
+
+                UDP LAN apps ==[domain 6]== RS1 ==[TCP + domain 0]== *RS2* ==[domain 5]== UDP LAN apps
+
                 UDP side:  Sending to/receiving from everybody in domain 5
-                TCP side:  Local machine with public IP/port 18.181.0.31:8500
-                Assuming public port 8500 bound to local port 9400.
-                Sending to/receiving from machine with public IP address
-                18.181.0.32:8500 on domain 0.  Please change these IP addresses
-                to match your network settings.
+                TCP side:  Sending to/receiving from Routing Service #1 in
+                domain 0, on LAN machine with IP/port 10.211.55.3:9401.
+                Configured with local port 9400.
+
+                !!Please change these IP addresses to match your network settings.!!
             </documentation>
         </annotation>
         
@@ -321,7 +333,7 @@
                             <!--                                                -->
                             <!-- CHANGE THIS TO THE MACHINE YOU WANT TO CONTACT -->
                             <!--                                                -->
-                            <element>tcpv4_lan://10.211.55.9:9401</element>
+                            <element>tcpv4_lan://10.211.55.3:9401</element>
                         </initial_peers>
                     </discovery>
                     <property>

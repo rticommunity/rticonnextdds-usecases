@@ -269,15 +269,20 @@ void PrintHelp()
 		<< endl;
 	cout << 
 		"    --max-tracks [number]" <<
-		"      Maximum of tracks the generator sends at once" 
+		"      Maximum tracks the generator sends at once" 
 		<< endl;
 	cout << 
 		"    --run-rate [number]" <<
-		"        Run in real time, faster, or slower.  For "
-		<< "                                      " 
-		<< "example, 2 will run twice as fast.  .5 will run "
-		<< "                                " 
-		<< "half as fast."
+		"        Run in real time, faster, or slower.  At default"
+		<< endl
+		<< "                               " 
+		<< "rate, all tracks are updated every 100ms.  If "
+		<< endl
+		<< "                               " 
+		<< "you set this to 2 the generator will run twice"
+		<< endl
+		<< "                               " 
+		<< "as fast, updating all tracks every 50ms."
 		<< endl;
 	cout << 
 		"    --creation-rate [number]" <<
