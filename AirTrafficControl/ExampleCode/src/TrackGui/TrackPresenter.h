@@ -53,23 +53,55 @@ public:
 class FlightInfoNetworkReceiver 
 {
 public:
+	// --- Constructor and destructor --- 
 	FlightInfoNetworkReceiver(TrackApp *parent); 
 	~FlightInfoNetworkReceiver();
 
+	// --- Create thread for receiving --- 
+	// Creates a new thread that will call ReceiveTracks()
+	void StartReceiving();
+
+	// --- Check for receipt of track data ---
+	// 
+	// This loops until the application is shutting down, and checks for
+	// updates to track data.  If there is new track data, it notifies
+	// any listeners (observers) that the track information has been
+	// updated.
 	static void ReceiveTracks(void *param);
 
-	void NotifyListenersUpdateTrack(const std::vector<FlightInfo *> flights);
-	void NotifyListenersDeleteTrack(const std::vector<FlightInfo *> flights);
-	bool IsShuttingDown() const { return _shuttingDown; }
-	void AddListener(FlightInfoListener *listener) {
+	// --- Add or remove listeners --- 
+	// Adds a listener that will be notified of track updates
+	void AddListener(FlightInfoListener *listener) 
+	{
 		_listeners.push_back(listener);
 	}
 
+	// Removes a listener that will no longer be notified of track updates
 	void RemoveListener(const FlightInfoListener *listener);
 
-	void StartReceiving();
+
+	// --- Notify listeners of track state updates --- 
+	void NotifyListenersUpdateTrack(const std::vector<FlightInfo *> flights);
+	void NotifyListenersDeleteTrack(const std::vector<FlightInfo *> flights);
+
+	// --- Is shutting down? --- 
+	bool IsShuttingDown() const 
+	{ 
+		return _shuttingDown; 
+	}
 
 private:
+	// --- Private methods --- 
+
+	// Convert from network formats of data to the formats expected by the 
+	// GUI that uses the data.
+	static void PrepareUpdate(
+		TrackApp *app,
+		std::vector< DdsAutoType<com::rti::atc::generated::Track> > 
+				*updateData,
+		std::vector<FlightInfo *> *flightData);
+
+	// --- Private members --- 
 	bool _shuttingDown;
 	TrackApp* _app;
 	std::vector<FlightInfoListener *> _listeners;

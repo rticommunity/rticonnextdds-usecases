@@ -24,10 +24,10 @@
     <ClCompile Include="..\src\CommonInfrastructure\OSAPI.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\CommonInfrastructure\DDSCommunicator.cxx">
+    <ClCompile Include="..\src\RadarGenerator\RadarGenerator.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\RadarGenerator\RadarGenerator.cxx">
+    <ClCompile Include="..\src\CommonInfrastructure\DDSCommunicator.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -29,7 +29,8 @@ damages arising out of the use or inability to use the software.
 
 // A listener that is receiving updates about new generated tracks
 // and sending them out over DDS
-class DDSRadarListener : public TrackListener {
+class DDSRadarListener : public TrackListener 
+{
 public:
 
 	// --- Constructor ---
@@ -79,16 +80,19 @@ public:
 	// Sends an update saying that a track has been dropped.  This uses the 
 	// same RadarWriter to notify other applications that the track has
 	// been dropped that is used to send track updates.
-	virtual bool TrackDelete(const GeneratorTrack &track) {
+	virtual bool TrackDelete(const GeneratorTrack &track) 
+	{
 
 		// Convert from generator format to network format
 		RadarAdapter::AdaptToTrack(_track, track);
 		_track.radarId = _radarId;
 
-		try {
+		try 
+		{
 			// Send the track deletion over the network
 			_writer->DeleteTrack(_track);
-		} catch (std::string str) {
+		} catch (std::string str) 
+		{
 			printf("Failure to delete track data: %s", str.c_str());
 			return false;
 		}

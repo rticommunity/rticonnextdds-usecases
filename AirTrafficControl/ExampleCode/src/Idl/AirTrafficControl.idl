@@ -34,7 +34,6 @@ struct Track {
 	// as an "instance" or unique object within DDS.  This allows us to do interesting
 	// things like keep a fixed amount of reliable data (history) from each radar.
 
-	// If this is a 
 	long radarId; //@key
 	long trackId; //@key
 
@@ -104,12 +103,9 @@ struct FlightPlan {
 	string<AERODROME_ID_LENGTH> departureAerodrome;
 
 	// Departure time 
-	// this is a shortcut - this should really be a separate time structure with hours and minutes
-	// should also add range checking for this eventually
 	short departureHour;
 	short departureMin;
 
-	// Route - leaving this out to simplify the example
 
 	// Destination aerodrome (4 characters)
 	string<AERODROME_ID_LENGTH> destinationAerodrome;

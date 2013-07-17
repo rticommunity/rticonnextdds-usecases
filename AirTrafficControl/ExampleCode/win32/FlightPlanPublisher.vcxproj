@@ -91,6 +91,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\src\CommonInfrastructure\DDSCommunicator.h" />
+    <ClInclude Include="..\src\CommonInfrastructure\DDSTypeWrapper.h" />
     <ClInclude Include="..\src\FlightPlanGenerator\FlightPlanPublisherInterface.h" />
   </ItemGroup>
   <ItemGroup>

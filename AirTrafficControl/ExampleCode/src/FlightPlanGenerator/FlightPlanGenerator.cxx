@@ -13,6 +13,7 @@ damages arising out of the use or inability to use the software.
 #include <iostream>
 #include "../Generated/AirTrafficControl.h"
 #include "../Generated/AirTrafficControlSupport.h"
+#include "../CommonInfrastructure/DDSTypeWrapper.h"
 #include "FlightPlanPublisherInterface.h"
 
 using namespace std;
@@ -21,6 +22,8 @@ using namespace std;
 #define SECONDS_PER_HOUR 3600
 #define SECONDS_PER_MIN 60
 #define HOURS_PER_DAY 24
+
+void PrintHelp();
 
 // ------------------------------------------------------------------------- //
 //
@@ -78,13 +81,25 @@ int main(int argc, char *argv[])
 			++i;
 			if (i == argc)
 			{
-				cout << "Bad parameter: Did not pass time between landing" << endl;
+				cout << "Bad parameter: Did not pass time between landing" 
+					<< endl;
 				return -1;
 			}
 			timeBetweenLandings =  atoi(argv[i]);
 		} else if (0 == strcmp(argv[i], "--no-multicast"))
 		{
 			multicastAvailable = false;
+		} else if (0 == strcmp(argv[i], "--help"))
+		{
+			PrintHelp();
+			return 0;
+		} else if (i > 0)
+		{
+			// If we have a parameter that is not the first one, and is not 
+			// recognized, return an error.
+			cout << "Bad parameter: " << argv[i] << endl;
+			PrintHelp();
+			return -1;
 		}
 
 	}
@@ -127,7 +142,8 @@ int main(int argc, char *argv[])
 		xmlFiles.push_back(
 			"file://../../../src/Config/flight_plan_profiles_no_multicast.xml");
 	}
-	try {
+	try 
+	{
 
 		// This is the network interface for this application - this is what
 		// actually sends the flight plan information over the transport 
@@ -141,80 +157,57 @@ int main(int argc, char *argv[])
 
 		printf("Sending flight plans over RTI Connext DDS\n");
 
-		while (1) {
 
-			list<FlightPlan *> flightPlans;
-			int i = 0;
+		// Write all flight plans up to the number specified
+		for (int i = 0; i < numFlightPlans; i++) 
+		{
 
-			// Write all flight plans
-			for (int i = 0; i < numFlightPlans; i++) {
+			// Allocate a flight plan structure
+			DdsAutoType<FlightPlan> flightPlan;
 
-				// Allocate a flight plan structure
-				FlightPlan *plan = FlightPlanTypeSupport::create_data();
+			// Give it a random airline and flight ID based on airlines
+			// that fly into SFO
+			sprintf(flightPlan.flightId, "%s%d", 
+				airlines[i % airlineNum], i + 1); 
 
-				// Add it to our vector of flight plans
-				flightPlans.push_back(plan);
+			// Give it a departure aerodrome
+			sprintf(flightPlan.departureAerodrome, "%s", 
+				departureAerodromes[i%8]);
 
-				// Give it a random airline and flight ID based on airlines
-				// that fly into SFO
-				sprintf(plan->flightId, "%s%d", 
-					airlines[i % airlineNum], i + 1); 
+			// Destination aerodrome is always SFO
+			sprintf(flightPlan.destinationAerodrome, "%s", "KSFO");
 
-				// Give it a departure aerodrome
-				sprintf(plan->departureAerodrome, "%s", 
-					departureAerodromes[i%8]);
+			// Use the current time as a starting point for the expected
+			// landing time of the aircraft
+			DDS_Time_t time;
+			fpInterface.GetCommunicator()->GetParticipant()
+										->get_current_time(time);
+			unsigned long currDay = time.sec % SECONDS_PER_DAY; 
+			short currHour = (short)(currDay / SECONDS_PER_HOUR);
+			short currMin = (short)((currDay % SECONDS_PER_HOUR) / 
+				SECONDS_PER_MIN);
 
-				// Destination aerodrome is always SFO
-				sprintf(plan->destinationAerodrome, "%s", "KSFO");
-
-				// Use the current time as a starting point for the expected
-				// landing time of the aircraft
-				DDS_Time_t time;
-				fpInterface.GetCommunicator()->GetParticipant()
-											->get_current_time(time);
-				unsigned long currDay = time.sec % SECONDS_PER_DAY; 
-				short currHour = (short)(currDay / SECONDS_PER_HOUR);
-				short currMin = (short)((currDay % SECONDS_PER_HOUR) / 
-					SECONDS_PER_MIN);
-
-				// In this example, each flight lands 5 minutes after the 
-				// previous flight
-				short minToLanding = (currMin + 
-					(timeBetweenLandings * (i + 1)));
-				plan->estimatedMinutes = minToLanding % SECONDS_PER_MIN;
+			// In this example, each flight lands 5 minutes after the 
+			// previous flight
+			short minToLanding = (currMin + 
+				(timeBetweenLandings * (i + 1)));
+			flightPlan.estimatedMinutes = minToLanding % SECONDS_PER_MIN;
 				
-				long hourTemp = currHour + (minToLanding / SECONDS_PER_MIN);
-				hourTemp = hourTemp % HOURS_PER_DAY;
-				plan->estimatedHours = (short)hourTemp;
+			long hourTemp = currHour + (minToLanding / SECONDS_PER_MIN);
+			hourTemp = hourTemp % HOURS_PER_DAY;
+			flightPlan.estimatedHours = (short)hourTemp;
 
-				// Write the data to the network.  This is a thin wrapper 
-				// around the RTI Connext DDS DataWriter that writes data to
-				// the network.
-				fpInterface.Write(plan);
+			// Write the data to the network.  This is a thin wrapper 
+			// around the RTI Connext DDS DataWriter that writes data to
+			// the network.
+			fpInterface.Write(flightPlan);
 
-				NDDSUtility::sleep(send_period);
-			}
+			NDDSUtility::sleep(send_period);
+		}
 
-
-
-			// Sleep for two minutes after publishing the flight plans
-			DDS_Duration_t deletion_time = {180,000000000};
-			NDDSUtility::sleep(deletion_time);
-
-			// Delete all flight plans from network and from the system
-			for (int i = 0; i < numFlightPlans; i++) {
-
-				// Notify the network that these flight plans are no longer
-				// valid.  This is necessary if we want to free up resources
-				// associated with the current flight plans.
-				fpInterface.Delete(flightPlans.front());
-
-				// Delete the actual flight plan data from the application.
-				FlightPlanTypeSupport::delete_data(flightPlans.front());
-				flightPlans.pop_front();
-				NDDSUtility::sleep(send_period);
-			}
-
+		while (1) 
+		{
+			NDDSUtility::sleep(send_period);
 		}
 	}
 	catch (string message)
@@ -226,3 +219,23 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
+void PrintHelp()
+{
+	cout << "Valid options are: " << endl;
+	cout << 
+		"    --num-plans [num]" <<
+		"              Number of flight plans to send" 
+		<< endl;
+	cout << 
+		"    --time-between [time in ms]" <<
+		"    Time between sending flight plans"
+		<< endl;
+	cout << 
+		"    --no-multicast" <<
+		"                 Do not use multicast " << 
+		"(note you must edit XML" << endl <<
+		"                                   " <<
+		"config to include IP addresses)" 
+		<< endl;
+
+}

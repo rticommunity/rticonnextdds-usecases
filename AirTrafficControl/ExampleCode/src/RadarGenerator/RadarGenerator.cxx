@@ -24,6 +24,8 @@ using namespace DDS;
 using namespace std;
 using namespace com::rti::atc::generated;
 
+void PrintHelp();
+
 // ------------------------------------------------------------------------- //
 //
 // Radar Generator Application:
@@ -48,9 +50,14 @@ using namespace com::rti::atc::generated;
 
 int main(int argc, char *argv[])	
 {
-    int radarId = 0;
+    int radarId = 42;
 	int sec = 0;
-	int sendRate = 1;
+	// Run in real time, faster, or slower
+	double runRate = 1;
+	// How often are new tracks added?
+	int creationRateSec = 120;
+	// How many tracks should I start generating initially?
+	int startTracks = 20;
 	int maxTracks = 64;
 	string setting;
 	RadarProfile profileToUse = LOW_LATENCY;
@@ -73,6 +80,20 @@ int main(int argc, char *argv[])
 				return -1;
 			}
 			radarId = atoi(argv[i]);
+		} else if (0 == strcmp(argv[i], "--start-tracks"))
+		{
+			// How many tracks can I handle?  Increasing this number will allow the 
+			// generator and the middleware to process more tracks.
+			++i;
+			if (i == argc)
+			{
+				cout << "Bad parameter: Did not pass a number of tracks to " <<
+					"generate at startup." 
+						<< endl;
+				return -1;
+			}
+			startTracks = atoi(argv[i]);
+
 		} else if (0 == strcmp(argv[i], "--max-tracks"))
 		{
 			// How many tracks can I handle?  Increasing this number will allow the 
@@ -85,20 +106,40 @@ int main(int argc, char *argv[])
 				return -1;
 			}
 			maxTracks = atoi(argv[i]);
-		} else if (0 == strcmp(argv[i], "--send-rate"))
+		} else if (0 == strcmp(argv[i], "--run-rate"))
 		{
 			// Should I be sending these in real time, faster, or slower?
 			++i;
 			if (i == argc)
 			{
-				cout << "Bad parameter: Did not pass a send rate" 
+				cout << "Bad parameter: Did not pass a run rate" 
 						<< endl;
 				return -1;
 			}
-			sendRate = atoi(argv[i]);
+			runRate = atof(argv[i]);
+		}  else if (0 == strcmp(argv[i], "--creation-rate"))
+		{
+			++i;
+			if (i == argc)
+			{
+				cout << "Bad parameter: Did not pass creation rate" << endl;
+				return -1;
+			}
+			creationRateSec = atoi(argv[i]);
 		} else if (0 == strcmp(argv[i], "--no-multicast"))
 		{
 			multicastAvailable = false;
+		} else if (0 == strcmp(argv[i], "--help"))
+		{
+			PrintHelp();
+			return 0;
+		} else if (i > 0)
+		{
+			// If we have a parameter that is not the first one, and is not 
+			// recognized, return an error.
+			cout << "Bad parameter: " << argv[i] << endl;
+			PrintHelp();
+			return -1;
 		}
 
 	}
@@ -129,7 +170,8 @@ int main(int argc, char *argv[])
 	}
 
 	TrackGenerator *trackGenerator = NULL;
-	try { 
+	try 
+	{ 
 
 		// This sets up the data interface for the radar - what data it sends
 		// and receives over the network, along with the quality of service
@@ -139,7 +181,8 @@ int main(int argc, char *argv[])
 
 
 		// What is the maximum number of tracks you want to generate?  At what 
-		trackGenerator = new TrackGenerator(radarId, maxTracks, sendRate);
+		trackGenerator = new TrackGenerator(radarId, startTracks, maxTracks, 
+			creationRateSec, runRate);
 
 		// Create a listener that will react when the track generator gives us
 		// track data. In this case, the listener will use the radar writer to
@@ -158,11 +201,11 @@ int main(int argc, char *argv[])
 		{
 			// Listen for updates to flight plans, and add them to the track 
 			// generator as they arrive
-			vector<com::rti::atc::generated::FlightPlan *> flightPlans;
+			vector< DdsAutoType<FlightPlan> > flightPlans;
 			radarNetInterface->
 				GetFlightPlanReader()->WaitForFlightPlans(&flightPlans);
 
-			for (vector<FlightPlan *>::iterator it = flightPlans.begin(); 
+			for (vector< DdsAutoType<FlightPlan> >::iterator it = flightPlans.begin(); 
 				it != flightPlans.end(); it++) 
 			{
 
@@ -172,7 +215,7 @@ int main(int argc, char *argv[])
 				// Adapt between the network format of data and the generator
 				// format for flight plan data (in this example, we use only
 				// the flight ID from the flight plan)
-				RadarAdapter::AdaptToGeneratorFlightPlan(flightPlan, *(*it));
+				RadarAdapter::AdaptToGeneratorFlightPlan(flightPlan, (*it));
 
 				// Tell the track generator that this flight plan exists
 				trackGenerator->AddFlightPlan(&flightPlan);
@@ -200,3 +243,57 @@ int main(int argc, char *argv[])
 }
 
 
+void PrintHelp()
+{
+	cout << "Valid options are: " << endl;
+	cout << 
+		"    --high-throughput" <<
+		"          Use the high throughput XML configuration" 
+		<< endl;
+	cout << 
+		"    --low-latency " <<
+		"             Use the low latency XML configuration (default)"
+		<< endl;
+	cout << 
+		"    --radar-id [number]" <<
+		"        ID of the radar used to differentiate if there" << 
+		"" << endl <<
+		"                               " <<
+		"are multiple radar generator applications" 
+		<< endl;
+	cout << 
+		"    --start-tracks [number]" <<
+		"    Number of tracks the generator should generate at "
+		<< "                              " 
+		<< "startup" 
+		<< endl;
+	cout << 
+		"    --max-tracks [number]" <<
+		"      Maximum tracks the generator sends at once" 
+		<< endl;
+	cout << 
+		"    --run-rate [number]" <<
+		"        Run in real time, faster, or slower.  At default"
+		<< endl
+		<< "                               " 
+		<< "rate, all tracks are updated every 100ms.  If "
+		<< endl
+		<< "                               " 
+		<< "you set this to 2 the generator will run twice"
+		<< endl
+		<< "                               " 
+		<< "as fast, updating all tracks every 50ms."
+		<< endl;
+	cout << 
+		"    --creation-rate [number]" <<
+		"   How fast to create new tracks."
+		<< endl;
+	cout << 
+		"    --no-multicast" <<
+		"             Do not use multicast " << 
+		"(note you must edit XML" << endl <<
+		"                               " <<
+		"config to include IP addresses)" 
+		<< endl;
+
+}
