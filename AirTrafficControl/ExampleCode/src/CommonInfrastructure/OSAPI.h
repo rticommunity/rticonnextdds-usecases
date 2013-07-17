@@ -49,35 +49,57 @@ damages arising out of the use or inability to use the software.
 // function.
 typedef void* (*ThreadFunction)(void *);   
 
+// ------------------------------------------------------------------------- //
 // Wrap threads
+//
+// Right now this only supports threads on Linux and Windows.
+// ------------------------------------------------------------------------- //
 class OSThread
 {
 
 public:
+	// --- Constructor --- 
 	OSThread(ThreadFunction function, 
 		void *functionParam);
 
+	// Run the thread
 	void Run();
-private:
 
+private:
+	// --- Private members ---
+
+	// OS-specific thread definition
 #ifdef RTI_WIN32
     HANDLE _thread;
 #else 
     pthread_t _thread;
 #endif
+	// Function called by OS-specific thread
 	ThreadFunction _function;
+
+	// Parameter to the function
 	void *_functionParam;
 };
 
+// ------------------------------------------------------------------------- //
 // Wrap mutexes
+//
+// Right now, this only supports mutexes on Linux and Windows
+// ------------------------------------------------------------------------- //
 class OSMutex
 {
 public:
+	// --- Constructor and destructor --- 
 	OSMutex();
 	~OSMutex();
+
+	// --- Lock and unlock mutext --- 
 	void Lock();
 	void Unlock();
 private:
+	// --- Private members ---
+
+	// OS-specific mutex constructs
 #ifdef RTI_WIN32
     CRITICAL_SECTION _handleCriticalSection;
 #else

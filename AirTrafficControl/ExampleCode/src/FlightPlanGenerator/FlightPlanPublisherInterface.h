@@ -13,6 +13,7 @@ damages arising out of the use or inability to use the software.
 
 #include <sstream>
 #include "../CommonInfrastructure/DDSCommunicator.h"
+#include "../CommonInfrastructure/DDSTypeWrapper.h"
 #include "../Generated/AirTrafficControl.h"
 #include "../Generated/AirTrafficControlSupport.h"
 
@@ -65,12 +66,12 @@ public:
 	// Uses DDS interface to send a flight plan efficiently over the network
 	// or shared memory to interested applications subscribing to flight plan
 	// information.
-	bool Write(FlightPlan *data);
+	bool Write(DdsAutoType<FlightPlan> data);
 
 	// --- Deletes the flight plan ---
 	// "Deletes" the flight plan from the system - removing the DDS instance 
 	// from all applications.
-	bool Delete(FlightPlan *data);
+	bool Delete(DdsAutoType<FlightPlan> data);
 
 private:
 	// --- Private members ---

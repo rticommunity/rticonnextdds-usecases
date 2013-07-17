@@ -50,7 +50,8 @@ FlightPlanPublisherInterface::FlightPlanPublisherInterface(std::vector<std::stri
 	// and being the factory class used to create Publishers, Subscribers, 
 	// Topics, etc.
 	if (NULL == _communicator->CreateParticipant(0, xmlFiles, 
-				"RTIExampleQosLibrary", "FlightPlanStateData")) {
+				"RTIExampleQosLibrary", "FlightPlanStateData")) 
+	{
 		std::stringstream errss;
 		errss << "Failed to create DomainParticipant object";
 		throw errss.str();
@@ -125,7 +126,7 @@ FlightPlanPublisherInterface::~FlightPlanPublisherInterface()
 // ----------------------------------------------------------------------------
 // Sends the flight plan over a transport (such as shared memory or UDPv4)
 // This uses the 
-bool FlightPlanPublisherInterface::Write(FlightPlan *data)
+bool FlightPlanPublisherInterface::Write(DdsAutoType<FlightPlan> data)
 {
 	DDS_ReturnCode_t retcode = DDS_RETCODE_OK;
 	DDS_InstanceHandle_t handle = DDS_HANDLE_NIL;
@@ -140,9 +141,10 @@ bool FlightPlanPublisherInterface::Write(FlightPlan *data)
 	// throughput, so we are not bothering to pre-register the instance 
 	// handle.  If we did pre-register the instance handle, this could 
 	// potentially speed up the writing.
-	retcode = _writer->write(*data, handle);
+	retcode = _writer->write(data, handle);
 
-	if (retcode != DDS_RETCODE_OK) {
+	if (retcode != DDS_RETCODE_OK) 
+	{
 		return false;
 	}
 
@@ -154,7 +156,7 @@ bool FlightPlanPublisherInterface::Write(FlightPlan *data)
 // Sends a deletion message for the flight plan data over a transport (such as 
 // shared memory or UDPv4) This uses the unregiste_instance call to notify
 // other applications that this flight plan has gone away and should be deleted
-bool FlightPlanPublisherInterface::Delete(FlightPlan *data)
+bool FlightPlanPublisherInterface::Delete(DdsAutoType<FlightPlan> data)
 {
 	DDS_ReturnCode_t retcode = DDS_RETCODE_OK;
 	DDS_InstanceHandle_t handle = DDS_HANDLE_NIL;
@@ -165,7 +167,7 @@ bool FlightPlanPublisherInterface::Delete(FlightPlan *data)
 	// "dispose" it will not clean up the space for a new instance - 
 	// instead it marks the current instance disposed and expects that you
 	// might reuse the same instance again later.
-	retcode = _writer->unregister_instance(*data, handle);
+	retcode = _writer->unregister_instance(data, handle);
 
 	if (retcode != DDS_RETCODE_OK)
 	{

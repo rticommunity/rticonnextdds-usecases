@@ -67,6 +67,13 @@ public:
 		return _shuttingDown; 
 	}
 
+	// --- Set shutdown --- //
+	// Set the application's shutting down state .  
+	void SetShuttingDown(bool shutDown) 
+	{ 
+		_shuttingDown = shutDown; 
+	}
+
 	// --- Getter for the presenter --- //
 	// Returns the FlightInfoNetworkReceiver - the "presenter" in a model-view
 	// -presenter pattern.

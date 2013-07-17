@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="c:/program files/rti/5.0.0/ndds.5.0.0/resource/qos_profiles_5.0.0/schema/rti_dds_profiles.xsd"
+     version="5.0.0">
+
+    <qos_library name="RTIExampleQosLibrary">
+        <qos_profile name="TCP">
+            <participant_qos>
+                <!-- Turning off the shared memory and UDPv4/UDPv6 -->
+                <!-- transports -->
+                <transport_builtin>
+                    <mask>MASK_NONE</mask>
+                </transport_builtin>
+                <discovery>
+                    <initial_peers>
+                        <!--                                            -->
+                        <!-- CHANGE THIS TO THE MACHINE YOU WANT TO     -->
+                        <!-- CONTACT                                    -->
+                        <!--                                            -->
+                        <element>tcpv4_lan://10.211.55.9:9400</element>
+                        <element>tcpv4_lan://10.211.55.9:9401</element>
+                    </initial_peers>
+                </discovery>
+                <!-- These are the settings to enable TCP for your      -->
+                <!-- network -->
+                <property>
+                    <value>
+                        <element>
+                            <name>dds.transport.load_plugins</name>
+                            <value>dds.transport.TCPv4.tcp1</value>
+                        </element>
+                        <element>
+                            <name>dds.transport.TCPv4.tcp1.library</name>
+                            <value>nddstransporttcp</value>
+                        </element>
+                        <element>
+                            <name>dds.transport.TCPv4.tcp1.create_function</name>
+                            <value>NDDS_Transport_TCPv4_create</value>
+                        </element>
+                        <element>
+                            <name>dds.transport.TCPv4.tcp1.parent.classid</name>
+                            <value>NDDS_TRANSPORT_CLASSID_TCPV4_LAN</value>
+                        </element>
+                        <!-- Change this to the port you want to open   -->
+                        <element>
+                            <name>dds.transport.TCPv4.tcp1.server_bind_port</name>
+                            <value>9402</value>
+                        </element>
+                    </value>
+                </property>
+            </participant_qos>
+        </qos_profile>
+
+    </qos_library>
+</dds>

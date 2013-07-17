@@ -19,7 +19,10 @@ damages arising out of the use or inability to use the software.
 // 
 // Note that this file generates interesting-looking data, but this is not the
 // core value that RTI Connext DDS provides, which is the efficient transport
-// of data over one or more transports to all interested parties.
+// of data over one or more transports to all interested parties.  
+//
+// None of this is required to send data over DDS!  This is simply a data 
+// source that is sending radar data.
 //
 // This class generates example track data that is sent to illustrate how RTI
 // can send track data over DDS.  This example data is not intended to be 
@@ -40,20 +43,10 @@ damages arising out of the use or inability to use the software.
 // SFO's position
 #define SFO_LAT                37.619
 #define SFO_LONG               -122.3749
-// Planes from the north turn to fly over the bay at roughly this lat/long
-#define NORTH_TURN_LAT         37.7331
-#define NORTH_TURN_LONG        -122.5031
-// Planes from the north will turn here to move north and align with the runway
-#define NORTH_APPROACH_TURN_LAT 37.5896
-#define NORTH_APPROACH_TURN_LONG -122.2100
 
 // Planes arriving from the north will approach from here
 #define APPROACH_BEGIN_LAT 37.5586
 #define APPROACH_BEGIN_LONG -122.2700
-
-// Planes arriving from the south will turn and approach from here
-#define SOUTH_TURN_LAT 37.5272
-#define SOUTH_TURN_LONG -122.1394
 
 // Defines to help generate semi-accurate positional information about
 // aircraft.
@@ -63,49 +56,44 @@ damages arising out of the use or inability to use the software.
 
 #define EARTH_MEAN_RADIUS_KM 6371
 
-#define NORTH_APPROACH_CIRCLE_CENTER_LAT NORTH_APPROACH_TURN_LAT - \
-				(NORTH_APPROACH_TURN_LAT - APPROACH_BEGIN_LAT)/2
-#define NORTH_APPROACH_CIRCLE_CENTER_LON NORTH_APPROACH_TURN_LONG - \
-	(NORTH_APPROACH_TURN_LONG - APPROACH_BEGIN_LONG)/2
 
-
-// Called from a thread created by the generator
-void *TrackGenerator::GenerateTracksFunc(void *arg) 
-{
-	TrackGenerator *gen = (TrackGenerator *)arg;
-	gen->GenerateTracks();
-
-    return NULL;
-}
-
-
+// ------------------------------------------------------------------------- //
 // Destructor for the track generator. Deletes all listeners, 
 // all tracks, and all flight plans
 TrackGenerator::~TrackGenerator()
 {
 	_mutex->Lock();
+
+	// Remove all listeners
 	for (std::vector<TrackListener *>::iterator it = _listeners.begin(); 
-			it != _listeners.end(); ++it) {
+			it != _listeners.end(); ++it) 
+	{
 		delete (*it);
 	}
 	_listeners.clear();
 
-	while(!_flightPlans.empty()) {
+	// If I have been storing flightplan data, remove it
+	while(!_flightPlans.empty()) 
+	{
 		GeneratorFlightPlan *plan = _flightPlans.front();
 		delete plan;
 		_flightPlans.pop();
 	}
 
+	// Remove all tracks I have generated
 	for (std::vector<GeneratorTrack *>::iterator it = _trackList.begin(); 
-			it != _trackList.end(); ++it) {
+			it != _trackList.end(); ++it) 
+	{
 		delete (*it);
 	}
 	_trackList.clear();
 
 	_mutex->Unlock();
+
 	delete _mutex;
 }
 
+// ------------------------------------------------------------------------- //
 // Removes a listener from the generator.  The listeners receive updates about
 // the tracks, and can do whatever is necessary when a track is updated.
 void TrackGenerator::RemoveListener(const TrackListener *listener)
@@ -116,7 +104,8 @@ void TrackGenerator::RemoveListener(const TrackListener *listener)
 	_mutex->Lock();
 
 	std::vector<TrackListener *>::iterator toErase;
-
+	
+	// Search for listener to remove
 	for(std::vector<TrackListener *>::iterator it = 
 		_listeners.begin(); it != _listeners.end(); 
 		++it)
@@ -128,18 +117,22 @@ void TrackGenerator::RemoveListener(const TrackListener *listener)
 	}
 
 	_listeners.erase(toErase);
+
 	_mutex->Unlock();
 
 }
 
+// ------------------------------------------------------------------------- //
 // Using an observer pattern to notify observers that a track has been deleted.
 void TrackGenerator::NotifyListenersDeleteTrack(const GeneratorTrack &track)
 {
 	_mutex->Lock();
 
 	for (std::vector<TrackListener *>::iterator it = _listeners.begin(); 
-		it != _listeners.end(); ++it) {
-		if (false == (*it)->TrackDelete(track)) {
+		it != _listeners.end(); ++it) 
+	{
+		if (false == (*it)->TrackDelete(track)) 
+		{
 			std::stringstream errss;
 			errss << "NotifyListenersDeleteTrack(): error deleting track.";
 			throw errss.str();
@@ -149,15 +142,18 @@ void TrackGenerator::NotifyListenersDeleteTrack(const GeneratorTrack &track)
 	_mutex->Unlock();
 }
 
+// ------------------------------------------------------------------------- //
 // Using an observer pattern to notify observers that a track has been updated.
 void TrackGenerator::NotifyListenersUpdateTrack(const GeneratorTrack &track)
 {
 	_mutex->Lock();
 
 	for (std::vector<TrackListener *>::iterator it = _listeners.begin();
-		it != _listeners.end(); ++it) {
+		it != _listeners.end(); ++it) 
+	{
 
-		if (false == (*it)->TrackUpdate(track)) {
+		if (false == (*it)->TrackUpdate(track)) 
+		{
 			std::stringstream errss;
 			errss << "NotifyListenersUpdateTrack(): error updating track.";
 			throw errss.str();
@@ -169,6 +165,260 @@ void TrackGenerator::NotifyListenersUpdateTrack(const GeneratorTrack &track)
 
 }
 
+// ------------------------------------------------------------------------- //
+// Function that is called by the generator's thread, and calls the 
+// generator method that periodically generates tracks.
+void *TrackGenerator::GenerateTracksFunc(void *arg) 
+{
+	TrackGenerator *gen = (TrackGenerator *)arg;
+	gen->GenerateTracks();
+
+    return NULL;
+}
+
+
+// Creates a track in the TrackGenerator.  Note that this recycles track IDs over time.
+// Called from spawned TrackGenerator thread
+GeneratorTrack* TrackGenerator::AddTrack(bool randomLocation)
+{
+
+	// Cannot create more tracks than the generator is 
+	// supposed to handle
+	if (_trackList.size() == _maxTracks) 
+	{
+		return NULL;
+	}
+
+	GeneratorTrack *track = new GeneratorTrack(_mutex);
+
+	// Recycle track ID when it gets to the max
+	if (_currentTrackId == GetMaxTracks()) 
+	{
+		_currentTrackId = 0;
+	}
+	track->id = _currentTrackId;
+
+	CalculateRandomPoint80KmFromSFO(&track->latLong, randomLocation);
+	if (!_flightPlans.empty()) 
+	{
+
+		GeneratorFlightPlan *plan = _flightPlans.front();
+
+		// This is pretty much a dummy call here, because this example does not
+		// actually do real correlation - instead it simply checks if the track
+		// has an empty flight ID, and considers the flight plan to be 
+		// "correlated" when the track has no flight ID.  However, this logic
+		// is here to represent a real application.
+		if (CorrelateFlightPlanWithTrack(plan, track))
+		{
+
+			// Copies data from the flight plan, does not keep a reference to 
+			// the flight plan
+			UpdateTrackWithFlightData(*track, *plan);
+
+			// No longer need to store the flight plan since the required data
+			// is now stored with the track.
+			delete plan;
+			_flightPlans.pop();
+		}
+	}
+
+	_currentTrackId++;
+	_trackList.push_back(track);
+
+	return track;
+}
+
+
+// ------------------------------------------------------------------------- //
+// Copies data from the flight plan, does not keep a reference to the flight
+// plan
+void TrackGenerator::UpdateTrackWithFlightData(GeneratorTrack &track, 
+	GeneratorFlightPlan &flightPlan)
+{
+	// Copies the flight ID - no need to worry about allocation of the
+	// flight ID string.
+	track.SetFlightId(flightPlan.flightID);
+}
+
+// Deletes the track from the list. 
+void TrackGenerator::DeleteTrack(GeneratorTrack &track)
+{
+	for (std::vector<GeneratorTrack *>::iterator it = 
+			_trackList.begin(); 	
+			it != _trackList.end(); ++it) 
+	{
+		if ((*it)->id == track.id) 
+		{
+			_trackList.erase(it);
+			break;
+		}
+	}
+}
+
+// ------------------------------------------------------------------------- //
+// Creates and starts a thread that starts "generating track data"
+void TrackGenerator::Start()
+{
+	// The Radar has a thread that generates fake tracks
+	OSThread *thread = new OSThread(
+		(ThreadFunction)GenerateTracksFunc, this);
+	thread->Run();
+}
+
+// ------------------------------------------------------------------------- //
+// Marks itself as shutting down so the thread will break after the next sleep
+// time.
+void TrackGenerator::Shutdown()
+{
+	_shuttingDown = true;
+}
+
+
+// ------------------------------------------------------------------------- //
+// CorrelateFlightPlanWithTrack:
+// We are not doing any actual correlation logic here - this is literally 
+// checking that the track that does not have a flight ID set, and copying 
+// the flight ID from the flight plan into the track.
+//
+// In a real application, this should be replaced with your own logic that 
+// correlates a particular flight plan with a particular track.  
+// ------------------------------------------------------------------------- //
+bool TrackGenerator::CorrelateFlightPlanWithTrack(GeneratorFlightPlan *flightPlan, 
+		GeneratorTrack *track)
+{
+	if (0 == strcmp(track->GetFlightId(), ""))
+	{
+		return true;
+	}
+
+	return false;
+}
+
+// ------------------------------------------------------------------------- //
+// Either adds the flight plan's relevant information to the track, or stores 
+// the flight plan until a new track is created later.
+void TrackGenerator::AddFlightPlan(GeneratorFlightPlan *flightPlan)
+{
+
+	bool storeFlightPlan = true;
+
+	// For all tracks, check if they are "correlated" with the new flight plan.
+	// If yes, add the flight plan information to the track.  If no, store the
+	// flight plan information.
+	for (unsigned int i = 0; i < _trackList.size(); i++)
+	{
+		// This example does not actually do real correlation - instead it 
+		// simply checks if the track has an empty flight ID, and considers the
+		// flight plan to be "correlated" when the track has no flight ID.
+		// However, this logic is here to represent a real application.
+		if (CorrelateFlightPlanWithTrack(flightPlan, _trackList[i]))
+		{
+			UpdateTrackWithFlightData(*_trackList[i], *flightPlan);
+			storeFlightPlan = false;
+			break;
+		}
+	}
+
+	if (storeFlightPlan)
+	{
+		// Only keep flight plans that will be associated with future tracks
+		_flightPlans.push(new GeneratorFlightPlan(flightPlan));
+	}
+}
+
+// ------------------------------------------------------------------------- //
+// This generates tracks at a given rate that was specified in the startup
+// parameters.
+void TrackGenerator::GenerateTracks()
+{
+	DDS::Duration_t clockUpdatePeriod = {_sampleRateSec,_sampleRateNanosec};
+	double timeToCreateTrack = 0;
+
+	double sendRateSec = _sampleRateSec / _runRate;
+	double sendRateNanosec = _sampleRateNanosec / _runRate;
+	DDS::Duration_t actualSleepTime = {(long)sendRateSec,
+		(unsigned long)sendRateNanosec};
+
+	if (_startTracks > _maxTracks)
+	{
+			std::stringstream errss;
+			errss << "Trying to create a generator with more starting tracks "
+				<< "than the maximum number of tracks.";
+			throw errss.str();
+	}
+
+	while (!IsShuttingDown())
+	{
+
+		double sampleRateInMs = clockUpdatePeriod.nanosec / 1000000;
+		sampleRateInMs += 1000 * clockUpdatePeriod.sec;
+
+		// If I need to create more tracks because either 1) I have just
+		// started, and I must create the number requested for startup or, 
+		// I am adding incremental tracks.
+		if (GetActiveTrackNumber() < _startTracks )
+		{
+			// Add the track at a random location within the bounding circle
+			AddTrack(true);
+			timeToCreateTrack = 0;
+
+		} else if ((timeToCreateTrack > _creationRateSec ) && 
+			(GetActiveTrackNumber() < GetMaxTracks() ))
+		{
+			AddTrack(false);
+			timeToCreateTrack = 0;
+		}
+
+		timeToCreateTrack++;
+
+
+		for (int i = 0; i < GetActiveTrackNumber(); i++) 
+		{
+		
+			GeneratorTrack *track = GetTrack(i);
+			
+			CalculatePathToSFO(&track->latLong, &track->bearing, 
+				&track->state, sampleRateInMs);
+
+			if (track->altitudeInFeet < 0) 
+			{
+				track->altitudeInFeet = 0;
+			}
+
+			// 3. Notify the listeners so they can do stuff with the track data
+			if (track->state != LANDED)
+			{
+				NotifyListenersUpdateTrack(*track);
+			} 
+			else
+			{
+				NotifyListenersDeleteTrack(*track);
+				DeleteTrack(*track);
+			}
+
+
+		}
+
+		NDDSUtility::sleep(actualSleepTime);
+
+    }
+
+}
+
+
+
+// ------------------------------------------------------------------------- //
+// ------------------------------------------------------------------------- //
+// 
+//         NOTE: This code is purely to generate interesting-looking data.
+// 
+// Everything below this point is track generation code that is completely 
+// irrelevant to the usage of RTI Connext DDS middleware.  This generates some 
+// dummy data showing flights approaching SFO.
+//
+// ------------------------------------------------------------------------- //
+// ------------------------------------------------------------------------- //
 
 // Calculate the bearing of the aircraft, given its current location and the
 // latitude and longitude that it is heading to.
@@ -192,6 +442,7 @@ void TrackGenerator::CalculateBearing(double *bearing,
 
 	// Back to degrees
 	*bearing = *bearing / M_PI * 180;
+
 	// Ensure this is between 0 and 360
 	*bearing = fmod((*bearing + 360) , 360);
 }
@@ -202,29 +453,12 @@ double TrackGenerator::KnotsToKph(double knots)
 	return knots * 1.852;
 }
 
-
-// The flight may be in one of several states, depending on how close it is to
-// the approach.  These states represent the typical legs of the flight path
-// when approaching SFO from the north or the south.
+// Forcing all flights to approach from the south, to look 
+// interesting
 void TrackGenerator::UpdateTrackPositionState(FlightState *state)
 {
-
-	if (*state == INITIAL_NORTH) {
-		*state = PATH_FROM_NORTH;
-		return;
-	}
-
-	if (*state == PATH_FROM_NORTH) {
-		*state = TURNING_TO_APPROACH_FROM_NORTH;
-		return;
-	}
-
-	if (*state == TURNING_TO_APPROACH_FROM_NORTH) {
-		*state = ON_APPROACH;
-		return;
-	}
-
-	if (*state == INITIAL_SOUTH) {
+	if (*state == INITIAL) 
+	{
 		*state = ON_APPROACH;
 		return;
 	}
@@ -263,46 +497,41 @@ void TrackGenerator::CalculateNextPosition(LatLong *latLong, double bearing,
 	latLong->longitude = newLong / M_PI * 180;
 }
 
-// Since the algorithms may not be exact due to rounding errors, it is possible
-// that we will pass the intended point.  If the aircraft is about to pass the
-// point it is headed to, move to the next state.
-bool TrackGenerator::PassedPoint(LatLong origLatLong, 
-	LatLong newLatLong, LatLong destination,
-	FlightState state)
+// Each flight will start at some random point 80 Km from SFO.  This is 
+// not the way that real flight traffic works, but it is good for an example of
+// flights near SFO.
+void TrackGenerator::CalculateRandomPoint80KmFromSFO(LatLong *latLong, 
+	bool randomDistanceWithin)
 {
-	// Going south
-	if (state == PATH_FROM_NORTH)
-	{ 
-		if(newLatLong.latitude < destination.latitude)
-		{
-			return true;
-		}
-	} else 
+	double randDegrees = rand() % 360;
+	double randRads = randDegrees * M_PI / 180;
+	double finalKm = 80;
+
+	if (randomDistanceWithin)
 	{
-		if(newLatLong.latitude > destination.latitude)
-		{
-			return true;
-		}
+		finalKm = rand() % 80;
 	}
 
-	// Going west
-	if (destination.longitude <= origLatLong.longitude)
-	{
-		if (newLatLong.longitude < destination.longitude)
-		{
-			return true;
-		}
-	}
-	// Going west
-	if (destination.longitude > origLatLong.longitude)
-	{
-		if (newLatLong.longitude > destination.longitude)
-		{
-			return true;
-		}
-	}
+	double latInRads = SFO_LAT * M_PI / 180;
+	double longInRads = SFO_LONG * M_PI / 180;
+	double distInRads = finalKm / EARTH_MEAN_RADIUS_KM;
+	double bearing = randRads;
 
-	return false;
+	double temp1 = sin(latInRads) * cos(distInRads);
+	double temp2 = cos(latInRads) * sin(distInRads) * cos(bearing);
+	double newLatInRads = 	asin (temp1 +  temp2);
+	double newLongInRads =
+		longInRads + atan2(sin(bearing)*sin(distInRads)*cos(latInRads),
+					cos(distInRads) - (sin(latInRads) * sin(newLatInRads)));
+
+	// Normalize to -180 - 180
+	newLongInRads = fmod((newLongInRads + 3 * M_PI), (2 * M_PI)) - M_PI; 
+
+	latLong->latitude = newLatInRads / M_PI * 180;
+	latLong->longitude = newLongInRads / M_PI * 180;
+
+	printf("New aircraft being updated.  Lat, Long: %f, %f\n", 
+		latLong->latitude, latLong->longitude);
 
 }
 
@@ -316,8 +545,8 @@ void TrackGenerator::FlyToPosition(LatLong *latLong, double *bearing,
 
 	double currBearing = *bearing;
 	LatLong current = *latLong;
-	CalculateBearing(bearing, *latLong, endPositionLatLong);
 
+	CalculateBearing(bearing, *latLong, endPositionLatLong);
 	CalculateNextPosition(latLong, *bearing, 
 		sampleMillisec, speed);
 
@@ -331,62 +560,13 @@ void TrackGenerator::FlyToPosition(LatLong *latLong, double *bearing,
 	}
 }
 
-// When the flight is turning, calculate the angle that it will move in the
-// next period of time.  (Simple algorithm - not accurate for large distances 
-// on a sphere)
-void TrackGenerator::CalculateAngleToMovePerPeriod(double *angle, 
-	double radius,
-	double centerLat, double centerLong, double kmPerMillisec, 
-	double sampleRate)
-{
-	double angleInRads = *angle * M_PI / 180;
-	double distancePerSamplePer = kmPerMillisec * sampleRate;
-	double totalDistance = radius * angleInRads;
 
-	double numPeriods = totalDistance / distancePerSamplePer;
-	*angle = *angle/numPeriods;
-}
-
-// When the flight is turning, calculate the angle that it will move in the
-// next period of time.  (Simple algorithm - not accurate for large distances 
-// on a sphere)
-void TrackGenerator::CalculatePosAroundCircle(LatLong *latLong, 
-	double radius, LatLong center, 
-	double angleToMove, FlightState *state)
-{
-	double x = center.longitude + radius/EARTH_MEAN_RADIUS_KM 
-		* cos(angleToMove * M_PI / 180);
-	double y = center.latitude + radius/EARTH_MEAN_RADIUS_KM 
-		* sin(angleToMove * M_PI / 180);
-
-	if (latLong->longitude == x && latLong->latitude == y)
-	{
-		UpdateTrackPositionState(state);
-	}
-	latLong->longitude = x;
-	latLong->latitude = y;
-
-}
-
-// Calculate the distances between two latitude/longitude points.
-double TrackGenerator::CalculateDistance(LatLong latlong1, 
-	LatLong latlong2)
-{
-	double a = latlong1.latitude - latlong2.latitude;
-	double b = latlong1.longitude - latlong2.longitude;
-
-	return sqrt( pow(a, 2) + pow(b,2));
-}
-
-// Depending on whether the flight is arriving from the north or the south, 
-// It will take a slightly different path.  This is a simple algorithm to take
-// one of the typical flight paths to land at SFO.
+// Flights go to a location southeast of SFO and then line up to
+// land.  This does no checking to avoid collisions.
 void TrackGenerator::CalculatePathToSFO(LatLong *currentLatLong, 
 						double *bearing, FlightState *state, 
 						double sampleRate)
 {
-	bool startTurning = true;
-	int circleSteps = 0;
 	double approachBearing = 0; 
 	LatLong approach;
 	approach.latitude = APPROACH_BEGIN_LAT;
@@ -398,353 +578,44 @@ void TrackGenerator::CalculatePathToSFO(LatLong *currentLatLong,
 	CalculateBearing(&approachBearing, approach, finalDestination);
 	double turnRadius = 9.656;
 
-	if (*state == INITIAL) {
+	if (*state == INITIAL) 
+	{
 		// Make slightly dumb assumption that bearing is directly toward
 		// SFO when flight is arriving in the airspace
+		int speedInKnots = 220;
 
 		CalculateBearing(bearing, *currentLatLong, finalDestination);
-		// Going north
-		if ( (0 <= *bearing  && *bearing <= 90) || 
-			 (270 <= *bearing && *bearing <= 360))
-		{
-			*state = INITIAL_SOUTH;
-			LatLong southTurnLatLong;
-			southTurnLatLong.latitude = SOUTH_TURN_LAT;
-			southTurnLatLong.longitude = SOUTH_TURN_LONG;
-			FlyToPosition(currentLatLong, bearing,
-						state, sampleRate, 
-						southTurnLatLong, 220);
-		}
-
-		// Going south
-		if (90 < *bearing && 
-			*bearing < 270)
-		{	
-			*state = INITIAL_NORTH;
-			LatLong northTurnLatLong;
-			northTurnLatLong.latitude = NORTH_TURN_LAT;
-			northTurnLatLong.longitude = NORTH_TURN_LONG;
-			FlyToPosition(currentLatLong, bearing, 
-						state, sampleRate,
-						northTurnLatLong, 220);
-		
-		}
-	} else if (*state == INITIAL_SOUTH)
-	{
-		LatLong southTurnLatLong;
-		southTurnLatLong.latitude = SOUTH_TURN_LAT;
-		southTurnLatLong.longitude = SOUTH_TURN_LONG;
+		LatLong approachLatLong;
+		approachLatLong.latitude = APPROACH_BEGIN_LAT;
+		approachLatLong.longitude = APPROACH_BEGIN_LONG;
 		FlyToPosition(currentLatLong, bearing,
-						state, sampleRate,
-						southTurnLatLong, 220);
-
-	} else if (*state == INITIAL_NORTH)
+					state, sampleRate, 
+					approachLatLong, speedInKnots);
+	} 
+	else if (*state == ON_APPROACH)
 	{
-		LatLong northTurnLatLong;
-		northTurnLatLong.latitude = NORTH_TURN_LAT;
-		northTurnLatLong.longitude = NORTH_TURN_LONG;
-		FlyToPosition(currentLatLong, bearing, 
-						state, sampleRate,
-						northTurnLatLong, 220);
-	}
-	else if (*state == PATH_FROM_NORTH)
-	{
-		LatLong northApproachTurnLatLong;
-		northApproachTurnLatLong.latitude = NORTH_APPROACH_TURN_LAT;
-		northApproachTurnLatLong.longitude = NORTH_APPROACH_TURN_LONG;
-
-		FlyToPosition(currentLatLong, bearing, 
-					state, sampleRate,
-					northApproachTurnLatLong, 220);
-
-	} else if (*state == TURNING_TO_APPROACH_FROM_NORTH)
-	{
-
-		LatLong circleLatLong;
-		circleLatLong.latitude = NORTH_APPROACH_CIRCLE_CENTER_LAT;
-		circleLatLong.longitude = NORTH_APPROACH_CIRCLE_CENTER_LON;
-		LatLong approachBeginLatLong;
-		approachBeginLatLong.latitude = APPROACH_BEGIN_LAT;
-		approachBeginLatLong.longitude = APPROACH_BEGIN_LONG;
-		turnRadius = CalculateDistance(circleLatLong, 
-			approachBeginLatLong) / 2;
-		double angle = *bearing - approachBearing;
-		CalculateAngleToMovePerPeriod(&angle, 
-				turnRadius, 
-				NORTH_APPROACH_CIRCLE_CENTER_LAT,
-				NORTH_APPROACH_CIRCLE_CENTER_LON, 
-				(double)100 / SEC_PER_HOUR / MILLISEC_PER_SEC, 
-				sampleRate);
-		LatLong northApproachCenterLatLon;
-		northApproachCenterLatLon.latitude = NORTH_APPROACH_CIRCLE_CENTER_LAT;
-		northApproachCenterLatLon.longitude = NORTH_APPROACH_CIRCLE_CENTER_LON;
-
-		CalculatePosAroundCircle(currentLatLong, turnRadius,
-						northApproachCenterLatLon,
-						angle, state);
-	} else if (*state == ON_APPROACH)
-	{
+		int speedInKnots = 140;
 		FlyToPosition(currentLatLong, bearing, 
 			state, sampleRate,
-			finalDestination, 100);
+			finalDestination, speedInKnots);
 
 	} 
 }
 
-
-// Each flight will start at some random point 80 Km from SFO.  This is 
-// not the way that real flight traffic works, but it is good for an example of
-// flights near SFO.
-void TrackGenerator::CalculateRandomPoint80KmFromSFO(LatLong *latLong)
-{
-	double randDegrees = rand() % 360;
-	double randRads = randDegrees * M_PI / 180;
-	double finalKm = 80;
-
-	double latInRads = SFO_LAT * M_PI / 180;
-	double longInRads = SFO_LONG * M_PI / 180;
-	double distInRads = finalKm / EARTH_MEAN_RADIUS_KM;
-	double bearing = randRads;
-
-	double temp1 = sin(latInRads) * cos(distInRads);
-	double temp2 = cos(latInRads) * sin(distInRads) * cos(bearing);
-	double newLatInRads = 
-		asin (  temp1 + 
-			  temp2 );
-	double newLongInRads =
-		longInRads + atan2(sin(bearing)*sin(distInRads)*cos(latInRads),
-					cos(distInRads) - (sin(latInRads) * sin(newLatInRads)));
-
-	// Normalize to -180 - 180
-	newLongInRads = fmod((newLongInRads + 3 * M_PI), (2 * M_PI)) - M_PI; 
-
-	latLong->latitude = newLatInRads / M_PI * 180;
-	latLong->longitude = newLongInRads / M_PI * 180;
-
-	printf("NewLat: %f, NewLong: %f\n", latLong->latitude, latLong->longitude);
-
-}
-
-// Creates a track in the TrackGenerator.  Note that this recycles track IDs over time.
-// Called from spawned TrackGenerator thread
-GeneratorTrack* TrackGenerator::AddTrack()
+// Since the algorithms may not be exact due to rounding errors, it is possible
+// that we will pass the intended point.  If the aircraft is at about the right
+// position, move to the next state
+bool TrackGenerator::PassedPoint(LatLong origLatLong, 
+	LatLong newLatLong, LatLong destination,
+	FlightState state)
 {
 
-	// Cannot create more tracks than the generator is 
-	// supposed to handle
-	if (_trackList.size() == _maxTracks) {
-		return NULL;
-	}
-
-	GeneratorTrack *track = new GeneratorTrack(_mutex);
-
-	// Recycle track ID when it gets to the max
-	if (_currentTrackId == GetMaxTracks()) {
-		_currentTrackId = 0;
-	}
-	track->id = _currentTrackId;
-
-	CalculateRandomPoint80KmFromSFO(&track->latLong);
-	if (!_flightPlans.empty()) {
-
-
-		GeneratorFlightPlan *plan = _flightPlans.front();
-
-		// This is pretty much a dummy call here, because this example does not
-		// actually do real correlation - instead it simply checks if the track
-		// has an empty flight ID, and considers the flight plan to be 
-		// "correlated" when the track has no flight ID.  However, this logic
-		// is here to represent a real application.
-		if (CorrelateFlightPlanWithTrack(plan, track))
-		{
-
-			// Copies data from the flight plan, does not keep a reference to 
-			// the flight plan
-			UpdateTrackWithFlightData(*track, *plan);
-
-			// No longer need to store the flight plan since the required data
-			// is now stored with the track.
-			delete plan;
-			_flightPlans.pop();
-		}
-	}
-
-	_currentTrackId++;
-	_trackList.push_back(track);
-
-	return track;
-}
-
-
-// Copies data from the flight plan, does not keep a reference to the flight
-// plan
-void TrackGenerator::UpdateTrackWithFlightData(GeneratorTrack &track, 
-	GeneratorFlightPlan &flightPlan)
-{
-	// Copies the flight ID - no need to worry about allocation of the
-	// flight ID string.
-	track.SetFlightId(flightPlan.flightID);
-}
-
-// Deletes the track from the list. 
-void TrackGenerator::DeleteTrack(GeneratorTrack &track)
-{
-	for (std::vector<GeneratorTrack *>::iterator it = 
-			_trackList.begin(); 	
-			it != _trackList.end(); ++it) {
-		if ((*it)->id == track.id) {
-			_trackList.erase(it);
-			break;
-		}
-	}
-}
-
-// Creates and starts a thread that starts "generating track data"
-void TrackGenerator::Start()
-{
-	// The Radar has a thread that generates fake tracks
-	OSThread *thread = new OSThread(
-		(ThreadFunction)GenerateTracksFunc, this);
-	thread->Run();
-}
-
-// Marks itself as shutting down so the thread will break after the next sleep
-// time.
-void TrackGenerator::Shutdown()
-{
-	_shuttingDown = true;
-
-}
-
-
-// ------------------------------------------------------------------------- //
-// CorrelateFlightPlanWithTrack:
-// We are not doing any actual correlation logic here - this is literally 
-// checking that the track that does not have a flight ID set, and copying 
-// the flight ID from the flight plan into the track.
-//
-// In a real application, this should be replaced with your own logic that 
-// correlates a particular flight plan with a particular track.  
-// ------------------------------------------------------------------------- //
-bool TrackGenerator::CorrelateFlightPlanWithTrack(GeneratorFlightPlan *flightPlan, 
-		GeneratorTrack *track)
-{
-	if (0 == strcmp(track->GetFlightId(), ""))
+	if ((fabs(newLatLong.latitude - destination.latitude) < .0005)
+		&& (fabs(newLatLong.longitude - destination.longitude) < .0005))
 	{
 		return true;
 	}
-
 	return false;
-}
-
-// Either adds the flight plan's relevant information to the track, or stores 
-// the flight plan until a new track is created later.
-void TrackGenerator::AddFlightPlan(GeneratorFlightPlan *flightPlan)
-{
-
-	bool storeFlightPlan = true;
-
-	// For all tracks, check if they are "correlated" with the new flight plan.
-	// If yes, add the flight plan information to the track.  If no, store the
-	// flight plan information.
-	for (unsigned int i = 0; i < _trackList.size(); i++)
-	{
-		// This example does not actually do real correlation - instead it 
-		// simply checks if the track has an empty flight ID, and considers the
-		// flight plan to be "correlated" when the track has no flight ID.
-		// However, this logic is here to represent a real application.
-		if (CorrelateFlightPlanWithTrack(flightPlan, _trackList[i]))
-		{
-			UpdateTrackWithFlightData(*_trackList[i], *flightPlan);
-			storeFlightPlan = false;
-			break;
-		}
-	}
-
-	if (storeFlightPlan)
-	{
-		// Only keep flight plans that will be associated with future tracks
-		_flightPlans.push(new GeneratorFlightPlan(flightPlan));
-	}
-}
-
-// ------------------------------------------------------------------------- //
-// This generates tracks at a given rate that was specified in the startup
-// parameters.
-// ------------------------------------------------------------------------- //
-void TrackGenerator::GenerateTracks()
-{
-	DDS::Duration_t clockUpdatePeriod = {_sec,_nanosec};
-	double timeToCreateTrack = 0;
-
-	double sendRateSec = _sec / _sendRate;
-	double sendRateNanosec = _nanosec / _sendRate;
-	DDS::Duration_t actualSleepTime = {(long)sendRateSec,
-		(unsigned long)sendRateNanosec};
-	int timeSinceFirstCreation = 0;
-
-
-	int circlePos = 0;
-	while (!IsShuttingDown())
-	{
-
-		double timeInMs = clockUpdatePeriod.nanosec / 1000000;
-
-		// Every sixty seconds of "clock time" which may be sped up
-		long trackCreationRate = (long) (60000 / timeInMs);
-
-		if (GetActiveTrackNumber() == 0  ||
-			((timeToCreateTrack > trackCreationRate ) && 
-			(GetActiveTrackNumber() < GetMaxTracks() )))
-		{
-			AddTrack();
-			timeToCreateTrack = 0;
-		}
-
-		timeToCreateTrack++;
-
-
-		for (int i = 0; i < GetActiveTrackNumber(); i++) {
-		
-			if ( i == 0 ) {
-				timeSinceFirstCreation++;
-			}
-			GeneratorTrack *track = GetTrack(i);
-			
-			// Faster than actual speed, to make this more 
-			// interesting looking
-			double trackUpdateRate =  clockUpdatePeriod.nanosec / 1000000;
-
-			CalculatePathToSFO(&track->latLong, &track->bearing, 
-				&track->state, trackUpdateRate);
-
-			if (track->altitudeInFeet < 0) {
-				track->altitudeInFeet = 0;
-			}
-
-			// 3. Notify the listeners so they can do stuff with the track data
-			if (track->state != LANDED)
-			{
-				NotifyListenersUpdateTrack(*track);
-			} 
-			else
-			{
-				NotifyListenersDeleteTrack(*track);
-				DeleteTrack(*track);
-			}
-
-
-		}
-
-		NDDSUtility::sleep(actualSleepTime);
-
-    }
-
-
-
 
 }
-
-
-
 

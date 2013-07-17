@@ -27,18 +27,16 @@ damages arising out of the use or inability to use the software.
 // ------------------------------------------------------------------------- //
 
 // Flight paths around SFO
-enum FlightState {
+enum FlightState 
+{
 	INITIAL,
-	INITIAL_NORTH,
-	INITIAL_SOUTH,
-	PATH_FROM_NORTH,
-	TURNING_TO_APPROACH_FROM_NORTH,
 	ON_APPROACH,
 	LANDED
 };
 
 // Structure containing latitude and longitude.
-struct LatLong {
+struct LatLong 
+{
 	double latitude;
 	double longitude;
 };
@@ -60,32 +58,37 @@ struct GeneratorTrack
 	GeneratorTrack(OSMutex *mutex) 
 	{
 		id = 0;
-		// Start near San Jose
-		latLong.latitude = 37.3041;
-		latLong.longitude = -121.9727;
+		latLong.latitude = 0;
+		latLong.longitude = 0;
 		altitudeInFeet = 3000;
 		bearing = 0;
 		state = INITIAL;
-		speedInKnots = 145; // Assuming a fairly typical speed when circling
+
+		// Assuming a fairly typical speed when circling
+		speedInKnots = 145; 
 
 		memset(flightId, 0, 8);
 
 		_mutex = mutex;
 	}
 
+	// --- Getter and setter for the flight ID --- 
 	void SetFlightId(std::string id)
 	{
 		_mutex->Lock();
-		if (id.size() < 8) {
+		if (id.size() < 8) 
+		{
 			strcpy(flightId, id.c_str());
 		}
 		_mutex->Unlock();
 	}
+
 	const char* GetFlightId() const 
 	{
 		return flightId;
 	}
 
+	// --- Public members ---
 	long id;
 	LatLong latLong;
 	double altitudeInFeet;
@@ -94,9 +97,9 @@ struct GeneratorTrack
 	FlightState state;
 
 private:
+
+	// --- Private members ---
 	char flightId[8]; 
-	double _turnCenterLat;
-	double _turnCenterLong;
 	OSMutex *_mutex;
 };
 
@@ -130,6 +133,7 @@ struct GeneratorFlightPlan
 		strcpy(flightID, plan->flightID);
 	}
 
+	// --- Public members ---
 	char flightID[8];
 	short estimatedHours;
 	short estimatedMinute;
@@ -144,11 +148,14 @@ struct GeneratorFlightPlan
 // generator.
 //
 // ------------------------------------------------------------------------- //
-class TrackListener {
+class TrackListener 
+{
 public:
+	// --- Track update and delete callbacks --- 
 	virtual bool TrackUpdate(const GeneratorTrack &track) = 0;
 	virtual bool TrackDelete(const GeneratorTrack &track) = 0;
 
+	// --- Virtual destructor --- 
 	virtual ~TrackListener() {};
 };
 
@@ -164,16 +171,36 @@ public:
 // radar and being sent over the middleware.
 //
 // ------------------------------------------------------------------------- //
-class TrackGenerator {
+class TrackGenerator 
+{
 
 public:
 
 	// --- Constructor --- 
-	TrackGenerator(int radarID, int maxTracks, 
-					int sendRate) : _shuttingDown(false),
-				_currentTrackId(0), _maxTracks(maxTracks),
-				_radarID(radarID), _sec(0), 
-				_nanosec(100000000), _sendRate(sendRate)
+
+	// radarID: this should be unique for each running radar app
+	// startTracks: How many tracks should be generated at startup?
+	// maxTracks: What is the maximum number of tracks the app can publish?
+	// creationRateSec: How fast should new tracks be added?  (In seconds in 
+	//   clock time.  If you have increased the run rate, these will be added  
+	//   at creation time / run rate
+	// runRate: How fast should this be running?  Normal speeds, 2x speeds, etc
+	// Note that the "sample rate" is hard-coded.  This determines how fast the
+	// radar is theoretically getting updates about each aircraft, and 
+	// determines how much an aircraft has moved during each update.  To make data 
+	// rates faster, increase the run rate, which makes the clock run faster.
+	// Increasing the clock rate makes the track generator sleep less, and 
+	// generate data faster.
+	TrackGenerator(int radarID, int startTracks, int maxTracks, 
+					int creationRateSec, double runRate) : _shuttingDown(false),
+				_currentTrackId(0), 
+				_startTracks(startTracks),
+				_maxTracks(maxTracks),
+				_radarID(radarID), 
+				_sampleRateSec(0), 
+				_sampleRateNanosec(100000000), 
+				_runRate(runRate), 
+				_creationRateSec(creationRateSec)
 	{
 		_mutex = new OSMutex();
 	}
@@ -239,19 +266,15 @@ private:
 	void NotifyListenersDeleteTrack(const GeneratorTrack &track);
 
 	// --- Create a new track  --- 
-	GeneratorTrack* AddTrack();
+	GeneratorTrack* AddTrack(bool randomLocation);
 
 	// --- Fly to SFO  --- 
+	//
+	// NOTE: This code is purely to generate interesting-looking data.
+	// The following methods are not required to use RTI Connext DDS
+	// but are included only to create interesting-looking dummy data.
 	void CalculatePathToSFO(LatLong *currentLatLong, double *bearing, 
-							FlightState *state, double sampleRate);
-	double CalculateDistance(LatLong latlong1, LatLong latlong2);
-	void CalculatePosAroundCircle(LatLong *latLong, double radius, 
-								LatLong center, double angleToMove, 
-								FlightState *state);
-	void CalculateAngleToMovePerPeriod(double *angle, 
-								double radius, double centerLat, 
-								double centerLong, double kmPerMillisec,
-								double sampleRate);
+								FlightState *state, double sampleRate);
 	void FlyToPosition(LatLong *latLong, double *bearing, 
 								FlightState *state, double sampleMillisec,
 								LatLong endPositionLatLong,
@@ -263,15 +286,14 @@ private:
 	void CalculateBearing(double *bearing, 
 								LatLong initLatLong, 
 								LatLong finalLatLong);
-
 	double KnotsToKph(double knots);
-	void CalculateRandomPoint80KmFromSFO(LatLong *latLong);
-
+	void CalculateRandomPoint80KmFromSFO(LatLong *latLong, 
+								bool randomLocation);
 	void UpdateTrackPositionState(FlightState *state);
 
 
 
-	
+	// --- Track getter and setter --- 
 	GeneratorTrack* GetTrack(int i) const 
 	{ 
 		return _trackList[i]; 
@@ -282,11 +304,13 @@ private:
 		return _maxTracks; 
 	}
 
+	// --- Getter for number of active tracks --- 
 	int GetActiveTrackNumber() 
 	{ 
 		return _trackList.size(); 
 	}
 
+	// --- Is the application shutting down? --- 
 	bool IsShuttingDown() const 
 	{ 
 		return _shuttingDown; 
@@ -312,6 +336,9 @@ private:
 	// the max
 	int _currentTrackId; 
 
+	// The number of tracks to start with
+	int _startTracks;
+
 	// Maximum number of tracks this radar can produce at once.
 	int _maxTracks;
 
@@ -319,11 +346,14 @@ private:
 	int _radarID;
 
 	// How quickly the radar is sampling the data
-	int _sec;
-	int _nanosec;
+	int _sampleRateSec;
+	int _sampleRateNanosec;
 
 	// If you want to send faster or slower than real time
-	double _sendRate;
+	double _runRate;
+
+	// How often new tracks are created
+	double _creationRateSec;
 
 	// Listeners that are notified of track events
 	std::vector<TrackListener *> _listeners;
