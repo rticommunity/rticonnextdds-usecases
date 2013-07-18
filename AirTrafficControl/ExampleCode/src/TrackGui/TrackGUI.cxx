@@ -51,7 +51,7 @@ AppFrame::AppFrame(TrackApp *app,
 	wxMenuBar *menuBar = new wxMenuBar;
 	menuBar->Append( menuFile, _("&File") );
 
-	SetMenuBar( menuBar );
+	SetMenuBar(menuBar);
 	CreateStatusBar();
 	SetStatusText( _("Track Viewer") );
 
@@ -76,12 +76,6 @@ AppFrame::AppFrame(TrackApp *app,
 	// Make the panels resize when the window resizes
 	wxSizer *sizerMain = new wxBoxSizer(wxVERTICAL);
 	sizerMain->Add(splitter, 1, wxEXPAND, 0);
-
-	wxSizer *sizerTop = new wxBoxSizer(wxVERTICAL);
-	sizerTop->Add(_panel, 1, wxEXPAND);
-
-	wxSizer *sizerBottom = new wxBoxSizer(wxVERTICAL);
-	sizerBottom->Add(_tablePanel,  1, wxEXPAND);
 
 	splitter->SplitHorizontally(_panel, _tablePanel);
 	SetSizer(sizerMain);
@@ -211,16 +205,16 @@ TrackPanel::TrackPanel(wxWindow *parent, wxWindowID id, const wxString& title,
 
 	_mutex = new OSMutex();
 
-	SHPHandle handle = SHPOpen(filePath.c_str(), "r+b");
+	_handle = SHPOpen(filePath.c_str(), "r+b");
 	int numEntities = 0;
 	int shapeType = 0;
 	double minBound[4], maxBound[4];
-	SHPGetInfo(handle, &numEntities, &shapeType, minBound, maxBound);
+	SHPGetInfo(_handle, &numEntities, &shapeType, minBound, maxBound);
 
 	for (int i = 0; i < numEntities; i++) 
 	{
 		SHPObject *shapeObject = 
-			SHPReadObject(handle, i);
+			SHPReadObject(_handle, i);
 		_shapeObjects.push_back(shapeObject);
 	}
 
@@ -580,6 +574,7 @@ TrackPanel::~TrackPanel()
 		SHPDestroyObject(_shapeObjects[i]);
 	}
 	_shapeObjects.clear();
+	SHPClose(_handle);
 
 	_trackPoints.clear();
 
