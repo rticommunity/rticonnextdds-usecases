@@ -114,6 +114,9 @@ public:
 	projPJ _latlongProjection;
 	projPJ _mercatorProjection;
 
+	// Handle to the shapes within the shapefile
+	SHPHandle _handle;
+
 	// wxWidgets macro for events
 	DECLARE_EVENT_TABLE()
 };

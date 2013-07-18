@@ -205,16 +205,16 @@ TrackPanel::TrackPanel(wxWindow *parent, wxWindowID id, const wxString& title,
 
 	_mutex = new OSMutex();
 
-	SHPHandle handle = SHPOpen(filePath.c_str(), "r+b");
+	_handle = SHPOpen(filePath.c_str(), "r+b");
 	int numEntities = 0;
 	int shapeType = 0;
 	double minBound[4], maxBound[4];
-	SHPGetInfo(handle, &numEntities, &shapeType, minBound, maxBound);
+	SHPGetInfo(_handle, &numEntities, &shapeType, minBound, maxBound);
 
 	for (int i = 0; i < numEntities; i++) 
 	{
 		SHPObject *shapeObject = 
-			SHPReadObject(handle, i);
+			SHPReadObject(_handle, i);
 		_shapeObjects.push_back(shapeObject);
 	}
 
@@ -574,6 +574,7 @@ TrackPanel::~TrackPanel()
 		SHPDestroyObject(_shapeObjects[i]);
 	}
 	_shapeObjects.clear();
+	SHPClose(_handle);
 
 	_trackPoints.clear();
 
