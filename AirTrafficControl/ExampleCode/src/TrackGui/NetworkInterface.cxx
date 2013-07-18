@@ -189,7 +189,9 @@ FlightPlanReader::~FlightPlanReader()
 	delete _shutDownNotifyCondition;
 	delete _waitSet;
 
-
+	// _condition does not get deleted explicitly because it belongs to the 
+	// _fpReader.  Instead, it is deleted when you call 
+	// delete_contained_entities
 	_fpReader->delete_contained_entities();
 
 	Subscriber *sub = _fpReader->get_subscriber();
