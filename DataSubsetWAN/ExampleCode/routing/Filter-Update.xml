@@ -1,0 +1,8 @@
+<topic_route>
+    <input>
+        <content_filter>
+            <parameter>75</parameter>
+            <parameter>45</parameter>
+        </content_filter>
+    </input>
+</topic_route>
