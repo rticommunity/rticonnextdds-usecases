@@ -197,9 +197,12 @@
                         <topic_name>Temperature</topic_name>
                         <registered_type_name>TemperatureType</registered_type_name>
                         <creation_mode>IMMEDIATE</creation_mode>
+
                         <!-- Only pass the data through if the temperature is high or low -->
                         <content_filter>
-                            <expression>value &gt; 100 OR value &lt; 32 </expression>
+                            <expression>value &gt; %0 OR value &lt; %1 </expression>
+                            <parameter>100</parameter>
+                            <parameter>32</parameter>
                         </content_filter>
 
                         <!-- The Temperature topic is:  -->
@@ -419,12 +422,16 @@
                     <publish_with_original_info>true</publish_with_original_info>
                     <publish_with_original_timestamp>true</publish_with_original_timestamp>
                     <input participant="1">
-                        <content_filter>
-                            <expression>value &gt; 100 OR value &lt; 32 </expression>
-                        </content_filter>
                         <topic_name>Temperature</topic_name>
                         <registered_type_name>TemperatureType</registered_type_name>
                         <creation_mode>IMMEDIATE</creation_mode>
+                        
+                        <!-- Only pass the data through if the temperature is high or low -->
+                        <content_filter>
+                            <expression>value &gt; %0 OR value &lt; %1 </expression>
+                            <parameter>100</parameter>
+                            <parameter>32</parameter>
+                        </content_filter>
 
                         <!-- The Temperature topic is:  -->
                         <!--   1) Best effort           -->
@@ -482,11 +489,6 @@
                         <registered_type_name>TemperatureType</registered_type_name>
                         <creation_mode>IMMEDIATE</creation_mode>
                         
-                        <!-- Only pass the data through if the temperature is high or low -->
-                        <content_filter>
-                            <expression>value &gt; 100 OR value &lt; 32 </expression>
-                        </content_filter>
-
                         <!-- The Temperature topic is:  -->
                         <!--   1) Best effort           -->
                         <datareader_qos base_name="RoutingLibrary::SensorDataReader">
