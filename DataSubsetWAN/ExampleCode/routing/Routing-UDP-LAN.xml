@@ -65,16 +65,15 @@
         <annotation>
             <documentation>
                 Routes Alarm and Temperature topics from one domain to second
-                domain and the other way around over UDP.
+    domain and the other way around over UDP.
 
-                Suggested configuration with this Routing Service marked as 
-                *RS1*:
+    Suggested configuration with this Routing Service marked as *RS1*:
 
-                UDP LAN apps ==[domain 6]== *RS1* ==[domain 0]== RS2 ==[domain 5]== UDP LAN apps
+    LAN apps ==[domain 6]== *RS1* ==[domain 0]== RS2 ==[domain 5]== LAN apps
 
-                UDP LAN side:  Sending to/receiving from everybody in domain 6
-                UDP "WAN" side:  Sending to/receiving from the other Routing
-                Service in domain 0
+    UDP LAN side:  Sending to/receiving from everybody in domain 6
+    UDP "WAN" side:  Sending to/receiving from the other Routing
+    Service in domain 0
             </documentation>
         </annotation>
 
@@ -142,9 +141,12 @@
                         <topic_name>Temperature</topic_name>
                         <registered_type_name>TemperatureType</registered_type_name>
                         <creation_mode>IMMEDIATE</creation_mode>
+
                         <!-- Only pass the data through if the temperature is high or low -->
                         <content_filter>
-                            <expression>value &gt; 100 OR value &lt; 32 </expression>
+                            <expression>value &gt; %0 OR value &lt; %1 </expression>
+                            <parameter>100</parameter>
+                            <parameter>32</parameter>
                         </content_filter>
 
                         <!-- The Temperature topic is:  -->
@@ -246,16 +248,15 @@
         <annotation>
             <documentation>
                 Routes Alarm and Temperature topics from one domain to second
-                domain and the other way around over UDP.
+    domain and the other way around over UDP.
 
-                Suggested configuration with this Routing Service marked as
-                *RS2*:
+    Suggested configuration with this Routing Service marked as *RS2*:
 
-                UDP LAN apps ==[domain 6]== RS1 ==[domain 0]== *RS2* ==[domain 5]== UDP LAN apps
+    LAN apps ==[domain 6]== RS1 ==[domain 0]== *RS2* ==[domain 5]== LAN apps
 
-                UDP LAN side:  Sending to/receiving from everybody in domain 5
-                UDP "WAN" side:  Sending to/receiving from the other Routing
-                Service in domain 0
+    UDP LAN side:  Sending to/receiving from everybody in domain 5
+    UDP "WAN" side:  Sending to/receiving from the other Routing
+    Service in domain 0
             </documentation>
         </annotation>
         
@@ -309,12 +310,16 @@
                     <publish_with_original_info>true</publish_with_original_info>
                     <publish_with_original_timestamp>true</publish_with_original_timestamp>
                     <input participant="1">
-                        <content_filter>
-                            <expression>value &gt; 100 OR value &lt; 32 </expression>
-                        </content_filter>
                         <topic_name>Temperature</topic_name>
                         <registered_type_name>TemperatureType</registered_type_name>
                         <creation_mode>IMMEDIATE</creation_mode>
+
+                        <!-- Only pass the data through if the temperature is high or low -->
+                        <content_filter>
+                            <expression>value &gt; %0 OR value &lt; %1 </expression>
+                            <parameter>100</parameter>
+                            <parameter>32</parameter>
+                        </content_filter>
 
                         <!-- The Temperature topic is:  -->
                         <!--   1) Best effort           -->
@@ -372,11 +377,6 @@
                         <registered_type_name>TemperatureType</registered_type_name>
                         <creation_mode>IMMEDIATE</creation_mode>
                         
-                        <!-- Only pass the data through if the temperature is high or low -->
-                        <content_filter>
-                            <expression>value &gt; 100 OR value &lt; 32 </expression>
-                        </content_filter>
-
                         <!-- The Temperature topic is:  -->
                         <!--   1) Best effort           -->
                         <datareader_qos base_name="RoutingLibrary::SensorDataReader">
