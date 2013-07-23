@@ -2,12 +2,21 @@
 ###########
 obj/
 objs/
+Debug/
+Release/
+ipch/
 
 # Compiled source #
 ###################
 *.com
 *.class
 *.o
+*.exe
+
+# Project temp files #
+######################
+*.suo
+*.sdf
 
 # Packages #
 ############
