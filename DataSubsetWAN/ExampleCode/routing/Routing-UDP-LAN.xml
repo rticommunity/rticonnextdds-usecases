@@ -64,16 +64,18 @@
 
         <annotation>
             <documentation>
-                Routes Alarm and Temperature topics from one domain to second
-    domain and the other way around over UDP.
+                Routes Alarm and Temperature topics from one domain to second domain
+    and the other way around over UDP.
 
-    Suggested configuration with this Routing Service marked as *RS1*:
+    Configurations in this file, with this Routing Service configuration marked
+    as *RS1*:
 
     LAN apps ==[domain 6]== *RS1* ==[domain 0]== RS2 ==[domain 5]== LAN apps
 
-    UDP LAN side:  Sending to/receiving from everybody in domain 6
-    UDP "WAN" side:  Sending to/receiving from the other Routing
-    Service in domain 0
+    UDP LAN side:  Sending to/receiving from app in domain 6
+    UDP "WAN" side:  Sending to/receiving from the other Routing Service 
+    in domain 0
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             </documentation>
         </annotation>
 
@@ -247,16 +249,18 @@
 
         <annotation>
             <documentation>
-                Routes Alarm and Temperature topics from one domain to second
-    domain and the other way around over UDP.
+                Routes Alarm and Temperature topics from one domain to second domain
+    and the other way around over UDP.
 
-    Suggested configuration with this Routing Service marked as *RS2*:
+    Configurations in this file, with this Routing Service configuration marked
+    as *RS2*:
 
     LAN apps ==[domain 6]== RS1 ==[domain 0]== *RS2* ==[domain 5]== LAN apps
 
-    UDP LAN side:  Sending to/receiving from everybody in domain 5
-    UDP "WAN" side:  Sending to/receiving from the other Routing
-    Service in domain 0
+    UDP LAN side:  Sending to/receiving from app in domain 5
+    UDP "WAN" side:  Sending to/receiving from the other Routing Service
+    in domain 0
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             </documentation>
         </annotation>
         

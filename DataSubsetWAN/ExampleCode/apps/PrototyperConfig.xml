@@ -84,7 +84,7 @@ RTI Data Distribution Service Deployment
             <register_type name="TemperatureType" kind="dynamicData"
                      type_ref="TemperatureType" />
 
-            <!-- Have a single topic called Alarm -->
+            <!-- Have topics Alarm and Temperature -->
             <topic name="Alarm"   register_type_ref="AlarmType"/>
             <topic name="Temperature" register_type_ref="TemperatureType" />
 
@@ -97,7 +97,7 @@ RTI Data Distribution Service Deployment
             <register_type name="TemperatureType" kind="dynamicData"
                      type_ref="TemperatureType" />
 
-            <!-- Have a single topic called Alarm -->
+            <!-- Have topics Alarm and Temperature -->
             <topic name="Alarm"   register_type_ref="AlarmType"/>
             <topic name="Temperature" register_type_ref="TemperatureType" />
 
@@ -125,7 +125,7 @@ RTI Data Distribution Service Deployment
                     <!-- to late-joining DataReaders as they come online.   -->
                     <!-- Pattern: State Data or Last Value Cache Pattern    -->
                     <datawriter_qos base_name="RTIExampleQosLibrary::StateData"/>
-                    </data_writer>
+                </data_writer>
                 
                 <!-- Object that sends periodic temperature updates over    -->
                 <!-- the network.  -->
