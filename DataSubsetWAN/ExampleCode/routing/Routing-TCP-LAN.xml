@@ -65,19 +65,20 @@
         <annotation>
             <documentation>
                 Routes Alarm and Temperature topics from one domain to second
-                domain and the other way around over UDP and TCP.
+    domain and the other way around over UDP and TCP.
 
-                Suggested configuration with this Routing Service marked as
-                *RS1*:
+    Configurations in this file with this Routing Service configuration marked
+    as *RS1*:
 
-                UDP LAN apps ==[domain 6]== *RS1* ==[TCP + domain 0]== RS2 ==[domain 5]== UDP LAN apps
+    UDP LAN ==[domain 6]== *RS1* ==[TCP + domain 0]== RS2 ==[domain 5]== UDP LAN
 
-                UDP side:  Sending to/receiving from everybody in domain 6
-                TCP side:  Sending to/receiving from Routing Service #2 in 
-                domain 0, on LAN machine with IP/port 10.211.55.3:9400. 
-                Configured with local port 9401.
+    UDP side:  Sending to/receiving from everybody in domain 6
+    TCP side:  Sending to/receiving from Routing Service #2 in
+        domain 0, on LAN machine with IP/port 10.211.55.3:9400.
+        Configured with local port 9401.
 
-                !!Please change these IP addresses to match your network settings.!!
+    !!Please change these IP addresses to match your network settings. !!
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             </documentation>
         </annotation>
 
@@ -107,6 +108,9 @@
                             <!--                                            -->
                             <!-- CHANGE THIS TO THE MACHINE YOU WANT TO     -->
                             <!-- CONTACT                                    -->
+                            <!-- NOTE: do not change the port unless you    -->
+                            <!-- change the server_bind_port the OTHER      -->
+                            <!-- configuration specifies                    -->
                             <!--                                            -->
                             <element>tcpv4_lan://10.211.55.3:9400</element>
                         </initial_peers>
@@ -131,7 +135,9 @@
                                 <name>dds.transport.TCPv4.tcp1.parent.classid</name>
                                 <value>NDDS_TRANSPORT_CLASSID_TCPV4_LAN</value>
                             </element>
-                            <!-- Change this to the port you want to open   --> 
+                            <!-- Change this to the port you want to open   -->
+                            <!-- If you change this, you must change the initial 
+                                 peers of the OTHER Routing Service configurtion -->
                             <element>
                                 <name>dds.transport.TCPv4.tcp1.server_bind_port</name>
                                 <value>9401</value>
@@ -294,19 +300,20 @@
         <annotation>
             <documentation>
                 Routes Alarm and Temperature topics from one domain to second
-                domain and the other way around over UDP and TCP.
+    domain and the other way around over UDP and TCP.
 
-                Suggested configuration with this Routing Service marked as
-                *RS2*:
+    Configurations in this file with this Routing Service configuration marked 
+    as *RS2*:
 
-                UDP LAN apps ==[domain 6]== RS1 ==[TCP + domain 0]== *RS2* ==[domain 5]== UDP LAN apps
+    UDP LAN ==[domain 6]== RS1 ==[TCP + domain 0]== *RS2* ==[domain 5]== UDP LAN
 
-                UDP side:  Sending to/receiving from everybody in domain 5
-                TCP side:  Sending to/receiving from Routing Service #1 in
-                domain 0, on LAN machine with IP/port 10.211.55.3:9401.
-                Configured with local port 9400.
+    UDP side:  Sending to/receiving from everybody in domain 5
+    TCP side:  Sending to/receiving from Routing Service #1 in
+        domain 0, on LAN machine with IP/port 10.211.55.3:9401.
+        Configured with local port 9400.
 
-                !!Please change these IP addresses to match your network settings.!!
+    !!Please change these IP addresses to match your network settings. !!
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             </documentation>
         </annotation>
         
@@ -335,6 +342,10 @@
                         <initial_peers>
                             <!--                                                -->
                             <!-- CHANGE THIS TO THE MACHINE YOU WANT TO CONTACT -->
+                            <!-- NOTE: do not change the port unless you change -->
+                            <!-- the server_bind_port the OTHER configuration   -->
+                            <!-- specifies                                      -->
+                            <!--                                                -->
                             <!--                                                -->
                             <element>tcpv4_lan://10.211.55.3:9401</element>
                         </initial_peers>
@@ -357,7 +368,9 @@
                                 <name>dds.transport.TCPv4.tcp1.parent.classid</name>
                                 <value>NDDS_TRANSPORT_CLASSID_TCPV4_LAN</value>
                             </element>
-                            <!-- Change to the local port you want to use   -->
+                            <!-- Change this to the local port you want to use   -->
+                            <!-- If you change this, you must change the initial 
+                                 peers of the OTHER Routing Service configurtion -->
                             <element>
                                 <name>dds.transport.TCPv4.tcp1.server_bind_port</name>
                                 <value>9400</value>
