@@ -68,8 +68,8 @@ RadarInterface::RadarInterface(long radarId, int maxFlights,
 	_maxFlightsToHandle = maxFlights;
 
 
-	char *libName = NULL;
-	char *profileName = NULL;
+	std::string libName;
+	std::string profileName;
 
 	// Depending on what is passed in, choose one of two XML profiles to 
 	// use - either for best latency or higher throughput
@@ -89,8 +89,8 @@ RadarInterface::RadarInterface(long radarId, int maxFlights,
 	// application.  This starts the discovery process.  For more information
 	// on what the DomainParticipant is responsible for, and how to configure
 	// it, see the base class.
-	if (NULL == _communicator->CreateParticipant(0, qosFileNames, libName, 
-					profileName)) 
+	if (NULL == _communicator->CreateParticipant(0, qosFileNames, libName.c_str(), 
+					profileName.c_str())) 
 	{
 		std::stringstream errss;
 		errss << "Failed to create DomainParticipant object";
@@ -177,8 +177,8 @@ RadarInterface::~RadarInterface()
 // DomainParticipant object to create a DataWriter and Topic.
 RadarWriter::RadarWriter(RadarInterface *netInterface, 
 						Publisher *pub, 
-						char *qosLibrary,
-						char *qosProfile) 
+						const std::string &qosLibrary,
+						const std::string &qosProfile) 
 {
 	ReturnCode_t retcode;
 
@@ -241,7 +241,7 @@ RadarWriter::RadarWriter(RadarInterface *netInterface,
 	// the max_samples and max_instances before creating the DataWriter
 	DDS_DataWriterQos writerQos;
 	retcode = TheParticipantFactory->get_datawriter_qos_from_profile(writerQos,
-											qosLibrary, qosProfile);
+											qosLibrary.c_str(), qosProfile.c_str());
 
 	if (retcode != DDS_RETCODE_OK) 
 	{
@@ -357,7 +357,8 @@ void RadarWriter::DeleteTrack(DdsAutoType<Track> &track)
 // ------------------------------------------------------------------------- //
 // This creates the DDS DataReader that receives updates about flight plans.
 FlightPlanReader::FlightPlanReader(RadarInterface *comm, Subscriber *sub, 
-										char *qosLibrary, char *qosProfile) 
+			const std::string &qosLibrary, 
+			const std::string &qosProfile) 
 {
 
 	if (comm == NULL) 
@@ -388,8 +389,8 @@ FlightPlanReader::FlightPlanReader(RadarInterface *comm, Subscriber *sub,
 	// Creating a DataReader
 	// This DataReader will receive the flight plan, and will store thatflight
 	// plan data in the middleware's queue to be queried by the 
-	 DataReader *reader = sub->create_datareader_with_profile(topic, qosLibrary,
-		qosProfile, NULL, DDS_STATUS_MASK_NONE);
+	 DataReader *reader = sub->create_datareader_with_profile(topic, qosLibrary.c_str(),
+		qosProfile.c_str(), NULL, DDS_STATUS_MASK_NONE);
 	 // Down casting to the type-specific reader
 	 _reader = FlightPlanDataReader::narrow(reader);
 	_waitSet = new WaitSet();
