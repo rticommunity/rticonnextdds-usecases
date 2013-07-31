@@ -286,7 +286,7 @@ void PrintHelp()
 		<< endl;
 	cout << 
 		"    --creation-rate [number]" <<
-		"   How fast to create new tracks."
+		"   How fast to create new tracks in seconds."
 		<< endl;
 	cout << 
 		"    --no-multicast" <<
