@@ -191,7 +191,7 @@ public:
 	// were previously configured when the RadarInterface's DDSCommunicator was
 	// created.
 	FlightPlanReader(RadarInterface *comm, DDS::Subscriber *sub, 
-		char *qosLibrary, char *qosProfile);
+		const std::string &qosLibrary, const std::string &qosProfile);
 
 
 	// --- Destructor --- 
@@ -252,7 +252,7 @@ public:
 	// were previously configured when the RadarInterface's DDSCommunicator was
 	// created.
 	RadarWriter(RadarInterface *comm, DDS::Publisher *pub, 
-		char *qosLibrary, char *qosProfile);
+		const std::string &qosLibrary, const std::string &qosProfile);
 
 	// --- Destructor --- 
 	~RadarWriter();

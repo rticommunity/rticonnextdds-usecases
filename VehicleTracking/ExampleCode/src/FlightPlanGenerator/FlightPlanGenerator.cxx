@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 
 	}
 	int airlineNum = 35;
-	char *airlines[] = {
+	const std::string airlines[] = {
 		"SWA","VIR", "ACA","CCA","SWR",
 		"AAL","TRS","ASA","ANA","BAW",
 		"CPA","CAL","CES","KLM","JAL",
@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
 		"UAE","JBU","SCX","VRD","ANZ",
 		"SIA","LRC","AMX","THO","AFR"};
 	
-	char *departureAerodromes[] = {
+	const std::string departureAerodromes[] = {
 		"KDAL","KLAX", "KSEA", "KEWR", 
 		"KBOS", "KDFW", "KDEN", "KJFK"};
 
@@ -168,11 +168,11 @@ int main(int argc, char *argv[])
 			// Give it a random airline and flight ID based on airlines
 			// that fly into SFO
 			sprintf(flightPlan.flightId, "%s%d", 
-				airlines[i % airlineNum], i + 1); 
+				airlines[i % airlineNum].c_str(), i + 1); 
 
 			// Give it a departure aerodrome
 			sprintf(flightPlan.departureAerodrome, "%s", 
-				departureAerodromes[i%8]);
+				departureAerodromes[i%8].c_str());
 
 			// Destination aerodrome is always SFO
 			sprintf(flightPlan.destinationAerodrome, "%s", "KSFO");

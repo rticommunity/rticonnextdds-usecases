@@ -236,6 +236,16 @@ void FlightInfoNetworkReceiver::ReceiveTracks(void *param)
 
 		flights.clear();
 
+		// Delete the "FlightInfo" structures we have just generated.  There
+		// are more efficient ways to do this by preallocating, but this is okay
+		// for this simple use case
+		for (unsigned int i = 0; i < flightsDeleted.size(); i++)
+		{
+			delete flightsDeleted[i];
+		}
+
+		flightsDeleted.clear();
+
 		// Sleep until the next UI refresh
 		NDDSUtility::sleep(uiUpdatePeriod);
 

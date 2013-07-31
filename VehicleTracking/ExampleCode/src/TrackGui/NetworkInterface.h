@@ -92,7 +92,7 @@ public:
 	// --- Constructor --- 
 	// Subscribes to flight plan information
 	FlightPlanReader(NetworkInterface *app, DDS::Subscriber *sub, 
-		char *qosLibrary, char *qosProfile);
+		const std::string &qosLibrary, const std::string &qosProfile);
 
 	// --- Destructor --- 
 	~FlightPlanReader();
@@ -143,7 +143,7 @@ public:
 	// --- Constructor --- 
 	// Subscribes to flight plan information
 	TrackReader(NetworkInterface *app, DDS::Subscriber *sub, 
-		char *qosLibrary, char *qosProfile);
+		const std::string &qosLibrary, const std::string &qosProfile);
 
 	// --- Destructor --- 
 	~TrackReader();

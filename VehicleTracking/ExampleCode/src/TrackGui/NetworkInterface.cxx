@@ -106,8 +106,8 @@ NetworkInterface::~NetworkInterface()
 // as soon as the discovery process has completed.
 FlightPlanReader::FlightPlanReader(NetworkInterface *app, 
 							Subscriber *sub,			
-							char *qosLibrary, 
-							char *qosProfile) 
+							const std::string &qosLibrary, 
+							const std::string &qosProfile) 
 {
 
 
@@ -142,8 +142,10 @@ FlightPlanReader::FlightPlanReader(NetworkInterface *app,
 	// Creating a DataReader
 	// This DataReader will receive the flight plan, and will store thatflight
 	// plan data in the middleware's queue to be queried by the 
-	 DataReader *reader = sub->create_datareader_with_profile(topic, qosLibrary,
-		qosProfile, NULL, DDS_STATUS_MASK_NONE);
+	 DataReader *reader = sub->create_datareader_with_profile(topic, 
+		qosLibrary.c_str(),
+		qosProfile.c_str(), 
+		NULL, DDS_STATUS_MASK_NONE);
 	 // Down casting to the type-specific reader
 	 _fpReader = FlightPlanDataReader::narrow(reader);
 	_waitSet = new WaitSet();
@@ -282,8 +284,8 @@ void FlightPlanReader::NotifyWakeup()
 // as soon as the discovery process has completed.
 TrackReader::TrackReader(NetworkInterface *app, 
 						Subscriber *sub, 
-						char *qosLibrary, 
-						char *qosProfile) 
+						const std::string &qosLibrary, 
+						const std::string &qosProfile) 
 {
 
 	_mutex = new OSMutex();
@@ -327,8 +329,10 @@ TrackReader::TrackReader(NetworkInterface *app,
 	// Creating a DataReader
 	// This DataReader will receive the flight plan, and will store thatflight
 	// plan data in the middleware's queue to be queried by the 
-	 DataReader *reader = sub->create_datareader_with_profile(topic, qosLibrary,
-		qosProfile, NULL, DDS_STATUS_MASK_NONE);
+	 DataReader *reader = sub->create_datareader_with_profile(topic, 
+		qosLibrary.c_str(),
+		qosProfile.c_str(), 
+		NULL, DDS_STATUS_MASK_NONE);
 	 // Down casting to the type-specific reader
 	 _reader = TrackDataReader::narrow(reader);
 	_waitSet = new WaitSet();
