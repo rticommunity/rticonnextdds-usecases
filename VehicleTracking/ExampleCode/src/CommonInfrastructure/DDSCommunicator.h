@@ -82,13 +82,15 @@ public:
 
 	// Creates a DomainParticipant with specified QoS in the specified domain
 	DDS::DomainParticipant* CreateParticipant(long domain, 
-		char *participantQosLibrary, char *participantQosProfile);
+		const std::string &participantQosLibrary, 
+		const std::string &participantQosProfile);
 
 	// Loads a set of XML files to load QoS profile information
 	// Creates a DomainParticipant with specified QoS in the specified domain
 	DDS::DomainParticipant* CreateParticipant(long domain, 
-		std::vector<std::string>fileNames, char *participantQosLibrary, 
-		char *participantQosProfile) ;
+		std::vector<std::string>fileNames, 
+		const std::string &participantQosLibrary, 
+		const std::string &participantQosProfile) ;
 
 	// --- Getting the DomainParticipant --- 
 
@@ -108,7 +110,8 @@ public:
 	DDS::Publisher* CreatePublisher();
 
 	// Create a Publisher with specified QoS
-	DDS::Publisher* CreatePublisher(char *qosLibrary, char *qosProfile);
+	DDS::Publisher* CreatePublisher(const std::string &qosLibrary, 
+		const std::string &qosProfile);
 
 	// --- Getting the Publisher --- 
 
@@ -129,7 +132,8 @@ public:
 	DDS::Subscriber* CreateSubscriber();
 
 	// Create a Subscriber with specified QoS
-	DDS::Subscriber* CreateSubscriber(char *qosLibrary, char *qosProfile);
+	DDS::Subscriber* CreateSubscriber(const std::string &qosLibrary, 
+		const std::string &qosProfile);
 	
 	// --- Getting the Subscriber --- 
 

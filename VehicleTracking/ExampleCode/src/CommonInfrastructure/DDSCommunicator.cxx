@@ -110,14 +110,14 @@ DomainParticipant* DDSCommunicator::CreateParticipant()
 // Creating a DomainParticipant with a specified domain ID and specified QoS 
 DomainParticipant* DDSCommunicator::CreateParticipant(
 	long domain, 
-	char *participantQosLibrary, 
-	char *participantQosProfile) 
+	const std::string &participantQosLibrary, 
+	const std::string &participantQosProfile) 
 {
 	_participant = 
 		TheParticipantFactory->create_participant_with_profile(
 									domain, 
-									participantQosLibrary, 
-									participantQosProfile, 
+									participantQosLibrary.c_str(), 
+									participantQosProfile.c_str(), 
 									NULL, 
 									STATUS_MASK_NONE);
 
@@ -137,8 +137,9 @@ DomainParticipant* DDSCommunicator::CreateParticipant(
 // Creating a DomainParticipant with a specified domain ID, specified QoS file
 // names, and specified QoS 
 DomainParticipant* DDSCommunicator::CreateParticipant(long domain, 
-	std::vector<std::string>fileNames, char *participantQosLibrary, 
-	char *participantQosProfile) 
+	std::vector<std::string>fileNames, 
+	const std::string &participantQosLibrary, 
+	const std::string &participantQosProfile) 
 {
 
 	// Adding a list of explicit file names to the DomainParticipantFactory
@@ -169,8 +170,8 @@ DomainParticipant* DDSCommunicator::CreateParticipant(long domain,
 	_participant = 
 		TheParticipantFactory->create_participant_with_profile(
 									domain, 
-									participantQosLibrary, 
-									participantQosProfile, 
+									participantQosLibrary.c_str(), 
+									participantQosProfile.c_str(), 
 									NULL, 
 									STATUS_MASK_NONE);
 
@@ -223,7 +224,9 @@ Publisher* DDSCommunicator::CreatePublisher()
 // ------------------------------------------------------------------------- //
 // Creating a Publisher object with specified QoS.  This is used to create 
 // type-specific DataWriter objects in the application
-Publisher* DDSCommunicator::CreatePublisher(char *qosLibrary, char *qosProfile)
+Publisher* DDSCommunicator::CreatePublisher(
+	const std::string &qosLibrary, 
+	const std::string &qosProfile)
 {
 	if (GetParticipant() == NULL) 
 	{
@@ -241,9 +244,9 @@ Publisher* DDSCommunicator::CreatePublisher(char *qosLibrary, char *qosProfile)
 	// multiple DDS DataWriters.  This could be moved to the base class, 
 	// 
 	_pub = GetParticipant()->create_publisher_with_profile(
-								qosLibrary, 
-								qosProfile,
-								NULL, DDS_STATUS_MASK_NONE);	
+						qosLibrary.c_str(), 
+						qosProfile.c_str(),
+						NULL, DDS_STATUS_MASK_NONE);	
 
 	if (_pub == NULL) 
 	{
@@ -293,8 +296,9 @@ Subscriber* DDSCommunicator::CreateSubscriber()
 // ------------------------------------------------------------------------- //
 // Creating a Subscriber object with specified QoS.  This is used to create 
 // type-specific DataReader objects in the application
-Subscriber* DDSCommunicator::CreateSubscriber(char *qosLibrary,
-	char *qosProfile)
+Subscriber* DDSCommunicator::CreateSubscriber(
+	const std::string &qosLibrary,
+	const std::string &qosProfile)
 {
 	if (GetParticipant() == NULL) 
 	{
@@ -312,9 +316,9 @@ Subscriber* DDSCommunicator::CreateSubscriber(char *qosLibrary,
 	//  create multiple DDS DataReaders. 
 	// 
 	_sub = GetParticipant()->create_subscriber_with_profile(
-								qosLibrary, 
-								qosProfile, 
-								NULL, DDS_STATUS_MASK_NONE);	
+						qosLibrary.c_str(), 
+						qosProfile.c_str(), 
+						NULL, DDS_STATUS_MASK_NONE);	
 	if (_sub == NULL) 
 	{
 		std::stringstream errss;
