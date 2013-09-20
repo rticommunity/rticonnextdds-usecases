@@ -82,6 +82,10 @@
             </documentation>
         </annotation>
 
+        <!--  This Routing Service can receive administration commands on  
+              domain 3.  This means that the Routing Service Shell or Admin  
+              Console tools can send commands to update the configuration of
+              this Routing Service. -->
         <administration>
             <domain_id>3</domain_id>
         </administration>
@@ -317,6 +321,10 @@
             </documentation>
         </annotation>
         
+        <!--  This Routing Service can receive administration commands on  
+              domain 3.  This means that the Routing Service Shell or Admin  
+              Console tools can send commands to update the configuration of
+              this Routing Service. -->
         <administration>
             <domain_id>3</domain_id>
         </administration>
