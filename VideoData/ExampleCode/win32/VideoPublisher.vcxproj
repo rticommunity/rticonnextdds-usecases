@@ -1,0 +1,131 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{FA2857A7-83A2-426C-82A5-87F5A54EECFF}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>VideoPublisher</RootNamespace>
+    <ProjectName>VideoPublisher</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)$(Configuration)\i86Win32VS2010\</OutDir>
+    <IntDir>$(Configuration)\i86Win32VS2010\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)$(Configuration)\i86Win32VS2010\</OutDir>
+    <IntDir>$(Configuration)\i86Win32VS2010\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>SIMCLIST_NO_DUMPRESTORE;_WIN32;__STDC_CONSTANT_MACROS;HAVE_AVCODEC_OPEN2;HAVE_AVFORMAT_OPEN_INPUT;_CRT_SECURE_NO_WARNINGS;RTI_WIN32;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(NDDSHOME)/include;$(NDDSHOME)/include/ndds;$(SolutionDir)..\thirdparty\gstreamer-sdk\win32\0.10\x86\include\libxml2;$(SolutionDir)..\thirdparty\gstreamer-sdk\win32\0.10\x86\lib\glib-2.0\include;$(SolutionDir)..\thirdparty\gstreamer-sdk\win32\0.10\x86\include\glib-2.0;$(SolutionDir)..\thirdparty\gstreamer-sdk\win32\0.10\x86\include\gstreamer-0.10</AdditionalIncludeDirectories>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>
+      </PrecompiledHeaderOutputFile>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>nddscppzd.lib;nddsczd.lib;nddscorezd.lib;winmm.lib;shlwapi.lib;netapi32.lib;WS2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);gobject-2.0.lib;gstreamer-0.10.lib;glib-2.0.lib;gstapp-0.10.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\thirdparty\gstreamer-sdk\win32\0.10\x86\lib;$(NDDSHOME)/lib/i86Win32VS2010</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>SIMCLIST_NO_DUMPRESTORE;_WIN32;__STDC_CONSTANT_MACROS;HAVE_AVCODEC_OPEN2;HAVE_AVFORMAT_OPEN_INPUT;_CRT_SECURE_NO_WARNINGS;RTI_WIN32;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(NDDSHOME)/include;$(NDDSHOME)/include/ndds;$(SolutionDir)..\thirdparty\gstreamer-sdk\win32\0.10\x86\include\libxml2;$(SolutionDir)..\thirdparty\gstreamer-sdk\win32\0.10\x86\lib\glib-2.0\include;$(SolutionDir)..\thirdparty\gstreamer-sdk\win32\0.10\x86\include\glib-2.0;$(SolutionDir)..\thirdparty\gstreamer-sdk\win32\0.10\x86\include\gstreamer-0.10</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\thirdparty\gstreamer-sdk\win32\0.10\x86\lib;$(NDDSHOME)/lib/i86Win32VS2010</AdditionalLibraryDirectories>
+      <AdditionalDependencies>nddscppz.lib;nddscz.lib;nddscorez.lib;shlwapi.lib;netapi32.lib;WS2_32.lib;advapi32.lib;shell32.lib;winmm.lib;%(AdditionalDependencies);gobject-2.0.lib;gstreamer-0.10.lib;glib-2.0.lib;gstapp-0.10.lib</AdditionalDependencies>
+      <AdditionalOptions>/verbose:lib %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\CommonInfrastructure\DDSCommunicator.h" />
+    <ClInclude Include="..\src\CommonInfrastructure\DDSTypeWrapper.h" />
+    <ClInclude Include="..\src\CommonInfrastructure\OSAPI.h" />
+    <ClInclude Include="..\src\CommonInfrastructure\simclist.h" />
+    <ClInclude Include="..\src\CommonInfrastructure\VideoBuffer.h" />
+    <ClInclude Include="..\src\CommonInfrastructure\VideoEvent.h" />
+    <ClInclude Include="..\src\CommonInfrastructure\VideoSource.h" />
+    <ClInclude Include="..\src\VideoPublisher\VideoPublisherInterface.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\CommonInfrastructure\DDSCommunicator.cxx" />
+    <ClCompile Include="..\src\CommonInfrastructure\OSAPI.cxx" />
+    <ClCompile Include="..\src\CommonInfrastructure\SimCList.cxx" />
+    <ClCompile Include="..\src\CommonInfrastructure\VideoBuffer.cxx" />
+    <ClCompile Include="..\src\CommonInfrastructure\VideoSource.cxx" />
+    <ClCompile Include="..\src\VideoPublisher\VideoPublisher.cxx" />
+    <ClCompile Include="..\src\VideoPublisher\VideoPublisherInterface.cxx" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\src\Config\base_profile_multicast.xml" />
+    <None Include="..\src\Config\base_profile_no_multicast.xml" />
+    <None Include="..\src\Config\video_stream_multicast.xml" />
+    <None Include="..\src\Config\video_stream_no_multicast.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="SharedDataTypes.vcxproj">
+      <Project>{e287142f-0d1e-49bf-b3bc-a218c1d1629f}</Project>
+      <Private>true</Private>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
