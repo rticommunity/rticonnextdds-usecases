@@ -167,7 +167,7 @@ typedef INT64   int64_t;
 #include <pthread.h>
 #endif
 
-#include "SimCList.h"
+#include "simclist.h"
 
 
 /* minumum number of elements for sorting with quicksort instead of insertion */
