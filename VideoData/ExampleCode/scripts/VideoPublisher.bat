@@ -13,7 +13,7 @@ set Path=%NDDSHOME%\lib\i86Win32VS2010;%scriptDir%..\thirdparty\gstreamer-sdk\wi
 
 if exist "%releaseBinDir%\%executableName%" (
     cd %releaseBinDir%
-    call "%executableName% %args%
+    call "%executableName%" %args%
 ) else if exist "%debugBinDir%\%executableName%" (
     cd %debugBinDir%
 	call "%executableName%" %args%

@@ -27,6 +27,10 @@ struct VideoStream {
 	// publishers that are publishing the same data.
 	long stream_id;  //@key
 
+	unsigned short priority;
+	unsigned long flags;
+	unsigned long sequence_number;
+
 	// This contains the video buffers
 	sequence <octet, MAX_BUFFER_SIZE> frame; 
 };

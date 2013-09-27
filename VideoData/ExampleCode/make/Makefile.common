@@ -51,8 +51,7 @@ endif
 INCLUDES = -Isrc/CommonInfrastructure -Isrc/Generated -I$(NDDSHOME)/include \
            -I$(NDDSHOME)/include/ndds -I/usr/include/gstreamer-0.10 \
            -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include \
-           -I/usr/include/libxml2 -I/usr/include/libavcodec \
-           -I/usr/include/libavformat
+           -I/usr/include/libxml2
  
 
 ###############################################################################
@@ -74,7 +73,7 @@ NDDSLIBS = -lnddscppz -lnddscz -lnddscorez
 endif
 endif
 
-LIBS = -L$(NDDSHOME)/lib/$(ARCH) -L/usr/lib $(NDDSLIBS) $(SYSLIBS) -lglib-2.0 -lgstreamer-0.10 -lavcodec -lavformat -lgstapp-0.10
+LIBS = -L$(NDDSHOME)/lib/$(ARCH) -L/usr/lib $(NDDSLIBS) $(SYSLIBS) -lglib-2.0 -lgstreamer-0.10 -lgstapp-0.10
 
 COMMONSRC = src/CommonInfrastructure/DDSCommunicator.cxx     \
           src/CommonInfrastructure/OSAPI.cxx               \
