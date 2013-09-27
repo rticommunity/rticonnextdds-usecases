@@ -174,7 +174,7 @@ public:
 		if (topic == NULL) 
 		{
 			std::stringstream errss;
-			errss << "FlightPlanReader(): failure to create Topic. Created twice?";
+			errss << "CreateTopic(): failure to create Topic. Created twice?";
 			throw errss.str();
 		}
 
