@@ -40,7 +40,7 @@ Real-Time Innovations, Inc. (RTI).  The above license is granted with
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "SimCList.h"
+#include "simclist.h"
 
 
 #define EMDS_BUFFER_FLAGS_METADATA  (0x1 << 0)
