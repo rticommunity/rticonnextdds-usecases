@@ -1,0 +1,255 @@
+/*********************************************************************************************
+(c) 2005-2013 Copyright, Real-Time Innovations, Inc.  All rights reserved.    	                             
+RTI grants Licensee a license to use, modify, compile, and create derivative works 
+of the Software.  Licensee has the right to distribute object form only for use with RTI 
+products.  The Software is provided “as is”, with no warranty of any type, including 
+any warranty for fitness for any purpose. RTI is under no obligation to maintain or 
+support the Software.  RTI shall not be liable for any incidental or consequential 
+damages arising out of the use or inability to use the software.
+**********************************************************************************************/
+#include <stdio.h>
+#include <vector>
+
+#include "../CommonInfrastructure/VideoSource.h"
+#include "../Generated/VideoData.h"
+#include "../Generated/VideoDataSupport.h"
+#include "ndds/ndds_cpp.h"
+#include "ndds/ndds_namespace_cpp.h"
+#include "../CommonInfrastructure/DDSCommunicator.h"
+#include "VideoPublisherInterface.h"
+
+#ifdef WIN32
+#include <stdlib.h>
+#include "Shlwapi.h"
+#endif
+
+using namespace std;
+
+
+// ------------------------------------------------------------------------- //
+//
+// FrameHandler:
+//
+// A class that receives a notification from the GStreamer framework that 
+// a frame is available to be processed.  This copies that frame into a 
+// DDS VideoStream data type, and calls Write() to send it over the network. 
+//
+// ------------------------------------------------------------------------- //
+class FrameHandler : public EMDSFrameHandler
+{
+
+public:
+	// --- Constructor ---
+	FrameHandler() : _seqNum(0)
+	{
+	}
+
+	// ------------------------------------------------------------------------
+	// Frame Ready:
+	// When the video framework calls back this listener to tell it that a
+	// frame is ready to be processed, this callback copies it into an RTI
+	// Connext DDS data object and publishes it over DDS.
+	virtual void FrameReady(void *obj, EMDSBuffer *buffer) 
+	{
+		// Has a copy of the DDS interface that is used to publish data over 
+		// the network (or shared memory).
+		VideoPublisherInterface *pubInterface = 
+			(VideoPublisherInterface *)obj;
+
+		// Creates a VideoStream data object
+		VideoStream *streamData = 
+				VideoStreamTypeSupport::create_data();
+		if (buffer->GetSize() > 0)
+		{
+			// Sets the frame information within the data to the correct size
+			// based on the buffer size
+			streamData->frame.ensure_length(
+				buffer->GetSize(), buffer->GetSize());
+
+			// Copy the data from the buffer into the object to be sent using
+			// the middleware.
+			streamData->frame.from_array( 
+				(DDS_Octet *)buffer->GetData(), buffer->GetSize());
+
+			// Set the sequence number
+			streamData->sequence_number = _seqNum;
+			_seqNum++;
+		}
+
+		streamData->flags = buffer->GetFlags();
+		streamData->stream_id = 234;
+	
+		// Sending the data over the network (or shared memory)
+		pubInterface->Write(*streamData);
+
+		// Cleaning up the data sample
+		VideoStreamTypeSupport::delete_data(streamData);
+	}
+
+	virtual void EOSHandler(void *obj, EMDSBuffer *buffer) 
+	{
+	}
+
+private:
+
+	// --- Private members --- 
+	int _seqNum;
+
+};
+
+
+// ------------------------------------------------------------------------- //
+//
+// CodecCompatibilityCheck:
+//
+// A class that acts as part of the interface between the video processing 
+// and the middleware.  This is called back from the VideoPublisherInterface
+// when that object discovers a DataReader that is interested in the same
+// Topic, stored in the constant VIDEO_TOPIC.  
+// 
+// This queries the video framework to see if the codecs are compatible with
+// each other.
+// ------------------------------------------------------------------------- //
+class CodecCompatibilityCheck : public CodecCompatibleHandler
+{
+public:
+
+	// --- Constructor --- 
+	CodecCompatibilityCheck(EMDSVideoSource *videoSource)
+		: _source(videoSource), _discoveredCompatibleReader(false)
+	{
+	}
+
+	// Calls the gstreamer framework to see if the subscribing app's codec
+	// is compatible with what we are sending.  If not, we return false.
+	virtual bool CodecsCompatible(std::string codecString)
+	{
+		if (_source->IsMetadataCompatible(codecString)) 
+		{
+			_discoveredCompatibleReader = true;
+		}
+		return _discoveredCompatibleReader;
+	}
+
+	bool DiscoveredCompatibleReader()
+	{
+		return _discoveredCompatibleReader;
+	}
+
+private:
+
+	// --- Private members --- 
+	EMDSVideoSource *_source;
+	bool _discoveredCompatibleReader;
+
+};
+
+// ----------------------------------------------------------------------------
+//
+// main function.  Prepares the video pipeline and the video publisher
+// interface (the class that sends video data over RTI Connext DDS)
+//
+int main (int argc, char *argv[])
+{
+
+	printf("--- Starting publisher application. --- \n");
+	printf("This application will read a video file, and publish it over RTI"
+		" Connext DDS \nmiddleware\n");
+	vector<string> xmlFiles;
+	bool multicastAvailable = false;
+
+// TODO: command-line parameters
+//
+	if (multicastAvailable)
+	{
+		// Adding the XML files that contain profiles used by this application
+		xmlFiles.push_back(
+			"file://../../../src/Config/base_profile_multicast.xml");
+		xmlFiles.push_back(
+			"file://../../../src/Config/video_stream_multicast.xml");
+	}
+	else
+	{
+		// Adding the XML files that contain profiles used by this application
+		xmlFiles.push_back(
+			"file://../../../src/Config/base_profile_no_multicast.xml");
+		xmlFiles.push_back(
+			"file://../../../src/Config/video_stream_no_multicast.xml");
+
+	}
+
+#ifdef WIN32
+	char fullPath[512];
+	std::string relativePath = "..\\..\\..\\resource\\bigbuck.webm";
+
+    if (NULL == _fullpath(fullPath, relativePath.c_str(), 512))
+	{
+		printf("Error getting file path\n");
+	}
+	EMDSVideoSource *videoSource = new EMDSVideoSource(
+		fullPath);
+#else
+	// TODO: fix path
+	EMDSVideoSource *videoSource = new EMDSVideoSource(
+		"/home/rose/code/gstreamer2/VideoData/ExampleCode/resource/bigbuck.webm");
+#endif
+
+	// If the video source was not created correctly, return an error.
+	if (videoSource == NULL)
+	{
+		printf("Failed to create video source\n");
+		return -1;
+	}
+
+	// Initialize the video source, including opening the file
+	if (videoSource->Initialize() != 0)
+	{
+		printf("Failed to initialize video\n");
+		return -1;
+	}
+
+	// Listener class to receive notifications of remote Video Subscriber apps
+	// This checks if the remote application has a codec that is compatible
+	// with what this application sends.
+	CodecCompatibilityCheck compatibilityCheck(videoSource);
+
+	// The Video Publisher Interface is responsible for:
+	// 1. Publishing video data over RTI Connext DDS 
+	// 2. Receiving discovery notifications about video subscribers that have 
+	//    been found.  If those have the correct Topic, and also contain
+	//    user_data QoS with codec information, we check whether they have
+	//    a codec that is compatible with what we are sending.  We only send if
+	//    the subscriber app has a compatible codec to us.  Note that this can
+	//    be used for a variety of uses, such as determining video quality, etc
+	VideoPublisherInterface videoInterface(xmlFiles, 
+		&compatibilityCheck);
+
+	// Callback from the gstreamer framework that is providing us with video
+	// frames.  This frameHandler uses the VideoPublisherInterface's Write() 
+	// method to write frames over the network.
+	FrameHandler *frameHandler = new FrameHandler();
+	videoSource->SetNewFrameCallbackHandler(
+			frameHandler,
+			(void *)&videoInterface);
+
+	// Wait for compatible DataReaders to come online
+	while (!compatibilityCheck.DiscoveredCompatibleReader())
+	{
+		DDS_Duration_t send_period = {2,0};
+		printf("Waiting for a compatible video subscriber to come online\n");
+		NDDSUtility::sleep(send_period);
+	}
+
+	// If we have found a compatible Video Subscriber, we start publishing.
+	videoSource->Start();
+
+	// Loop forever here
+	while (1) 
+	{
+		DDS_Duration_t send_period = {0,100000000};
+		NDDSUtility::sleep(send_period);
+	}
+
+}
+
+

@@ -203,9 +203,7 @@ Publisher* DDSCommunicator::CreatePublisher()
 
 	// Creating a Publisher.  
 	// This object is used to create type-specific DataWriter objects that 
-	// can actually send data.  The Publisher object is being created in 
-	// the RadarInterface class because one Publisher can be used to create
-	// multiple DDS DataWriters.  This could be moved to the base class, 
+	// can actually send data.  
 	// 
 	_pub = GetParticipant()->create_publisher(
 									DDS_PUBLISHER_QOS_DEFAULT, 
@@ -239,9 +237,7 @@ Publisher* DDSCommunicator::CreatePublisher(
 
 	// Creating a Publisher.  
 	// This object is used to create type-specific DataWriter objects that 
-	// can actually send data.  The Publisher object is being created in the
-	// RadarInterface class because one Publisher can be used to create
-	// multiple DDS DataWriters.  This could be moved to the base class, 
+	// can actually send data.  
 	// 
 	_pub = GetParticipant()->create_publisher_with_profile(
 						qosLibrary.c_str(), 

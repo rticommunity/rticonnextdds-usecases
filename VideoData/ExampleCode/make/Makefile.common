@@ -1,0 +1,184 @@
+###############################################################################
+##         (c) Copyright, Real-Time Innovations, All rights reserved.        ##
+##                                                                           ##
+##         Permission to modify and use for internal purposes granted.       ##
+## This software is provided "as is", without warranty, express or implied.  ##
+##                                                                           ##
+###############################################################################
+
+# This Makefile contains the common rules to build for all the architectures.
+# It is included from the architecture-specific Makefile.
+# This Makefile requires the following variables:
+# - ARCH: Architecture to build (for example i86Linux2.6gcc4.4.5)
+#
+# Optional variables:
+# - DEBUG: If set to '1', it turns on debugging information
+# - SHAREDLIB: If set to '1', shared libraries will be used
+# - CXX: compiler name.
+# - CXXFLAGS: compiler flags: will be appended to $CXX command-line
+# - CXXLD: linker name.
+# - CXXLDFLAGS: linker flags: will be inserted at the beginning of CXXLD cmdline
+# - SYSLIBS: additional system libraries to append to the CXXLD command-line
+
+###############################################################################
+# Ensure this Makefile is invoked with the right variable set
+###############################################################################
+ifeq ($(ARCH), )
+all:
+	@echo "***************************************************************"
+	@echo "You cannot use this Makefile directly, instead use the"
+	@echo "architecture-specific Makefile. For example:"
+	@echo "         gmake -f make/Makefile.i86Linux2.6gcc4.4.5"
+	@echo "***************************************************************"
+	@false
+else
+###############################################################################
+# Ensure $NDDSHOME is defined
+###############################################################################
+ifeq ($(NDDSHOME), )
+all:
+	@echo "***************************************************************"
+	@echo "The environment variable 'NDDSHOME' is not set!"
+	@echo "To use this makefile you need to set NDDSHOME to the directory"
+	@echo "where you have RTI Connext installed."
+	@echo "***************************************************************"
+	@false
+endif
+endif
+
+
+# Define the sources and NDDS search path
+INCLUDES = -Isrc/CommonInfrastructure -Isrc/Generated -I$(NDDSHOME)/include \
+           -I$(NDDSHOME)/include/ndds -I/usr/include/gstreamer-0.10 \
+           -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include \
+           -I/usr/include/libxml2
+ 
+
+###############################################################################
+# Modify build flags for debug/release
+###############################################################################
+ifeq ($(DEBUG),1)
+CXXFLAGS += -g -O0 -D__STDC_CONSTANT_MACROS
+ifeq ($(SHAREDLIB),1)
+NDDSLIBS = -lnddscppd -lnddscd -lnddscored
+else
+NDDSLIBS = -lnddscppzd -lnddsczd -lnddscorezd
+endif
+else
+CXXFLAGS += -O2 -D__STDC_CONSTANT_MACROS
+ifeq ($(SHAREDLIB),1)
+NDDSLIBS = -lnddscpp -lnddsc -lnddscore
+else
+NDDSLIBS = -lnddscppz -lnddscz -lnddscorez
+endif
+endif
+
+LIBS = -L$(NDDSHOME)/lib/$(ARCH) -L/usr/lib $(NDDSLIBS) $(SYSLIBS) -lglib-2.0 -lgstreamer-0.10 -lgstapp-0.10
+
+COMMONSRC = src/CommonInfrastructure/DDSCommunicator.cxx     \
+          src/CommonInfrastructure/OSAPI.cxx               \
+          src/CommonInfrastructure/VideoBuffer.cxx \
+          src/CommonInfrastructure/VideoSource.cxx \
+          src/CommonInfrastructure/VideoOutput.cxx \
+          src/CommonInfrastructure/SimCList.cxx
+
+COMMON_H  = src/CommonInfrastructure/DDSCommunicator.h \
+          src/CommonInfrastructure/OSAPI.h               \
+          src/CommonInfrastructure/DDSTypeWrapper.h       \
+          src/CommonInfrastructure/VideoBuffer.h \
+          src/CommonInfrastructure/VideoSource.h
+
+SOURCES_IDL = src/Generated/VideoData.cxx    \
+          src/Generated/VideoDataPlugin.cxx  \
+          src/Generated/VideoDataSupport.cxx
+
+VIDEOPUB_H = src/VideoPublisher/VideoPublisher.h
+
+VIDEOPUBSRC = src/VideoPublisher/VideoPublisher.cxx \
+              src/VideoPublisher/VideoPublisherInterface.cxx 
+
+VIDEOSUB_H = src/VideoSubscriber/VideoSubscriber.h
+
+VIDEOSUBSRC = src/VideoSubscriber/VideoSubscriber.cxx \
+              src/VideoSubscriber/VideoSubscriberInterface.cxx 
+
+HEADERS_IDL = src/Generated/VideoData.h      \
+          src/Generated/VideoDataPlugin.h    \
+          src/Generated/VideoDataSupport.h
+
+DIRECTORIES   = objs.dir objs/$(ARCH).dir objs/$(ARCH)/VideoPublisher.dir \
+                objs/$(ARCH)/Common.dir objs/$(ARCH)/VideoSubscriber.dir
+SOURCES_NODIR = $(notdir $(COMMONSRC)) $(notdir $(SOURCES_IDL))
+VIDEOPUBSRC_NODIR = $(notdir $(VIDEOPUBSRC))
+VIDEOSUBSRC_NODIR = $(notdir $(VIDEOSUBSRC))
+
+COMMONOBJS    = $(SOURCES_NODIR:%.cxx=objs/$(ARCH)/Common/%.o)
+VIDEOPUBOBJS  = $(VIDEOPUBSRC_NODIR:%.cxx=objs/$(ARCH)/VideoPublisher/%.o) $(COMMONOBJS)
+VIDEOSUBOBJS  = $(VIDEOSUBSRC_NODIR:%.cxx=objs/$(ARCH)/VideoSubscriber/%.o) $(COMMONOBJS)
+EXEC          = VideoPublisher 
+SUBEXEC       = VideoSubscriber
+
+###############################################################################
+# Build Rules
+###############################################################################
+$(ARCH): VideoPublisher VideoSubscriber 
+
+VideoPublisher: $(DIRECTORIES) $(VIDEOPUBOBJS) $(EXEC:%=objs/$(ARCH)/VideoPublisher/%.o) \
+	$(EXEC:%=objs/$(ARCH)/VideoPublisher/%.out)
+
+VideoSubscriber: $(DIRECTORIES) $(VIDEOSUBOBJS) $(@:%=objs/$(ARCH)/VideoSubscriber/%.o) \
+	$(SUBEXEC:%=objs/$(ARCH)/VideoSubscriber/%.out)
+
+
+# Building the video publisher application
+objs/$(ARCH)/VideoPublisher/%.out: objs/$(ARCH)/VideoPublisher/%.o
+	$(CXXLD) $(CXXLDFLAGS) -o $(@:%.out=%) $(VIDEOPUBOBJS) $(LIBS)
+
+# Building the video subscriber application
+objs/$(ARCH)/VideoSubscriber/%.out: objs/$(ARCH)/VideoSubscriber/%.o
+	$(CXXLD) $(CXXLDFLAGS) -o $(@:%.out=%) $(VIDEOSUBOBJS) $(LIBS)
+
+objs/$(ARCH)/Common/%.o: src/CommonInfrastructure/%.cxx $(COMMON_H)
+	$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
+	
+objs/$(ARCH)/Common/%.o: src/Generated/%.cxx $(COMMON_H)
+	$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
+
+objs/$(ARCH)/VideoPublisher/%.o: src/VideoPublisher/%.cxx $(COMMON_H) $(HEADERS_IDL)
+	$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
+
+objs/$(ARCH)/VideoSubscriber/%.o: src/VideoSubscriber/%.cxx $(COMMON_H) $(HEADERS_IDL)
+	$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
+
+
+# Rule to rebuild the generated files when the .idl file change
+$(SOURCES_IDL) $(HEADERS_IDL): src/Idl/VideoData.idl
+	@mkdir -p src/Generated
+ifeq ($(OS_ARCH), i86Win32)
+	call $(NDDSHOME)/scripts/rtiddsgen.bat -d src/idl src/VideoData.idl -replace -language C++
+else
+	$(NDDSHOME)/scripts/rtiddsgen -namespace -d src/Generated src/Idl/VideoData.idl -replace -language C++
+endif
+
+generate: $(SOURCES_IDL) $(HEADERS_IDL)
+
+# Here is how we create those subdirectories automatically.
+%.dir : 
+	@echo "Checking directory $*"
+	@if [ ! -d $* ]; then \
+		echo "Making directory $*"; \
+		mkdir -p $* ; \
+	fi;
+
+###############################################################################
+# Clean target: removes the objs dir
+###############################################################################
+clean:
+	@rm -Rf objs/$(ARCH)
+	@echo "Successfully deleted object and executable files for architecture $(ARCH)"
+	@echo "To delete ALL the architectures and any generated file use target 'veryclean'"
+
+veryclean:
+	@rm -Rf objs
+	@rm -Rf src/idl
+	@echo "Deleted all executables, objects and generated files"
