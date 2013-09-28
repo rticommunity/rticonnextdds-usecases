@@ -208,9 +208,14 @@ int main (int argc, char *argv[])
 	EMDSVideoSource *videoSource = new EMDSVideoSource(
 		fullPath);
 #else
-	// TODO: fix path
+	std::string relativePath = "../../../resource/bigbuck.webm";
+	char fullPath[PATH_MAX];
+	if (NULL == realpath(relativePath.c_str(), fullPath))
+	{
+		printf("Error getting the file path\n");
+	}
 	EMDSVideoSource *videoSource = new EMDSVideoSource(
-		"/home/rose/code/gstreamer2/VideoData/ExampleCode/resource/bigbuck.webm");
+		fullPath);
 #endif
 
 	// If the video source was not created correctly, return an error.
