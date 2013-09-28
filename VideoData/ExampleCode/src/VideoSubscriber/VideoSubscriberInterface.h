@@ -84,7 +84,7 @@ public:
 	VideoSubscriberInterface( 
 		std::vector<std::string>qosFileNames,
 		std::string videoProperties,
-		bool multicastVideoStreams = FALSE);
+		bool multicastVideoStreams = false);
 
 	// --- Destructor --- 
 	~VideoSubscriberInterface();

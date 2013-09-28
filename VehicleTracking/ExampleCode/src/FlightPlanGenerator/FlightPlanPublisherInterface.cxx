@@ -125,7 +125,8 @@ FlightPlanPublisherInterface::~FlightPlanPublisherInterface()
 
 // ----------------------------------------------------------------------------
 // Sends the flight plan over a transport (such as shared memory or UDPv4)
-// This uses the 
+// This writes the FlightPlan data using RTI Connext DDS to any DataReader
+// that shares the same Topic
 bool FlightPlanPublisherInterface::Write(DdsAutoType<FlightPlan> data)
 {
 	DDS_ReturnCode_t retcode = DDS_RETCODE_OK;
