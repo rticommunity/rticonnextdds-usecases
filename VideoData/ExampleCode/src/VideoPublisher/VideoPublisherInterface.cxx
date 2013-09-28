@@ -167,8 +167,8 @@ bool VideoPublisherInterface::Write(DdsAutoType<VideoStream> data)
 		return false;
 	}
 
-	printf("Writing sample #%d, length: %d\n", 
-		data.sequence_number,data.frame.length());
+/*	printf("Writing sample #%d, length: %d\n", 
+		data.equence_number, data.frame.length());*/
 
 	return true;
 

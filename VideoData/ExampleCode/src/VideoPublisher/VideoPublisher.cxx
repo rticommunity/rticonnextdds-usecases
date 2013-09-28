@@ -9,6 +9,7 @@ damages arising out of the use or inability to use the software.
 **********************************************************************************************/
 #include <stdio.h>
 #include <vector>
+#include <iostream>
 
 #include "../CommonInfrastructure/VideoSource.h"
 #include "../Generated/VideoData.h"
@@ -25,6 +26,7 @@ damages arising out of the use or inability to use the software.
 
 using namespace std;
 
+void PrintHelp();
 
 // ------------------------------------------------------------------------- //
 //
@@ -156,10 +158,27 @@ int main (int argc, char *argv[])
 	printf("This application will read a video file, and publish it over RTI"
 		" Connext DDS \nmiddleware\n");
 	vector<string> xmlFiles;
-	bool multicastAvailable = false;
+	bool multicastAvailable = true;
 
-// TODO: command-line parameters
-//
+	for (int i = 0; i < argc; i++)
+	{
+		if (0 == strcmp(argv[i], "--no-multicast"))
+		{
+			multicastAvailable = false;
+		} else if (0 == strcmp(argv[i], "--help"))
+		{
+			PrintHelp();
+			return 0;
+		} else if (i > 0)
+		{
+			// If we have a parameter that is not the first one, and is not 
+			// recognized, return an error.
+			cout << "Bad parameter: " << argv[i] << endl;
+			PrintHelp();
+			return -1;
+		}
+
+	}
 	if (multicastAvailable)
 	{
 		// Adding the XML files that contain profiles used by this application
@@ -221,35 +240,59 @@ int main (int argc, char *argv[])
 	//    a codec that is compatible with what we are sending.  We only send if
 	//    the subscriber app has a compatible codec to us.  Note that this can
 	//    be used for a variety of uses, such as determining video quality, etc
-	VideoPublisherInterface videoInterface(xmlFiles, 
-		&compatibilityCheck);
 
-	// Callback from the gstreamer framework that is providing us with video
-	// frames.  This frameHandler uses the VideoPublisherInterface's Write() 
-	// method to write frames over the network.
-	FrameHandler *frameHandler = new FrameHandler();
-	videoSource->SetNewFrameCallbackHandler(
-			frameHandler,
-			(void *)&videoInterface);
-
-	// Wait for compatible DataReaders to come online
-	while (!compatibilityCheck.DiscoveredCompatibleReader())
+	try 
 	{
-		DDS_Duration_t send_period = {2,0};
-		printf("Waiting for a compatible video subscriber to come online\n");
-		NDDSUtility::sleep(send_period);
+		VideoPublisherInterface videoInterface(xmlFiles, 
+			&compatibilityCheck);
+
+		// Callback from the gstreamer framework that is providing us with video
+		// frames.  This frameHandler uses the VideoPublisherInterface's Write() 
+		// method to write frames over the network.
+		FrameHandler *frameHandler = new FrameHandler();
+		videoSource->SetNewFrameCallbackHandler(
+				frameHandler,
+				(void *)&videoInterface);
+
+		// Wait for compatible DataReaders to come online
+		while (!compatibilityCheck.DiscoveredCompatibleReader())
+		{
+			DDS_Duration_t send_period = {2,0};
+			printf("Waiting for a compatible video subscriber to come online\n");
+			NDDSUtility::sleep(send_period);
+		}
+
+		// If we have found a compatible Video Subscriber, we start publishing.
+		videoSource->Start();
+
+		// Loop forever here
+		while (1) 
+		{
+			DDS_Duration_t send_period = {0,100000000};
+			NDDSUtility::sleep(send_period);
+		}
+
+	} 
+	catch (string message)
+	{
+		cout << "Application exception" << message << endl;
 	}
 
-	// If we have found a compatible Video Subscriber, we start publishing.
-	videoSource->Start();
-
-	// Loop forever here
-	while (1) 
-	{
-		DDS_Duration_t send_period = {0,100000000};
-		NDDSUtility::sleep(send_period);
-	}
 
 }
 
+void PrintHelp()
+{
+	cout << "Valid options are: " << endl;
+	cout << 
+		"    --no-multicast" <<
+		"       Do not use any multicast, including for discovery"
+		<< endl << 
+		"                         " <<
+		"(note you must edit XML config to include IP" << endl <<
+		"                         " <<
+		"addresses)" 
+		<< endl;
+
+}
 
