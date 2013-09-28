@@ -58,7 +58,8 @@ using namespace com::rti::media::generated;
 
 VideoSubscriberInterface::VideoSubscriberInterface( 
 							std::vector<std::string>qosFileNames,
-							std::string videoMetadata)
+							std::string videoMetadata,
+							bool multicastVideoStreams)
 { 
 
 	std::string libName;
@@ -67,8 +68,15 @@ VideoSubscriberInterface::VideoSubscriberInterface(
 	// Depending on what is passed in, choose one of two XML profiles to 
 	// use - either for best latency or higher throughput
 	libName = "RTIExampleQosLibrary";
-	profileName = "StreamingVideoData";
 
+	if (multicastVideoStreams)
+	{
+		profileName = "OneToManyMulticast";
+	}
+	else
+	{
+		profileName = "StreamingVideoData";
+	}
 	_communicator = new DDSCommunicator();
 
 	// Calling the parent class's CreateParticipant method.

@@ -91,9 +91,21 @@ int main (int argc, char *argv[])
 	{
 		if (0 == strcmp(argv[i], "--multicast"))
 		{
+			if (multicastAvailable == false)
+			{
+				cout << "Cannot specify --multicast and --no-multicast" 
+					<< endl;
+				return -1;
+			}
 			multicastVideoData = true;
 		} else if (0 == strcmp(argv[i], "--no-multicast"))
 		{
+			if (multicastVideoData == true)
+			{
+				cout << "Cannot specify --multicast and --no-multicast"
+					<< endl;
+				return -1;
+			}
 			multicastAvailable = false;
 		} else if (0 == strcmp(argv[i], "--help"))
 		{
@@ -128,41 +140,48 @@ int main (int argc, char *argv[])
 			"file://../../../src/Config/video_stream_no_multicast.xml");
 	}   
 
-	// Create the video framework components that will be used to display the
-	// video.
-	EMDSVideoOutput *vout = new EMDSVideoDisplayOutput();
-	if (vout == NULL) 
+	try 
 	{
-		printf("Error, video not created\n");
-	}
+		// Create the video framework components that will be used to display the
+		// video.
+		EMDSVideoOutput *vout = new EMDSVideoDisplayOutput();
+		if (vout == NULL) 
+		{
+			printf("Error, video not created\n");
+		}
 
-	// Query the metadata from the framework, such as what codecs this 
-	// application can support.
-	std::string videoMetadata = 
-		((EMDSVideoDisplayOutput *)vout)->GetStreamMetadata();
+		// Query the metadata from the framework, such as what codecs this 
+		// application can support.
+		std::string videoMetadata = 
+			((EMDSVideoDisplayOutput *)vout)->GetStreamMetadata();
 
-	// Create the RTI Connext DDS video interface to the application, which 
-	// receives updates of video frames from the network, and gives them to
-	// the display handler.  This also takes in the video metadata, and 
-	// sends it using the DDS USER_DATA QoS as a part of the discovery process.
-	// Publishing applications use that metadata to decide whether to send to
-	// this application or not.  
-	VideoSubscriberInterface videoInterface(xmlFiles, videoMetadata);
+		// Create the RTI Connext DDS video interface to the application, which 
+		// receives updates of video frames from the network, and gives them to
+		// the display handler.  This also takes in the video metadata, and 
+		// sends it using the DDS USER_DATA QoS as a part of the discovery process.
+		// Publishing applications use that metadata to decide whether to send to
+		// this application or not.  
+		VideoSubscriberInterface videoInterface(xmlFiles, videoMetadata);
 
-	bool isDone = false;
+		bool isDone = false;
 
-	// Create the video display handler that actually shows the video 
-	VideoDisplayHandler *videoDisplay = new VideoDisplayHandler(vout, &isDone);
+		// Create the video display handler that actually shows the video 
+		VideoDisplayHandler *videoDisplay = new VideoDisplayHandler(vout, &isDone);
 
-	// Register the display handler with the DataReader that will notify it
-	// when video frames arrive 
-	videoInterface.GetVideoStreamReader()->RegisterVideoHandler(videoDisplay);
+		// Register the display handler with the DataReader that will notify it
+		// when video frames arrive 
+		videoInterface.GetVideoStreamReader()->RegisterVideoHandler(videoDisplay);
 
-	// Continue while the video is not finished.
-	while (!isDone) 
+		// Continue while the video is not finished.
+		while (!isDone) 
+		{
+			DDS_Duration_t send_period = {0,100000000};
+			NDDSUtility::sleep(send_period);
+		}
+	}		
+	catch (string message)
 	{
-		DDS_Duration_t send_period = {0,100000000};
-		NDDSUtility::sleep(send_period);
+		cout << "Application exception" << message << endl;
 	}
 }
 
@@ -175,10 +194,12 @@ void PrintHelp()
 		<< endl;
 	cout << 
 		"    --no-multicast" <<
-		"                 Do not use multicast for discovery" << 
-		"(note you must edit XML" << endl <<
-		"                                   " <<
-		"config to include IP addresses)" 
+		"       Do not use any multicast, including for discovery"
+		<< endl << 
+		"                         " <<
+		"(note you must edit XML config to include IP" << endl <<
+		"                         " <<
+		"addresses)" 
 		<< endl;
 
 }

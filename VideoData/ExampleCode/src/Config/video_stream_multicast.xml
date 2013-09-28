@@ -27,7 +27,7 @@ RTI Connext user manual.
 
 
 
-        <qos_profile name="StreamingVideoData" base_name="OneToManyMulticast">
+        <qos_profile name="StreamingVideoData" base_name="MaxTransportThroughput">
             <!-- QoS used to configure the data writer created in the example code -->
             <datawriter_qos>
 
@@ -43,7 +43,7 @@ RTI Connext user manual.
                 <history>
                     <!-- If you need strict reliability, this should be changed to 
                          keep all history. -->
-                    <kind>KEEP_ALL_HISTORY_QOS</kind>
+                    <kind>KEEP_LAST_HISTORY_QOS</kind>
                     <depth>50</depth>
                 </history>
 
@@ -51,9 +51,9 @@ RTI Connext user manual.
                        a different number of maximum frames that can be handled
                        at once, the resource limits are being set in code. 
                        -->
-                <resource_limits>
-                    <max_samples>10</max_samples>
-                  </resource_limits>
+                <!--<resource_limits>
+                    <max_samples>100</max_samples>
+                  </resource_limits> -->
 
 
                 <publish_mode>
@@ -117,7 +117,7 @@ RTI Connext user manual.
                 <history>
                     <!-- If you need strict reliability, this should be changed
                          to keep all history. -->
-                    <kind>KEEP_ALL_HISTORY_QOS</kind>
+                    <kind>KEEP_LAST_HISTORY_QOS</kind>
                     <depth>50</depth>
                 </history>
 
@@ -157,6 +157,25 @@ RTI Connext user manual.
                 </participant_name>
             </participant_qos>
             
+        </qos_profile>
+
+        <qos_profile name="OneToManyMulticast" base_name="StreamingVideoData">
+
+            <datareader_qos>
+                <!-- Uncomment this to enable user data over multicast.  This is 
+                     commented out for systems that do not have multicast, or 
+                     with switches that block some multicast traffic -->
+                <multicast>
+                    <value>
+                      <element>
+                          <!-- Must be a valid multicast address-->
+                          <receive_address>239.255.5.1</receive_address>
+                      </element>
+                    </value>
+                </multicast>
+
+            </datareader_qos>
+
         </qos_profile>
 
     </qos_library>
