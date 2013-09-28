@@ -119,7 +119,6 @@ private:
 	std::string _url;
 	OSThread *_worker;
 	EMDSFrameHandler *_frameReadyHandler;
-	// TODO: Does it make sense to keep this here or with the handler itself????????????
 	void *_handlerObj;
 
 	// GStreamer objects
