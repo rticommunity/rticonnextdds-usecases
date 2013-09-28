@@ -86,7 +86,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>C:\gstreamer-sdk\0.10\x86\lib;C:\rose\code\test_gstreamer\ffmpeg-HEAD-e2774b3\libavformat;C:\rose\code\test_gstreamer\ffmpeg-HEAD-e2774b3\libavcodec-default;$(NDDSHOME)/lib/i86Win32VS2010</AdditionalLibraryDirectories>
-      <AdditionalDependencies>nddscppz.lib;nddscz.lib;nddscorez.lib;netapi32.lib;WS2_32.lib;avcodec.lib;avformat.lib;advapi32.lib;shell32.lib;winmm.lib;%(AdditionalDependencies);gstreamer-0.10.lib;gobject-2.0.lib;gstapp-0.10.lib</AdditionalDependencies>
+      <AdditionalDependencies>nddscppz.lib;nddscz.lib;nddscorez.lib;netapi32.lib;WS2_32.lib;advapi32.lib;shell32.lib;winmm.lib;%(AdditionalDependencies);gstreamer-0.10.lib;gobject-2.0.lib;gstapp-0.10.lib</AdditionalDependencies>
       <AdditionalOptions>/verbose:lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
