@@ -113,7 +113,7 @@ RTI Connext user manual.
 		<!-- Streaming video data can be reliable or best-effort depending on 
 		     network characteristics --> 
                 <reliability>
-                    <kind>RELIABLE_RELIABILITY_QOS</kind>
+                    <kind>BEST_EFFORT_RELIABILITY_QOS</kind>
                 </reliability>
 
                 <!-- Reliably deliver 50 last updates to video stream.  Do not  

@@ -51,7 +51,6 @@ void EMDSBuffer::Initialize()
 {
 	data = NULL;
 	size = 0;
-	priority = 0;
 	seqn = 0;
 	timestamp = 0.0;
 }

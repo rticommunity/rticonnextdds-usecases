@@ -327,7 +327,6 @@ void VideoStreamReader::NotifyHandlers(VideoStream *frame, double timestamp)
 		// Copy the data and metadata into the new buffer
 		buffer->SetData(frameBinaryData, frame->frame.length());		
 		buffer->SetSeqn(frame->sequence_number);
-		buffer->SetFlags((EMDSBufferFlags)frame->priority);
 		buffer->SetTimestamp(timestamp);
 
 		// If this is the end of the video, notify the handler

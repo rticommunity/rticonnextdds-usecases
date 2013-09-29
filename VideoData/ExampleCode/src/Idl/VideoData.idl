@@ -27,7 +27,8 @@ struct VideoStream {
 	// publishers that are publishing the same data.
 	long stream_id;  //@key
 
-	unsigned short priority;
+	// Some video formats may require metadata to be sent with the binary
+	// video data, including flags and the sequence_number.
 	unsigned long flags;
 	unsigned long sequence_number;
 
