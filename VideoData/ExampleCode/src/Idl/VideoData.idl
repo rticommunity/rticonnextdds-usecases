@@ -24,11 +24,11 @@ const long MAX_BUFFER_SIZE = 1048576;
 struct VideoStream {
 
 	// This allows a subscriber to differentiate between different video
-	// publishers that are publishing the same data.
+	// publishers that are publishing the same data on the same Topic.
 	long stream_id;  //@key
 
 	// Some video formats may require metadata to be sent with the binary
-	// video data, including flags and the sequence_number.
+	// video data, such as flags or a frame sequence_number.
 	unsigned long flags;
 	unsigned long sequence_number;
 

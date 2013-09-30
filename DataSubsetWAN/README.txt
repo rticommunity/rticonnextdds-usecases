@@ -32,7 +32,7 @@ Additional Documentation
 ------------------------
 
 Additional documentation is available in the Docs directory and online at: 
-www.rti.com/usecases/real-timelan-over-wan.html
+www.rti.com/usecases/real-time-lan-over-wan.html
 
 
 Download RTI Connext DDS
@@ -67,6 +67,13 @@ Utilities Getting Started Guide.
 For this example, you must also set an environment variable called 
 PROTOTYPER_HOME. This must be set to the directory where you installed RTI 
 Prototyper with Lua.
+
+We will refer to the location where you unzipped the example in this document 
+as EXAMPLE_HOME.  
+
+All configuration and script files are located in EXAMPLE_HOME/ExampleCode/.  
+Before running, change directories into EXAMPLE_HOME/ExampleCode.
+
 
 
 To Start the Sender
