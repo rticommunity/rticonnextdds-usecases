@@ -55,7 +55,7 @@ typedef double EMDSTimestamp;
 //
 // EMDSBuffer:
 // Class that encapuslates a sized video buffer, which may include flags or
-// priority data about that video buffer.
+// metadata about that video buffer.
 //
 // ------------------------------------------------------------------------- //
 class EMDSBuffer
@@ -93,7 +93,6 @@ private:
 	unsigned char *data;
 	unsigned int seqn;
 	size_t size;
-	uint8_t priority;
 	EMDSTimestamp timestamp;
 	EMDSBufferFlags flags;
 };
