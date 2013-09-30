@@ -130,7 +130,7 @@ void EMDSVideoDisplayOutput::Initialize()
 		"caps=\"video/x-vp8, width=(int)640, height=(int)360, "
 		"pixel-aspect-ratio=(fraction)1/1, framerate=(fraction)1000/1\" ! "
 		"queue2 ! vp8dec ! queue2 ! "
-	//	"videorate ! video/x-raw-yuv,framerate=25/1 ! "
+		"videorate ! video/x-raw-yuv,framerate=25/1 ! "
 		"ffmpegcolorspace ! "
 		"directdrawsink name=\"sink\"",
 		NULL);

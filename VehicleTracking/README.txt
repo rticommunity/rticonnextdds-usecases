@@ -46,6 +46,12 @@ directory inside your RTI Connext DDS installation. For more information on how
 to set an environment variable, please see the RTI Core Libraries and Utilities 
 Getting Started Guide.
 
+We will refer to the location where you unzipped the example in this document 
+as EXAMPLE_HOME.  
+
+All source and build files are located in EXAMPLE_HOME/ExampleCode/.  Before
+building or running, change directories into EXAMPLE_HOME/ExampleCode.
+
 Windows Systems
 ---------------
 
@@ -70,15 +76,15 @@ compiler version.  Right now this example only supports i86Linux2.6gcc4.5.5
 Run the Example
 ---------------
 
-On Windows systems, navigate to the EXAMPLE_HOME\scripts directory. In this 
-directory are three separate batch files to start the applications:
+On Windows systems, navigate to the EXAMPLE_HOME\ExampleCode\scripts directory.  
+In this directory are three separate batch files to start the applications:
 
         - FlightPlanGenerator.bat
         - RadarGenerator.bat
         - TrackGui.bat
 
-On Linux systems, navigate to the EXAMPLE_HOME/scripts directory. In this 
-directory are three separate batch files to start the applications:
+On Linux systems, navigate to the EXAMPLE_HOME/ExampleCode/scripts directory.  
+In this directory are three separate batch files to start the applications:
 
         - FlightPlanGenerator.sh
         - RadarGenerator.sh
