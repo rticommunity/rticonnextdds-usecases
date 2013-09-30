@@ -329,17 +329,9 @@ void VideoStreamReader::NotifyHandlers(VideoStream *frame, double timestamp)
 		buffer->SetSeqn(frame->sequence_number);
 		buffer->SetTimestamp(timestamp);
 
-		// If this is the end of the video, notify the handler
-		if (buffer->GetFlags() & EMDS_BUFFER_FLAGS_EOS)
-		{
-			(*it)->OnVideoEnd();	
-		} 
-		else
-		{
-			// If this is not the video end, notify the handler that a new
-			// frame update should be processed 
-			(*it)->OnFrameUpdate(buffer);
-		}
+		// If this is not the video end, notify the handler that a new
+		// frame update should be processed 
+		(*it)->OnFrameUpdate(buffer);
 	}
 }
 
