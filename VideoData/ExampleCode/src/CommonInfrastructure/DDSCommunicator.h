@@ -109,7 +109,7 @@ public:
 
 	// Loads a set of XML files to load QoS profile information
 	// Creates a DomainParticipant with specified QoS in the specified domain
-				DDS::DomainParticipant* CreateParticipant(long domain, 
+	DDS::DomainParticipant* CreateParticipant(long domain, 
 		std::vector<std::string>fileNames, 
 		const std::string &participantQosLibrary, 
 		const std::string &participantQosProfile, 
