@@ -141,7 +141,7 @@
                             </element>
                             <!-- Change this to the port you want to open   -->
                             <!-- If you change this, you must change the initial 
-                                 peers of the OTHER Routing Service configurtion -->
+                                 peers of the OTHER Routing Service configuration -->
                             <element>
                                 <name>dds.transport.TCPv4.tcp1.server_bind_port</name>
                                 <value>9401</value>
@@ -378,7 +378,7 @@
                             </element>
                             <!-- Change this to the local port you want to use   -->
                             <!-- If you change this, you must change the initial 
-                                 peers of the OTHER Routing Service configurtion -->
+                                 peers of the OTHER Routing Service configuration -->
                             <element>
                                 <name>dds.transport.TCPv4.tcp1.server_bind_port</name>
                                 <value>9400</value>

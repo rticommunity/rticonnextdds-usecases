@@ -138,7 +138,7 @@ class VideoStreamListener : public DDS::DataReaderListener
 {
 public:
 
-    // --- Constructor --- 
+	// --- Constructor --- 
 	VideoStreamListener(VideoStreamReader *reader) :
 		_reader(reader)
 	{
