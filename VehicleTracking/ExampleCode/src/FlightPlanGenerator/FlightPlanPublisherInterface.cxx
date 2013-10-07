@@ -104,7 +104,7 @@ FlightPlanPublisherInterface::FlightPlanPublisherInterface(std::vector<std::stri
 	{
 		std::stringstream errss;
 		errss << 
-			"RadarWriter(): failure to create writer. Inconsistent Qos?";
+			"Failure to create FlightPlan writer. Inconsistent Qos?";
 		throw errss.str();
 	}
 
