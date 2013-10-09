@@ -147,11 +147,11 @@ RadarInterface::RadarInterface(long radarId, int maxFlights,
 	// that decision from the user.
 	// Initialize the receiver with the QoS profile defined in the 
 	// flight_plan_profiles_multicast.xml file
-	_FlightPlanReader = new FlightPlanReader(this, subscriber, 
+	_flightPlanReader = new FlightPlanReader(this, subscriber, 
 		"RTIExampleQosLibrary",
 		"FlightPlanStateData");
 
-	if (_FlightPlanReader == NULL) 
+	if (_flightPlanReader == NULL) 
 	{
 		std::stringstream errss;
 		errss << "Failed to create FlightPlanReader object";
@@ -168,7 +168,7 @@ RadarInterface::~RadarInterface()
 {
 
 	delete _radarWriter;
-	delete _FlightPlanReader;
+	delete _flightPlanReader;
 	delete _communicator;
 }
 
