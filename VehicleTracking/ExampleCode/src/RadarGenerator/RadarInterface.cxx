@@ -84,11 +84,11 @@ RadarInterface::RadarInterface(long radarId, int maxFlights,
 
 	_communicator = new DDSCommunicator();
 
-	// Calling the parent class's CreateParticipant method.
+	// Calling the DDSCommunicator class's CreateParticipant method.
 	// This creates the DomainParticpant, the first step in creating a DDS
 	// application.  This starts the discovery process.  For more information
 	// on what the DomainParticipant is responsible for, and how to configure
-	// it, see the base class.
+	// it, see the DDSCommunicator class.
 	if (NULL == _communicator->CreateParticipant(0, qosFileNames, libName.c_str(), 
 					profileName.c_str())) 
 	{
@@ -98,7 +98,7 @@ RadarInterface::RadarInterface(long radarId, int maxFlights,
 	}
 
 
-	// Calling the parent class's CreatePublisher method.  
+	// Calling the DDSCommunicator class's CreatePublisher method.  
 	// You do _not_ need to create one publisher per DataWriter.
 	Publisher *publisher = _communicator->CreatePublisher();
 

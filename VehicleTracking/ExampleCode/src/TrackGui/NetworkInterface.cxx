@@ -43,11 +43,11 @@ NetworkInterface::NetworkInterface(
 	// Class with code for creating the basic objects for DDS communication.
 	_communicator = new DDSCommunicator();
 
-	// Calling the parent class's CreateParticipant method.
+	// Calling the DDSCommunicator class's CreateParticipant method.
 	// This creates the DomainParticpant, the first step in creating a DDS
 	// application.  This starts the discovery process.  For more information
 	// on what the DomainParticipant is responsible for, and how to configure
-	// it, see the base class.
+	// it, see the DDSCommunicator class.
 	if (NULL == _communicator->CreateParticipant(0, qosFileNames, 
 									"RTIExampleQosLibrary", 
 									"HighThroughputRadar")) 
