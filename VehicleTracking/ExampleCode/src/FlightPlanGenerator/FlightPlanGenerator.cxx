@@ -36,14 +36,10 @@ void PrintHelp();
 // the application.  It creates the flight plans for a variety of airlines, and
 // sends them.  
 //
-// This example application is deleting all flight plans after 2 minutes, 
-// regardless of what the other applications do. 
-//
 // The flight plan data is modeled as RTI Connext DDS "state data," meaning:
 //   1) the data is modeled to have a key field which differentiates individual
 //      flight plans.  This key field is the flight ID.
-//
-//   and that it is sent:
+//   ...and that it is sent:
 //   1) Reliably
 //   2) Durably - meaning that this application can write a flight plan, and
 //      even if the subscribing applications do not exist, yet, they will be

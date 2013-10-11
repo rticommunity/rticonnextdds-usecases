@@ -118,7 +118,7 @@ public:
 	// DDS "WaitSet" object to wait for flight plans
 	FlightPlanReader *GetFlightPlanReader() 
 	{
-		return _FlightPlanReader;
+		return _flightPlanReader;
 	}
 
 	// --- How many flights should the middleware handle at once? --- 
@@ -163,7 +163,7 @@ private:
 
 	// Used for receiving flight plan data, and being notified about the
 	// arrival of flight plan data.
-	FlightPlanReader *_FlightPlanReader;
+	FlightPlanReader *_flightPlanReader;
 
 	// This maximum number is used in the middleware in several places
 	int _maxFlightsToHandle;
