@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
 		// TODO: move this into another thread
 		while (1) 
 		{
-			vector<DdsAutoType<ChocolateLotState>> lotStates;
+			vector< DdsAutoType<ChocolateLotState> > lotStates;
 
 			// TODO: better comments
 			mesInterface.GetChocolateLotStateReader()->

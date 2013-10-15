@@ -151,7 +151,7 @@ void StationController::ProcessLots()
 {
 	while (!_shuttingDown)
 	{
-		vector<DdsAutoType<ChocolateLotState>> lotsToProcess;
+		vector< DdsAutoType<ChocolateLotState> > lotsToProcess;
 		_networkInterface->
 			GetChocolateLotStateReader()->WaitForChocolateLotUpdates(
 					&lotsToProcess);
