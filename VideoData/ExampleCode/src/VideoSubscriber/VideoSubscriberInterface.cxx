@@ -188,7 +188,9 @@ void VideoStreamListener::on_data_available(DataReader *reader)
 
 				double timestamp = infoSeq[i].source_timestamp.sec + 
 						(infoSeq[i].source_timestamp.nanosec / NANOSEC_TO_SEC);
-				_reader->NotifyHandlers(&dataSeq[i], timestamp);
+
+				_reader->NotifyHandlers(&dataSeq[i], dataSeq[i].stream_id, 
+					timestamp);
 			}
 		}
 
@@ -312,7 +314,8 @@ void VideoStreamReader::UnregisterVideoHandler(VideoEventHandler *handler)
 //
 // Notify handlers of frame events that a frame has arrived
 // 
-void VideoStreamReader::NotifyHandlers(VideoStream *frame, double timestamp)
+void VideoStreamReader::NotifyHandlers(VideoStream *frame, 
+	long streamId, double timestamp)
 {
 	EMDSBuffer *buffer = NULL;
 
@@ -331,7 +334,7 @@ void VideoStreamReader::NotifyHandlers(VideoStream *frame, double timestamp)
 
 		// If this is not the video end, notify the handler that a new
 		// frame update should be processed 
-		(*it)->OnFrameUpdate(buffer);
+		(*it)->OnFrameUpdate(buffer, streamId);
 	}
 }
 

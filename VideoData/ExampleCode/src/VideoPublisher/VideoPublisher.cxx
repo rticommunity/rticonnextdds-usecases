@@ -44,6 +44,9 @@ public:
 	// --- Constructor ---
 	FrameHandler() : _seqNum(0)
 	{
+		srand(time(NULL));
+		_streamId = rand();
+		printf("Created frame publisher with unique stream ID: %d\n", _streamId);
 	}
 
 	// ------------------------------------------------------------------------
@@ -79,7 +82,7 @@ public:
 		}
 
 		streamData->flags = buffer->GetFlags();
-		streamData->stream_id = 234;
+		streamData->stream_id = _streamId;
 	
 		// Sending the data over the network (or shared memory)
 		pubInterface->Write(*streamData);
@@ -96,6 +99,8 @@ private:
 
 	// --- Private members --- 
 	int _seqNum;
+
+	int _streamId;
 
 };
 

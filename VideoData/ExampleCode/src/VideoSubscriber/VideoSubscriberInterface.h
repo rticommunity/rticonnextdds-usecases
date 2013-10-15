@@ -59,7 +59,7 @@ class VideoSubscriberInterface;
 class VideoEventHandler
 {
 public:
-	virtual void OnFrameUpdate(EMDSBuffer *buffer) = 0;
+	virtual void OnFrameUpdate(EMDSBuffer *buffer, long streamId) = 0;
 	virtual void OnVideoEnd() = 0;
 
 };
@@ -190,7 +190,7 @@ public:
 	void RegisterVideoHandler(VideoEventHandler *handler);
 	void UnregisterVideoHandler(VideoEventHandler *handler);
 	void NotifyHandlers(com::rti::media::generated::VideoStream *frame,
-				double timestamp);
+				long streamId, double timestamp);
 
 
 private:
