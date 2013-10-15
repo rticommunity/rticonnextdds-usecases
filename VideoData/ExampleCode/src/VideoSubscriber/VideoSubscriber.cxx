@@ -41,12 +41,26 @@ class VideoDisplayHandler : public VideoEventHandler
 {
 public:
 	VideoDisplayHandler(EMDSVideoOutput *outputHandler, bool *finishRun)
-			: _outputHandler(outputHandler), _finish(finishRun)
+			: _outputHandler(outputHandler), _finish(finishRun),
+			_streamId(-1)
 	{
 	}
 
-	virtual void OnFrameUpdate(EMDSBuffer *buffer)
+	virtual void OnFrameUpdate(EMDSBuffer *buffer, long streamId)
 	{
+		// The first time we get a stream, set the value of the 
+		// stream ID
+		if (_streamId == -1)
+		{
+			_streamId = streamId;
+		}
+
+		// This example can handle only one video stream at a time.  If we see
+		// a stream ID other than the one we are processing, don't process it.
+		if (_streamId != streamId)
+		{
+			return;
+		}
 		_outputHandler->GetFrameHandler()->FrameReady(_outputHandler, buffer);
 	}
 
@@ -59,6 +73,8 @@ private:
 
 	// --- Private members --- 
 	EMDSVideoOutput *_outputHandler;
+
+	long _streamId;
 
 	bool *_finish;
 };
