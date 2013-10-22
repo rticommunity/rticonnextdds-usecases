@@ -274,6 +274,12 @@ VideoStreamReader::VideoStreamReader(
 	// queue, to be retrieved by listener in the on_data_available callback
 	 DataReader *reader = sub->create_datareader(topic, 
 		readerQoS, _listener, DDS_DATA_AVAILABLE_STATUS);
+	if (reader == NULL)
+	{
+		std::stringstream errss;
+		errss << "VideoStreamReader(): failure to create DataReader.";
+		throw errss.str();
+	}
 
 	 // Down casting to the type-specific reader
 	 _reader = VideoStreamDataReader::narrow(reader);
