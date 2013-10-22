@@ -144,8 +144,9 @@ int main(int argc, char *argv[])
 
 	}
 
-	// Tune the radar for low latency.  The two QoS profiles are 
-	// defined in USER_QOS_PROFILES.xml
+	// Set up paths for XML files.  The profiles are for applications that 
+	// have no multicast available at all, or that have multicast available
+	// on the network.
 	vector<string> xmlFiles;
 
 	if (multicastAvailable)
@@ -180,7 +181,10 @@ int main(int argc, char *argv[])
 								profileToUse, xmlFiles);
 
 
-		// What is the maximum number of tracks you want to generate?  At what 
+		// Create a new track generator, with a unique ID, a number of tracks
+		// to start generating, a maximum number of tracks to generate at a 
+		// time, a creation rate (how quickly new tracks are added), and a run
+		// rate (real-time, faster, slower)
 		trackGenerator = new TrackGenerator(radarId, startTracks, maxTracks, 
 			creationRateSec, runRate);
 
