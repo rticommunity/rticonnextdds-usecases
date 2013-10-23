@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<!-- 
+(c) 2005-2013 Copyright, Real-Time Innovations, Inc.  All rights reserved.    	                             
+RTI grants Licensee a license to use, modify, compile, and create derivative works 
+of the Software.  Licensee has the right to distribute object form only for use with RTI 
+products.  The Software is provided “as is”, with no warranty of any type, including 
+any warranty for fitness for any purpose. RTI is under no obligation to maintain or 
+support the Software.  RTI shall not be liable for any incidental or consequential 
+damages arising out of the use or inability to use the software.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Description
+XML QoS base profile for Factory Data
+
+For more information about XML QoS Profiles see Chapter 15 in the 
+RTI Connext user manual.
+-->
+<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="C:/Program Files/RTI/5.0.0/ndds.5.0.0/scripts/../resource/rtiddsgen/../qos_profiles_5.0.0/schema/rti_dds_qos_profiles.xsd"
+     version="5.0.0">
+    <!-- QoS Library containing the QoS profile used in the example.
+        A QoS library is a named set of QoS profiles.
+    -->
+    <qos_library name="RTIExampleQosLibrary">
+
+        <!-- This profile is used to set up transport settings for the maximum
+           size allowed for UDP.  This is required to get the maximum possible
+           throughput.  -->
+        <qos_profile name="MaxTransportThroughput">
+            <participant_qos>
+                
+                <receiver_pool>
+                    <buffer_size>65507</buffer_size>
+                </receiver_pool>
+                
+                <property>
+                    <value>
+
+                        <!--  Configure UDP transport for higher throughput: -->
+                        <element>
+                            <name>dds.transport.UDPv4.builtin.parent.message_size_max</name>
+                            <value>65507</value>
+                        </element>
+
+                        <!--
+                          The next setting is to setup the buffers for sending and recieving data 
+                          on the transport to be at least double what our expected message size will be.
+                          In this case our expected message size is 1MB, so therefore we are setting
+                          the buffer sizes to 2MB.
+                          -->
+                        <element>
+                            <name>dds.transport.UDPv4.builtin.send_socket_buffer_size</name>
+                            <value>2097152</value>
+                        </element>
+                        <element>
+                            <name>dds.transport.UDPv4.builtin.recv_socket_buffer_size</name>
+                            <value>2097152</value>
+                        </element>
+                        <!--
+                            Configure shared memory transport for higher throughput:
+                          -->
+                        <element>
+                            <!-- 
+                            Set the shared memory maximum message size to the
+                            same value that was set for UDP.
+                            -->
+                            <name>dds.transport.shmem.builtin.parent.message_size_max</name>
+                            <value>65507</value>
+                            <!-- 64 KB - header sizes -->
+                        </element>
+                        <element>
+                            <!--
+                            Set the size of the shared memory transport's
+                            receive buffer to some large value.
+                            -->
+                            <name>dds.transport.shmem.builtin.receive_buffer_size</name>
+                            <value>2097152</value>
+                            <!-- 2 MB -->
+                        </element>
+                        <element>
+                            <!--
+                             Set the maximum number of messages that the shared
+                             memory transport can cache while waiting for them
+                             to be read and deserialized.
+                             -->
+                            <name>dds.transport.shmem.builtin.received_message_count_max</name>
+                            <value>2048</value>
+                        </element>
+                        
+                    </value>
+                </property>
+                
+            </participant_qos>
+            
+        </qos_profile>
+
+
+
+        <qos_profile name="MulticastNotAvailable" base_name="MaxTransportThroughput">
+
+            <participant_qos>
+         
+                <discovery>
+                    <initial_peers>
+                        <!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
+                        <!-- Insert addresses here of machines you want     -->
+                        <!-- to contact                                     -->
+                        <!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
+                        <element>127.0.0.1</element>
+                        <!-- <element>192.168.1.2</element>-->
+                    </initial_peers>
+                </discovery>
+
+            </participant_qos>
+
+        </qos_profile>
+
+    </qos_library>
+</dds>
