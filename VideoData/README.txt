@@ -12,7 +12,7 @@ The two applications are:
 
 1. Video Publisher (VideoPublisher)
         - Provides streaming video in VP8 format
-2. Video Subscriber
+2. Video Subscriber (VideoSubscriber)
 	- Receives streaming video in VP8 format
 
 Additional Documentation
