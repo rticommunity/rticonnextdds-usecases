@@ -35,9 +35,6 @@
     <ClCompile Include="..\src\CommonInfrastructure\DDSCommunicator.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\ManufacturingExecutionSystem\MES.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\CommonInfrastructure\ChocolateLotStateEntities.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -45,6 +42,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\CommonInfrastructure\EnumPrintHelpers.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ManufacturingExecutionSystem\ManufacturingExecutionSystem.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
