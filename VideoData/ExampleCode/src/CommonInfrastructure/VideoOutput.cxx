@@ -211,44 +211,4 @@ std::string EMDSVideoDisplayOutput::GetStreamMetadata()
 }
 
 
-#ifndef WIN32
-
-// ----------------------------------------------------------------------------
-void
-_frame_process_write_trace_fn(EMDSVideoOutput *self,EMDSBuffer *buffer){
-	EMDSVideoTraceOutput *tracer = (EMDSVideoTraceOutput *)self;
-	unsigned long seqn = 0;
-	int written = 0;
-	char line[1024];
-	struct timeval recvtime;
-	gettimeofday(&recvtime, NULL);
-	seqn = buffer->GetSeqn();
-	sprintf(line,
-		"%lf %lf %lu %lu\n",
-		buffer->GetTimestamp(),
-		(double)recvtime.tv_sec + (recvtime.tv_usec/1000000.0),
-		seqn, buffer->GetSize());
-	written = write(tracer->_fd, line, strlen(line));
-	if (written == 0){
-		std::cout << "Failed to write to trace file" << std::endl;
-	}
-}
-
-// ----------------------------------------------------------------------------
-EMDSVideoTraceOutput::EMDSVideoTraceOutput(std::string path)
-{
-	int fd;
-	fd = open(path.c_str(), O_WRONLY | O_TRUNC | O_CREAT, 0600);
-	if (fd < 1)
-	{
-		std::cout << "Failed to open trace file '" << path.c_str()
-			<< "'" << endl;
-	}
-
-	EMDSVideoOutput::Initialize();
-	_fd = fd;
-	_filepath = strdup(path.c_str());
-}
-#endif
-
 
