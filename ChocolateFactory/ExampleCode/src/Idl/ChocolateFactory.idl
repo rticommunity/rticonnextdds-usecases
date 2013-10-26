@@ -39,7 +39,7 @@ enum LotStatusKind
 	ASSIGNED_TO_SC,
 	WAITING_AT_SC,
 	PROCESSING_AT_SC,
-	COMPLETED
+	LOT_COMPLETED
 };
 
 // TODO: explain that this is a placeholder for a real step
@@ -70,7 +70,7 @@ struct ChocolateLotState
 
 	// This will be the same as the controller if the controller producing the
 	// status is currently processing the lot
-	StationControllerKind assignedLotOwner;
+	StationControllerKind nextController;
 
 	// Current status of the lot: Waiting/Procesing/Completed
 	LotStatusKind lotStatus;

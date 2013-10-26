@@ -256,13 +256,14 @@ ChocolateLotStateReader::ChocolateLotStateReader(
 			enumName);
 
 		// Filter to receive updates if: 1) This is assigned to me or 2) this lot 
-		// is COMPLETED (at which point I unregister the instance)
+		// is in state LOT_COMPLETED (at which point I unregister the instance)
 		_parameters[0] = 
 			const_cast<char *>(enumName.c_str());
 		ContentFilteredTopic *cft = 
 			_communicator->GetCommunicator()->
 				GetParticipant()->create_contentfilteredtopic("ContentFilter",
-				topic, "lotStatus = 'COMPLETED' OR (assignedLotOwner = %0 AND lotStatus = 'ASSIGNED_TO_SC')",
+				topic, 
+				"lotStatus = 'LOT_COMPLETED' OR nextController = %0",
 				_parameters);
 		if (cft == NULL)
 		{

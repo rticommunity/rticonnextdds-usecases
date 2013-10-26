@@ -69,6 +69,35 @@ void StationControllerType::GetControllerEnumName(
 
 }
 
+
+void StationControllerType::GetControllerIngredientName(
+		com::rti::chocolatefactory::generated::StationControllerKind kind,
+		std::string &ingredientOut)
+{
+	if (kind == SUGAR_CONTROLLER)
+	{
+		ingredientOut = "sugar";
+	}
+	else if (kind == COCOA_BUTTER_CONTROLLER)
+	{
+		ingredientOut = "cocoa butter";
+	}
+	else if (kind == COCOA_LIQUOR_CONTROLLER)
+	{
+		ingredientOut = "cocoa liquor";
+	}
+	else if (kind == VANILLA_CONTROLLER)
+	{
+		ingredientOut = "vanilla";
+	}
+	else if (kind == MILK_CONTROLLER)
+	{
+		ingredientOut = "milk";
+	}
+
+
+}
+
 void LotStatusType:: GetLotStatusPrettyName(
 		com::rti::chocolatefactory::generated::LotStatusKind kind,
 		std::string &kindOut)
@@ -85,9 +114,9 @@ void LotStatusType:: GetLotStatusPrettyName(
 	{
 		kindOut = "Processing at Station Controller";
 	}
-	else if (kind == COMPLETED)
+	else if (kind == LOT_COMPLETED)
 	{
-		kindOut = "Completed";
+		kindOut = "Lot Completed";
 	}
 }
 

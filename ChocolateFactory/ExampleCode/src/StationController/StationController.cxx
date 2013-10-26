@@ -166,14 +166,14 @@ void StationController::ProcessLots()
 		for (int i = 0; i < lotsToProcess.size(); i++)
 		{
 
-			DdsAutoType<ChocolateLotState> updatedState;
+			DdsAutoType<ChocolateLotState> updatedState = 
+				lotsToProcess[i];
 
 			// If this lot is entirely completed with the process of being
 			// created, I can unregister it - removing any information that
 			// I was storing about its state
-			if (lotsToProcess[i].lotStatus == COMPLETED)
+			if (lotsToProcess[i].lotStatus == LOT_COMPLETED)
 			{
-				updatedState.lotID = lotsToProcess[i].lotID;
 				updatedState.controller = _stationControllerKind;
 				_networkInterface->GetChocolateLotStateWriter()->
 					UnregisterChocolateLotState(updatedState);
@@ -182,13 +182,15 @@ void StationController::ProcessLots()
 
 			// If this lot is being assigned to me, update its status to say 
 			// it is waiting at my station
-			if (lotsToProcess[i].assignedLotOwner == _stationControllerKind)
+			if (lotsToProcess[i].nextController == _stationControllerKind)
 			{
-				updatedState.lotID = lotsToProcess[i].lotID;
 				updatedState.controller = _stationControllerKind;
+
+				// TODO: better comments
+				// No next station, yet (this prevents this station controller
+				// from receiving its own state updates)
+				updatedState.nextController = INVALID_CONTROLLER;
  				updatedState.lotStatus = WAITING_AT_SC;
-				strcpy(updatedState.recipeName, lotsToProcess[i].recipeName);
-				updatedState.assignedLotOwner = _stationControllerKind;
 
 				_networkInterface->GetChocolateLotStateWriter()->
 					PublishChocolateLotState(updatedState);
@@ -199,25 +201,40 @@ void StationController::ProcessLots()
 		// just sleeping in place of real functionality
 		for (int i = 0; i < lotsToProcess.size(); i++)
 		{
-			if (lotsToProcess[i].assignedLotOwner == _stationControllerKind
-				&& lotsToProcess[i].lotStatus != COMPLETED)
+			if (lotsToProcess[i].nextController == _stationControllerKind)
 			{
-				DdsAutoType<ChocolateLotState> updatedState;
-				updatedState.lotID = lotsToProcess[i].lotID;
+				DdsAutoType<ChocolateLotState> updatedState = 
+					lotsToProcess[i];
 				updatedState.controller = _stationControllerKind;
  				updatedState.lotStatus = PROCESSING_AT_SC;
-				strcpy(updatedState.recipeName, lotsToProcess[i].recipeName);
-				updatedState.assignedLotOwner = _stationControllerKind;
+
+				// TODO: better comments
+				// No next station, yet (this prevents this station controller
+				// from receiving its own state updates)
+				updatedState.nextController = INVALID_CONTROLLER;
 
 				_networkInterface->GetChocolateLotStateWriter()->
 					PublishChocolateLotState(updatedState);
 
+				// TODO: process for the time listed in the recipe
 				// "Processing" the lot for 2 seconds.  Really only sleeping
 				printf("Station controller %s processing lot #%d\n", 
 						controllerKindString.c_str(), 
 						lotsToProcess[i].lotID);
 				DDS_Duration_t busySleep = {2,0};
 				NDDSUtility::sleep(busySleep);
+
+				// Increase the length of the ingredients list by 1
+				updatedState.ingredients.ensure_length(
+					updatedState.ingredients.length() + 1,
+					updatedState.ingredients.length() + 1);
+				string ingredientName;
+					StationControllerType::GetControllerIngredientName(
+						_stationControllerKind, ingredientName);
+				updatedState.ingredients[updatedState.ingredients.length() - 1] =
+					new char [ingredientName.size() + 1];
+				strcpy(updatedState.ingredients[updatedState.ingredients.length() - 1],
+					const_cast<char *>(ingredientName.c_str()));
 
 				// Who is the next station controller in the recipe?  Query the
 				// middleware to get the recipe and then send an update 
@@ -239,13 +256,14 @@ void StationController::ProcessLots()
 						// this lot as completed.
 						if (j == recipe.steps.length() - 1)
 						{
-							updatedState.lotStatus = COMPLETED;
+							updatedState.nextController = INVALID_CONTROLLER;
+							updatedState.lotStatus = LOT_COMPLETED;
 							break;
 						} else
 						{
 							// Assign this lot to the next control station in
 							// the recipe
-							updatedState.assignedLotOwner = 
+							updatedState.nextController = 
 								steps[j + 1].stationController;
 							updatedState.lotStatus = ASSIGNED_TO_SC;
 							break;
@@ -255,7 +273,7 @@ void StationController::ProcessLots()
 
 				string nextControllerKindString;
 				StationControllerType::GetControllerPrettyName(
-					updatedState.assignedLotOwner, nextControllerKindString);
+					updatedState.nextController, nextControllerKindString);
 				printf("Station controller %s sending lot #%d to %s\n", 
 						controllerKindString.c_str(), 
 						updatedState.lotID,
@@ -288,7 +306,10 @@ void PrintHelp()
 	cout << "Valid options are: " << endl;
 	cout << 
 		"    --controller-type [number]" <<
-		" Valid values 1-5. Type of controller to use" 
+		" Valid values 1-5. Type of controller this app "
+		<< endl
+		<< "                               " 
+		<< "represents" 
 		<< endl;
 	cout << 
 		"    --no-multicast" <<

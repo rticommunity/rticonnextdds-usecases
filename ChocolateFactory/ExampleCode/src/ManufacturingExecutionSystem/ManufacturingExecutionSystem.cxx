@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
 				recipeNames[i % 3].c_str()); 
 
 			// All lots must to go the sugar controller first
-			lotState.assignedLotOwner = SUGAR_CONTROLLER;
+			lotState.nextController = SUGAR_CONTROLLER;
 
 			// The current lot status is that it is assigned to a station
 			// controller.

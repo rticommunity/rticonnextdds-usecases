@@ -38,6 +38,13 @@ public:
 		com::rti::chocolatefactory::generated::StationControllerKind kind,
 		std::string &kindOut);
 
+	// Takes a StationControllerKind and fills in a string that represents
+	// the type of ingredient that controller adds	
+	static void GetControllerIngredientName(
+		com::rti::chocolatefactory::generated::StationControllerKind kind,
+		std::string &ingredientOut);
+
+
 };
 
 class LotStatusType
