@@ -1,0 +1,157 @@
+
+<!--
+RTI Data Distribution Service Deployment
+-->
+<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="c:/program files/rti/5.0.0/ndds.5.0.0/resource/qos_profiles_5.0.0/schema/rti_dds_profiles.xsd" 
+     version="5.0.0">
+
+    <qos_library name="RTIExampleQosLibrary">
+        <qos_profile name="StateData">
+            <datawriter_qos>
+                <!-- Alarms are valid and available as long as the -->
+                <!-- original application is alive. -->
+                <!-- Pattern: State Data or Last Value Cache -->
+                <durability>
+                    <kind>TRANSIENT_LOCAL_DURABILITY_QOS</kind>
+                </durability>
+                <history>
+                    <kind>KEEP_LAST_HISTORY_QOS</kind>
+                    <depth>1</depth>
+                </history>
+                <reliability>
+                    <kind>RELIABLE_RELIABILITY_QOS</kind>
+                </reliability>
+
+            </datawriter_qos>
+        </qos_profile>
+        <qos_profile name="SensorData">
+            <datawriter_qos>
+                <reliability>
+                    <kind>BEST_EFFORT_RELIABILITY_QOS</kind>
+                </reliability>
+            </datawriter_qos>
+        </qos_profile>
+    </qos_library>
+    
+    <!-- types -->
+    <types>
+    
+        <!-- Defining the alarm levels available -->
+        <enum name="AlarmLevel">
+            <enumerator name="WARNING"/>
+            <enumerator name="ERROR"/>
+        </enum>
+
+        <enum name="AlarmKind">
+            <enumerator name="TOO_COLD"/>
+            <enumerator name="TOO_HOT"/>
+        </enum>
+        
+        <!-- Defining the data type for alarm data -->
+        <struct name="AlarmType">
+            <!-- An ID of the application that is sending alarm data -->
+            <member name="appID" key="true" type="long"/>
+            
+            <!-- The type of alarm message that is being sent -->
+            <!-- Note that you must use type="nonBasic" and nonBasicTypeName for -->
+            <!-- for non-primitive types.  -->
+            <member name="alarmType" type="nonBasic" nonBasicTypeName="AlarmKind"/>
+            
+            <!-- Note that you must use type="nonBasic" and nonBasicTypeName for --> 
+            <!-- for non-primitive types.  -->
+            <member name="alarmLevel" type="nonBasic" nonBasicTypeName="AlarmLevel"/>
+        </struct>
+
+        <struct name="TemperatureType">
+            <member name="appID" type="long" key="true"/>
+            <member name="value" type="float"/>
+        </struct>
+    </types>
+
+
+    <!-- A namespace for a set of domains.  If you are reusing the same     -->
+    <!-- domain configurations in multiple applications, you should define  -->
+    <!-- them in a domain library.                                          -->
+    <domain_library name="ExampleDomains" >
+
+        <!-- A domain is a logical, isolated communication network. -->
+        <!-- Here you must associate data types and topics with a -->
+        <!-- particular domain. -->
+        <domain name="SenderDataDomain" domain_id="6">
+            <register_type name="AlarmType" kind="dynamicData"
+                     type_ref="AlarmType" />
+            <register_type name="TemperatureType" kind="dynamicData"
+                     type_ref="TemperatureType" />
+
+            <!-- Have topics Alarm and Temperature -->
+            <topic name="Alarm"   register_type_ref="AlarmType"/>
+            <topic name="Temperature" register_type_ref="TemperatureType" />
+
+        </domain>
+        <!-- This will not receive from the sender unless RTI Routing     -->
+        <!-- Service is used to bridge between these domains.             -->
+        <domain name="ReceiverDataDomain" domain_id="5">
+            <register_type name="AlarmType" kind="dynamicData"
+                     type_ref="AlarmType" />
+            <register_type name="TemperatureType" kind="dynamicData"
+                     type_ref="TemperatureType" />
+
+            <!-- Have topics Alarm and Temperature -->
+            <topic name="Alarm"   register_type_ref="AlarmType"/>
+            <topic name="Temperature" register_type_ref="TemperatureType" />
+
+        </domain>
+
+    </domain_library>
+
+    <!-- Grouping of communication objects -->
+    <participant_library name="ParticipantLibrary">
+
+        <!-- DomainParticipants are containers for all other communication -->
+        <!-- objects. They act within a single domain. (See <domain> above) -->
+        <domain_participant name="Sender"
+                            domain_ref="ExampleDomains::SenderDataDomain">
+
+            <!-- Container for DataWriters that actually send data -->
+
+            <publisher name="Publisher">
+
+                <!-- Object that sends Alarm data over the network.        -->
+                <data_writer name="AlarmWriter" topic_ref="Alarm">
+                    
+                    <!-- Alarms are valid and available as long as the      -->
+                    <!-- original application is alive. They must be sent   -->
+                    <!-- to late-joining DataReaders as they come online.   -->
+                    <!-- Pattern: State Data or Last Value Cache Pattern    -->
+                    <datawriter_qos base_name="RTIExampleQosLibrary::StateData"/>
+                </data_writer>
+                
+                <!-- Object that sends periodic temperature updates over    -->
+                <!-- the network.  -->
+                <data_writer name="TemperatureWriter" topic_ref="Temperature">
+
+                    <!-- Pattern: Periodic or Sensor Data Pattern -->                    
+                    <datawriter_qos base_name="RTIExampleQosLibrary::SensorData"/>
+                </data_writer>
+
+            </publisher>
+            
+        </domain_participant>
+        <!-- DomainParticipants are containers for all other communication -->
+        <!-- objects. They act within a single domain. (See <domain> above) -->
+        <domain_participant name="Receiver"
+                            domain_ref="ExampleDomains::ReceiverDataDomain">
+            <!-- Container for the DataReaders that actually receive data -->
+            <subscriber name="AlarmSubscriber">
+                <!-- DataReader that receives alarm data -->
+                <data_reader name="AlarmReader"   topic_ref="Alarm"/>
+
+                <!-- DataReader that receives temperature data -->
+                <data_reader name="TemperatureReader" topic_ref="Temperature"/>
+            </subscriber>
+
+        </domain_participant>
+
+    </participant_library>
+</dds>

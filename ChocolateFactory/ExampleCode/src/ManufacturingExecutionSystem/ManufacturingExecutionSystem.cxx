@@ -14,11 +14,13 @@ damages arising out of the use or inability to use the software.
 #include "../Generated/ChocolateFactory.h"
 #include "../CommonInfrastructure/DDSTypeWrapper.h"
 #include "../CommonInfrastructure/EnumPrintHelpers.h"
+#include "../CommonInfrastructure/OSAPI.h"
 #include "MESInterface.h"
 
 using namespace std;
 
 void PrintHelp();
+void *PrintLotUpdates(void *param);
 
 // ------------------------------------------------------------------------- //
 //
@@ -50,6 +52,11 @@ void PrintHelp();
 //      possible that some updates would be overwritten.  This guarantees 
 //      delivery of the _most recent_ update to the lot state.
 //
+// Note: it is possible to get chocolate lot state updates "out of order,"  
+// meaning that you may see an update saying that a particular controller is
+// processing the lot and THEN get an update saying it was assigned to that 
+// controller.  This is inherent in the fact that you are getting updates from
+// multiple sources that could be sending updates from multiple machines.
 // ------------------------------------------------------------------------- //
 
 int main(int argc, char *argv[])
@@ -65,7 +72,7 @@ int main(int argc, char *argv[])
 			++i;
 			if (i == argc)
 			{
-				cout << "Bad parameter: Did not pass number of plans" << endl;
+				cout << "Bad parameter: Did not pass number of lots" << endl;
 				return -1;
 			}
 			numLotsToProcess =  atoi(argv[i]);
@@ -129,6 +136,11 @@ int main(int argc, char *argv[])
 		// reads and writes data.
 		MESInterface mesInterface(xmlFiles);
 
+		// Start a thread that will listen for updates about lots as they pass
+		// through the different station controllers
+		OSThread *thread = new OSThread(
+			(ThreadFunction)PrintLotUpdates, &mesInterface);	
+		thread->Run();
 
 		DDS_Duration_t send_period = {timeBetweenLotCommands,0};
 
@@ -163,6 +175,9 @@ int main(int argc, char *argv[])
 			// The current lot status is that it is assigned to a station
 			// controller.
 			lotState.lotStatus = ASSIGNED_TO_SC;
+			
+			printf("Sending command to start lot with recipe %s\n", 
+				lotState.recipeName);
 
 			// Write the data to the network.  This is a thin wrapper 
 			// around the RTI Connext DDS DataWriter that writes data to
@@ -174,28 +189,8 @@ int main(int argc, char *argv[])
 		}
 
 		// Wait for updates about chocolate lots and print out their status
-		// TODO: move this into another thread
 		while (1) 
 		{
-			vector< DdsAutoType<ChocolateLotState> > lotStates;
-
-			// TODO: better comments
-			mesInterface.GetChocolateLotStateReader()->
-				WaitForChocolateLotUpdates(&lotStates);
-
-			for (int i = 0; i < lotStates.size(); i++)
-			{
-				string lotStatus, controllerName;
-				LotStatusType::GetLotStatusPrettyName(lotStates[i].lotStatus, 
-					lotStatus);
-				StationControllerType::GetControllerPrettyName(lotStates[i].controller,
-					controllerName);
-				printf("Lot #%d is in state: %s at controller: %s\n",
-					lotStates[i].lotID,
-					lotStatus.c_str(),
-					controllerName.c_str());
-
-			}
 			NDDSUtility::sleep(send_period);
 		}
 	}
@@ -204,8 +199,69 @@ int main(int argc, char *argv[])
 		cout << "Application exception" << message << endl;
 	}
 
-
 	return 0;
+}
+
+// ------------------------------------------------------------------------- //
+// This function waits for updates to lot states as they arrive over DDS (over
+// the network or shared memory).  When it receives updates to lot states, it
+// prints the current state of the lot to the screen.
+// 
+// Note: it is possible to get these updates "out of order," meaning that you 
+// may see an update saying that a particular controller is processing the lot
+// and THEN get an update saying it was assigned to that controller.  This is 
+// inherent in the fact that you are getting updates from multiple sources that
+// could be on multiple machines.
+void *PrintLotUpdates(void *param)
+{
+	MESInterface *mesInterface = (MESInterface *)param;
+
+	while (1)
+	{
+		vector< DdsAutoType<ChocolateLotState> > lotStates;
+
+		// This blocks a thread until chocolate lot state updates become 
+		// available over DDS.  It fills in the vector with chocolate lot state
+		// updates.
+		mesInterface->GetChocolateLotStateReader()->
+			WaitForChocolateLotUpdates(&lotStates);
+
+		// Iterate over the chocolate lot state updates that have arrived
+		for (int i = 0; i < lotStates.size(); i++)
+		{
+			string lotStatus, controllerName;
+
+			// Get the name of the lot status to help with printing 
+			LotStatusType::GetLotStatusPrettyName(lotStates[i].lotStatus, 
+				lotStatus);
+
+			// If the lot is not "assigned to station controller" print the
+			// current station controller
+			if (lotStates[i].lotStatus != ASSIGNED_TO_SC)
+			{
+				// Get the name of the current station controller that is
+				// updating the state of the chocolatel ot.
+				StationControllerType::GetControllerPrettyName(
+					lotStates[i].controller,
+					controllerName);
+				printf("Lot #%d is in state: %s at controller: %s\n",
+					lotStates[i].lotID,
+					lotStatus.c_str(),
+					controllerName.c_str());
+			} else
+			{
+				// If the lot is "assigned to station controller," print the
+				// name of the next station controller that it is assigned to
+				StationControllerType::GetControllerPrettyName(
+					lotStates[i].nextController,
+					controllerName);
+				printf("Lot #%d is in state: %s at controller: %s\n",
+					lotStates[i].lotID,
+					lotStatus.c_str(),
+					controllerName.c_str());
+			}
+		}
+	}
 }
 
 void PrintHelp()

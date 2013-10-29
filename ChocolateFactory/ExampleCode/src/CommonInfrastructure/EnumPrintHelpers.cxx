@@ -13,9 +13,11 @@ damages arising out of the use or inability to use the software.
 using namespace com::rti::chocolatefactory::generated;
 
 
-// TODO comment this
+// ------------------------------------------------------------------------- //
+// Converts from a StationControllerKind to a string representation of what
+// the Station Controller does
 void StationControllerType::GetControllerPrettyName(
-		com::rti::chocolatefactory::generated::StationControllerKind kind,
+		StationControllerKind kind,
 		std::string &kindOut)
 {
 	if (kind == SUGAR_CONTROLLER)
@@ -41,9 +43,11 @@ void StationControllerType::GetControllerPrettyName(
 
 }
 
-// TODO: Comment this
+// ------------------------------------------------------------------------- //
+// Converts from a StationControllerKind to a string representation of the
+// enumeration kind
 void StationControllerType::GetControllerEnumName(
-		com::rti::chocolatefactory::generated::StationControllerKind kind,
+		StationControllerKind kind,
 		std::string &kindOut)
 {
 	if (kind == SUGAR_CONTROLLER)
@@ -70,8 +74,11 @@ void StationControllerType::GetControllerEnumName(
 }
 
 
+// ------------------------------------------------------------------------- //
+// Converts from a StationControllerKind to a string representation of the
+// ingredient that the Station Controller adds to the recipe
 void StationControllerType::GetControllerIngredientName(
-		com::rti::chocolatefactory::generated::StationControllerKind kind,
+		StationControllerKind kind,
 		std::string &ingredientOut)
 {
 	if (kind == SUGAR_CONTROLLER)
@@ -99,7 +106,7 @@ void StationControllerType::GetControllerIngredientName(
 }
 
 void LotStatusType:: GetLotStatusPrettyName(
-		com::rti::chocolatefactory::generated::LotStatusKind kind,
+		LotStatusKind kind,
 		std::string &kindOut)
 {
 	if (kind == ASSIGNED_TO_SC)

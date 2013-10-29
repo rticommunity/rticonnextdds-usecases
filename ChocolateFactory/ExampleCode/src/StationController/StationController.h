@@ -26,9 +26,6 @@ public:
 	// --- Process lots --- 
 	void ProcessLots();
 
-	// --- Get the nice name of the station controller kind --- 
-	void GetControllerKind(std::string &kindOut);
-
 private:
 
 	// --- Private members --- 

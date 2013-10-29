@@ -332,7 +332,6 @@ Subscriber* DDSCommunicator::CreateSubscriber(
 ApplicationNetInterface::ApplicationNetInterface(
 	std::vector<std::string>qosFileNames)
 {
-	// TODO:  Throw exception if NULL???
 	_communicator = new DDSCommunicator();
 
 }

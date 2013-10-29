@@ -51,8 +51,8 @@ damages arising out of the use or inability to use the software.
 // For information on the ChocolateRecipe or ChocolateLotState types, please see 
 // the ChocolateFactory.idl file.  
 //
-// For information on the quality of service for throughput vs. latency, please
-// see the recipe_profiles_multicast.xml file.
+// For information on the quality of service for state data, please see the 
+// recipe_profiles_multicast.xml file.
 //
 // Reading Recipe data:
 // --------------------
@@ -67,8 +67,8 @@ damages arising out of the use or inability to use the software.
 //      (TRANSIENT_LOCAL_DURABILITY_QOS)
 //   3. A predetermined amount of state is sent to any late-joiners.  In this 
 //      case, applications are only interested in the current state of each
-//      chocolate lot (or the current chocolate chip chocolate recipe), which
-//      translates to a history with depth = 1, kind = KEEP_LAST_HISTORY_QOS
+//      chocolate lot (or the current chocolate recipe), which translates to a
+//      history with depth = 1, kind = KEEP_LAST_HISTORY_QOS
 //
 
 class ChocolateLotStateWriter;

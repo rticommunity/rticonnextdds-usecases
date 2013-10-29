@@ -22,8 +22,10 @@ const long MAX_RECIPE_STEPS = 9;
 const long MAX_STRING_LENGTH = 256;
 
 
-// TODO: Comments in IDL!
-
+// The kind of station controller that is processing the chocolate. Note that
+// a real recipe includes more types of controllers and more steps, but this 
+// is a simple example that only shows the steps where ingredients are added to
+// the chocolate lot.
 enum StationControllerKind
 {
 	INVALID_CONTROLLER,
@@ -34,6 +36,8 @@ enum StationControllerKind
 	MILK_CONTROLLER
 };
 
+// A lot is either assigned to station controller, waiting to be processed at
+// a station controller, being processed at a station controller, or completed.
 enum LotStatusKind
 {
 	ASSIGNED_TO_SC,
@@ -42,7 +46,9 @@ enum LotStatusKind
 	LOT_COMPLETED
 };
 
-// TODO: explain that this is a placeholder for a real step
+// This is a placeholder for a real step in a recipe, describing only which 
+// station controller should be processing the lot and how long that station 
+// controller should process the lot for.
 struct RecipeStep
 {
 	StationControllerKind stationController;

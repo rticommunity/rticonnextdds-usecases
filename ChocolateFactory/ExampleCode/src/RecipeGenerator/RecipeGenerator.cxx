@@ -129,31 +129,47 @@ int main(int argc, char *argv[])
 			sprintf(recipe.recipeName, "%s", 
 				recipes[i].c_str()); 
 
-			// TODO:  recipe stations
+			// This sets up the recipes that can be used to create dark 
+			// chocolate, milk chocolate, or white chocolate.  In place of real
+			// recipe steps, it includes the timing that each step in the 
+			// recipe should require.  
 			if (0 == strcmp(recipe.recipeName, "Dark"))
 			{
 				recipe.steps.ensure_length(4,4);
 				recipe.steps[0].stationController = SUGAR_CONTROLLER;
+				recipe.steps[0].seconds = 1;
 				recipe.steps[1].stationController = COCOA_BUTTER_CONTROLLER;
+				recipe.steps[1].seconds = 2;
 				recipe.steps[2].stationController = COCOA_LIQUOR_CONTROLLER;
+				recipe.steps[2].seconds = 3;
 				recipe.steps[3].stationController = VANILLA_CONTROLLER;
+				recipe.steps[3].seconds = 4;
 			}
 			if (0 == strcmp(recipe.recipeName, "Milk"))
 			{
 				recipe.steps.ensure_length(5,5);
 				recipe.steps[0].stationController = SUGAR_CONTROLLER;
+				recipe.steps[0].seconds = 1;
 				recipe.steps[1].stationController = COCOA_BUTTER_CONTROLLER;
+				recipe.steps[1].seconds = 2;
 				recipe.steps[2].stationController = COCOA_LIQUOR_CONTROLLER;
+				recipe.steps[2].seconds = 3;
 				recipe.steps[3].stationController = MILK_CONTROLLER;
+				recipe.steps[3].seconds = 4;
 				recipe.steps[4].stationController = VANILLA_CONTROLLER;
+				recipe.steps[4].seconds = 5;
 			}
 			if (0 == strcmp(recipe.recipeName, "White"))
 			{
 				recipe.steps.ensure_length(4,4);
 				recipe.steps[0].stationController = SUGAR_CONTROLLER;
+				recipe.steps[0].seconds = 1;
 				recipe.steps[1].stationController = COCOA_BUTTER_CONTROLLER;
+				recipe.steps[1].seconds = 2;
 				recipe.steps[2].stationController = MILK_CONTROLLER;
+				recipe.steps[2].seconds = 3;
 				recipe.steps[3].stationController = VANILLA_CONTROLLER;
+				recipe.steps[3].seconds = 4;
 
 			}
 
@@ -163,6 +179,9 @@ int main(int argc, char *argv[])
 			// the network.
 			recipeInterface.Write(recipe);
 
+			// Sleep before sending the next recipe.  There is no real
+			// requirement to sleep between sends, except that it stresses
+			// the network less
 			NDDSUtility::sleep(send_period);
 		}
 

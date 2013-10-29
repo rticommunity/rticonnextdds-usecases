@@ -94,12 +94,14 @@
     <ClInclude Include="..\src\CommonInfrastructure\DDSCommunicator.h" />
     <ClInclude Include="..\src\CommonInfrastructure\DDSTypeWrapper.h" />
     <ClInclude Include="..\src\CommonInfrastructure\EnumPrintHelpers.h" />
+    <ClInclude Include="..\src\CommonInfrastructure\OSAPI.h" />
     <ClInclude Include="..\src\ManufacturingExecutionSystem\MESInterface.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\CommonInfrastructure\ChocolateLotStateEntities.cxx" />
     <ClCompile Include="..\src\CommonInfrastructure\DDSCommunicator.cxx" />
     <ClCompile Include="..\src\CommonInfrastructure\EnumPrintHelpers.cxx" />
+    <ClCompile Include="..\src\CommonInfrastructure\OSAPI.cxx" />
     <ClCompile Include="..\src\ManufacturingExecutionSystem\ManufacturingExecutionSystem.cxx" />
     <ClCompile Include="..\src\ManufacturingExecutionSystem\MESInterface.cxx" />
   </ItemGroup>

@@ -14,10 +14,9 @@ using namespace DDS;
 using namespace com::rti::chocolatefactory::generated;
 
 
-// TODO: change comment for MES
 // ------------------------------------------------------------------------- //
-// The StationControllerInterface is the network interface to the whole 
-// Station Controller application.  This creates DataReaders and DataWriters
+// The MESInterface is the network interface to the whole Manufacturing
+// Execution System application.  This creates DataReaders and DataWriters
 // in order to receive and send data.  
 //
 // This interface is built from:
@@ -31,31 +30,30 @@ using namespace com::rti::chocolatefactory::generated;
 //
 // Reading ChocolateLotState data:
 // ------------------------------
-// The station controller listens to chocolate lot state data that indicates that
-// a chocolate lot is on the way to this station controller.
+// The Manufacturing Execution System listens to chocolate lot state data that 
+// indicates the current location of the chocolate lot state according to each
+// Station Controller.  
 //
-// It uses a DDS DataReader, with a content filter to receive only updates
-// that indicate that it is the next station controller to process the lot.
+// !!!
+// NOTE: This may receive updates about a chocolate lot state out of order,
+// because the chocolate lot state is being updated by multiple applications
+// that could reside on multiple machines.  Getting in-order data from multiple
+// sources can be difficult, and may require finely-synchronized clocks on each
+// machine.
 // 
 // Writing ChocolateLotState data:
 // ----------------------------
-// This application sends chocolate lot state data, announcing that the current
-// lot of chocolates is either:
-//   1. Waiting to be processed by this station controller
-//   2. Being processed by this station controller
-//   3. Done being processed by this station controller/ready to be processed
-//      by the next station controller.
+// This application sends chocolate lot state data, using the announcement to 
+// assign the chocolate lot to a particular controller.  This sets the 
+// chocolate lot state to:
+//    - Assigned to the next station controller.
 // 
 // For information on the ChocolateRecipe or ChocolateLotState types, please see the
 // ChocolateFactory.idl file.  
 //
-// For information on the quality of service for throughput vs. latency, please
-// see the recipe_profiles_multicast.xml file.
+// For information on the quality of service for state data, please see the 
+// recipe_profiles_multicast.xml file.
 //
-// Reading Recipe data:
-// --------------------
-// This application reads recipe data to know which state controller to send
-// the chocolate lot to when it is done.
 //
 // Quality of Service:
 // -------------------
@@ -65,10 +63,9 @@ using namespace com::rti::chocolatefactory::generated;
 //      (TRANSIENT_LOCAL_DURABILITY_QOS)
 //   3. A predetermined amount of state is sent to any late-joiners.  In this 
 //      case, applications are only interested in the current state of each
-//      chocolate lot (or the current chocolate chip chocolate recipe), which
-//      translates to a history with depth = 1, kind = KEEP_LAST_HISTORY_QOS
+//      chocolate lot (or the current chocolate recipe), which translates to a
+//      history with depth = 1, kind = KEEP_LAST_HISTORY_QOS
 //
-
 // ------------------------------------------------------------------------- //
 
 MESInterface::MESInterface(
@@ -136,13 +133,12 @@ MESInterface::MESInterface(
 		throw errss.str();
 	}
 
-	// TODO: Comments
 	// Creating the application's ChocolateLotStateReader object.
 	// We could give the application access to the DataReader directly, but 
 	// this simplifies the application's access - this creates the objects that
 	// allow the application to block a thread until a ChocolateLotState update
-	// is received that notifies this Station Controller that it needs to 
-	// process a chocolate lot.
+	// is received that notifies this MES that a chocolate lot state has been
+	// updated.
 	// This DataReader is configured with QoS for state data.
 	_chocolateLotStateReader = new ChocolateLotStateReader(this, subscriber, 
 		"RTIExampleQosLibrary",

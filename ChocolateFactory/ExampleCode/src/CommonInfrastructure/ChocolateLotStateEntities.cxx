@@ -23,7 +23,6 @@ ChocolateLotStateWriter::ChocolateLotStateWriter(
 						const std::string &qosLibrary,
 						const std::string &qosProfile) 
 {
-	ReturnCode_t retcode;
 
 	if (netInterface == NULL) 
 	{

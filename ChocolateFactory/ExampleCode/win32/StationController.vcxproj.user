@@ -4,7 +4,7 @@
     <LocalDebuggerEnvironment>path=%NDDSHOME%\lib\i86Win32VS2010;%PATH%</LocalDebuggerEnvironment>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>$(SolutionDir)$(Configuration)\i86Win32VS2010\</LocalDebuggerWorkingDirectory>
-    <LocalDebuggerCommandArguments>--controller-type 2</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>--controller-type 1</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LocalDebuggerWorkingDirectory>$(SolutionDir)$(Configuration)\i86Win32VS2010\</LocalDebuggerWorkingDirectory>

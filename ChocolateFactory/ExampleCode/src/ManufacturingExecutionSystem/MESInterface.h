@@ -21,7 +21,7 @@ using namespace com::rti::chocolatefactory::generated;
 
 // ----------------------------------------------------------------------------
 //
-// The manufacturing execution system  interface provides lot plans
+// The manufacturing execution system interface provides lot plans
 // over the network (or shared memory) to other applications that are interested 
 // in monitoring the state of chocolate lots.  
 //		

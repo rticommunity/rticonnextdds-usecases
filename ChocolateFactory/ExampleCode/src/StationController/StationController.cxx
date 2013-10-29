@@ -21,11 +21,32 @@ using namespace com::rti::chocolatefactory::generated;
 
 void PrintHelp();
 
-// TODO: Update comments
 // ------------------------------------------------------------------------- //
 //
 // Station Controller Application:
-// TODO: better comments
+// This application acts as a "station controller" in a chocolate factory. Its
+// purpose is to process a chocolate lot according to a recipe for the chocolate
+// either dark chocolate, milk chocolate, or white chocolate.
+// 
+// To "process" a lot, this application retrieves the recipe that this lot is
+// using, and based on how much time the step should take, it sleeps.
+//
+// This application receives:
+//     1. Recipe data: it receives recipes so it can get information on how to
+//        process a particular lot.  (Note that this exmaple replaces real 
+//        recipe information with how long to sleep)
+//     2. Filtered chocolate lot state updates: this application creates a 
+//        content-filtered topic, so it receives only updates about chocolate
+//        lots that: 
+//          a. Are assigned to it, or
+//          b. Are completed (so it can unregister that lot)
+// 
+// This application sends:
+//     1. Updates to a chocolate state saying either:
+//          a. It is waiting at this station controller
+//          b. This station controller is processing it
+//          c. It is assigned to the next station controller in the recipe
+//          d. It is completed (no more station controllers in the recipe)
 //
 // ------------------------------------------------------------------------- //
 
@@ -39,13 +60,16 @@ int main(int argc, char *argv[])
 
 	for (int i = 0; i < argc; i++)
 	{
-
+		// There are five types of valid controller described in the IDL type 
+		// StationControllerKind: Sugar controller, cocoa butter controller
+		// cocoa liquor controller, vanilla controller, and milk controller
 		if (0 == strcmp(argv[i], "--controller-type"))
 		{
 			++i;
 			if (i == argc)
 			{
-				cout << "Bad parameter: Did not pass a station controller type" << endl;
+				cout << "Bad parameter: Did not pass a station controller type"
+					<< endl;
 				return -1;
 			}
 			controllerType = atoi(argv[i]);
@@ -53,7 +77,8 @@ int main(int argc, char *argv[])
 			// Only curently have 5 types of controller
 			if (controllerType < 1 || controllerType > 5)
 			{
-				cout << "Bad parameter: controller types are between 1 and 5" << endl;
+				cout << "Bad parameter: controller types are between 1 and 5" 
+					<< endl;
 				return -1;
 			}
 		} else if (0 == strcmp(argv[i], "--no-multicast"))
@@ -101,17 +126,22 @@ int main(int argc, char *argv[])
 
 		// This sets up the data interface for the station controller - what 
 		// data it sends and receives over the network, along with the quality
-		// of service
+		// of service.  From the standpoint of RTI Connext, this is where
+		// the most interesting code is that sets up all of the objects that
+		// allow the application to communicate over shared memory or over 
+		// the network
 		StationControllerInterface *stationControllerInterface
 					= new StationControllerInterface(
 								(StationControllerKind)controllerType,
 								xmlFiles);
 
+		// Create a new Station Controller object.
 		StationController *controller = new StationController(
 			(StationControllerKind)controllerType,
 			stationControllerInterface);
 
-		// Process incoming lots
+		// Process incoming lots, including sending lot updates over
+		// RTI Connext
 		controller->ProcessLots();
 
 		delete controller;
@@ -127,7 +157,6 @@ int main(int argc, char *argv[])
 }
 
 
-// TODO: Initialize the station controller interface in the constructor?
 // ----------------------------------------------------------------------------
 // Station controller constructor.  
 
@@ -139,27 +168,40 @@ StationController::StationController(
 	_networkInterface = scInterface;
 	_shuttingDown = false;
 }
+
 // ----------------------------------------------------------------------------
 // ProcessLots:
 // This method executes the main logic for the StationController:
-//   1.) wait for lot status
-//   2.) process
-//   3.) pass to next sc
-
-// TODO: move this to multiple methods?
+//   1. Wait for lot status (filtered so it will only receive lots that are 
+//      assigned to this station controller, or that have been completed)
+//   2. Update lots to say they are being processed
+//   2. Process lots
+//   3. Update lot status to say it is assigned to the next controller
+//
 void StationController::ProcessLots()
 {
 	while (!_shuttingDown)
 	{
+
+		// --- Wait for lots to process ---
+
+		string controllerKindString;
+		StationControllerType::GetControllerPrettyName(
+			_stationControllerKind, controllerKindString);
+		printf("Station controller %s waiting for data\n", 
+			controllerKindString.c_str());
+
 		vector< DdsAutoType<ChocolateLotState> > lotsToProcess;
+
+		// This network interface receives lot state updates that are filtered
+		// for just this station controller.  This method will block this 
+		// thread until there are lots that should be processed (or a timeout
+		// occurs).
 		_networkInterface->
 			GetChocolateLotStateReader()->WaitForChocolateLotUpdates(
 					&lotsToProcess);
 
-		string controllerKindString;
-		GetControllerKind(controllerKindString);
-		printf("Station controller %s waiting for data\n", 
-			controllerKindString.c_str());
+		// --- Update lots to WAITING, or unregister completed lots --- 
 
 		// Announce that all lots I have received requests for are waiting at
 		// this StationController to be processed.
@@ -169,80 +211,80 @@ void StationController::ProcessLots()
 			DdsAutoType<ChocolateLotState> updatedState = 
 				lotsToProcess[i];
 
-			// If this lot is entirely completed with the process of being
-			// created, I can unregister it - removing any information that
-			// I was storing about its state
+			// Controller updating/unregistering this lot is me
+			updatedState.controller = _stationControllerKind;
+
+			// --- Unregister completed lots ---
+			// If this lot is entirely completed being created, I can
+			// unregister it - removing any information that I was storing
+			// about its state.  This means that late-joining applications will
+			// not receive updates about this lot from me. If we fail to
+			// unregister, the state of this lot will be available until this
+			// application shuts down.
 			if (lotsToProcess[i].lotStatus == LOT_COMPLETED)
 			{
-				updatedState.controller = _stationControllerKind;
+				// Call to unregister lot
 				_networkInterface->GetChocolateLotStateWriter()->
 					UnregisterChocolateLotState(updatedState);
 				continue;
 			}
 
+			// --- Update lots assigned to me to waiting state --- 
 			// If this lot is being assigned to me, update its status to say 
 			// it is waiting at my station
 			if (lotsToProcess[i].nextController == _stationControllerKind)
 			{
-				updatedState.controller = _stationControllerKind;
-
-				// TODO: better comments
-				// No next station, yet (this prevents this station controller
-				// from receiving its own state updates)
+				// Next station is invalid until I am complete
 				updatedState.nextController = INVALID_CONTROLLER;
+
+				// State is waiting at the controller
  				updatedState.lotStatus = WAITING_AT_SC;
 
+				// Write this update to the network
 				_networkInterface->GetChocolateLotStateWriter()->
 					PublishChocolateLotState(updatedState);
 			}
 		}
 
-		// Process the lots that we know about.  "Processing" a lot involves
+		// --- Process lots --- 
+		// Process the lots that we know about. "Processing" a lot involves
 		// just sleeping in place of real functionality
 		for (int i = 0; i < lotsToProcess.size(); i++)
 		{
+			// Check if this lot is assigned to me (rather than completed)
 			if (lotsToProcess[i].nextController == _stationControllerKind)
 			{
+				// Fill in updated state
 				DdsAutoType<ChocolateLotState> updatedState = 
 					lotsToProcess[i];
 				updatedState.controller = _stationControllerKind;
  				updatedState.lotStatus = PROCESSING_AT_SC;
 
-				// TODO: better comments
-				// No next station, yet (this prevents this station controller
-				// from receiving its own state updates)
+				// No next controller assigned until I am done
 				updatedState.nextController = INVALID_CONTROLLER;
 
+				// Write the chocolate lot state over the network
 				_networkInterface->GetChocolateLotStateWriter()->
 					PublishChocolateLotState(updatedState);
 
-				// TODO: process for the time listed in the recipe
-				// "Processing" the lot for 2 seconds.  Really only sleeping
-				printf("Station controller %s processing lot #%d\n", 
-						controllerKindString.c_str(), 
-						lotsToProcess[i].lotID);
-				DDS_Duration_t busySleep = {2,0};
-				NDDSUtility::sleep(busySleep);
+				// --- Query recipe for this lot --- 
 
-				// Increase the length of the ingredients list by 1
-				updatedState.ingredients.ensure_length(
-					updatedState.ingredients.length() + 1,
-					updatedState.ingredients.length() + 1);
-				string ingredientName;
-					StationControllerType::GetControllerIngredientName(
-						_stationControllerKind, ingredientName);
-				updatedState.ingredients[updatedState.ingredients.length() - 1] =
-					new char [ingredientName.size() + 1];
-				strcpy(updatedState.ingredients[updatedState.ingredients.length() - 1],
-					const_cast<char *>(ingredientName.c_str()));
-
-				// Who is the next station controller in the recipe?  Query the
-				// middleware to get the recipe and then send an update 
-				// assigning this lot to the next station
+				// The GetRecipe() call queries recipes that are stored in the
+				// middleware's queue.
 				DdsAutoType<ChocolateRecipe> recipe;
 				_networkInterface->GetRecipeReader()->GetRecipe(
 					lotsToProcess[i].recipeName, &recipe);
 
+				// Get the current recipe step information to know how to
+				// process the lot
+				RecipeStep currentStep;
+
+				// Start to fill in the next state of the chocolate lot based
+				// on the next recipe step.
+				DdsAutoType<ChocolateLotState> nextState
+					= lotsToProcess[i];
+
+				// Iterate over the recipe steps 
 				RecipeStep *steps = new RecipeStep[MAX_RECIPE_STEPS];
 				recipe.steps.to_array(steps, recipe.steps.length());
 
@@ -252,38 +294,72 @@ void StationController::ProcessLots()
 					// in the process.
 					if (steps[j].stationController == _stationControllerKind)
 					{
+						// Set currentStep to the current recipe step
+						currentStep = steps[j];
+
 						// If this is the last step in the recipe, we can mark
 						// this lot as completed.
 						if (j == recipe.steps.length() - 1)
 						{
-							updatedState.nextController = INVALID_CONTROLLER;
-							updatedState.lotStatus = LOT_COMPLETED;
-							break;
+							nextState.nextController = INVALID_CONTROLLER;
+							nextState.lotStatus = LOT_COMPLETED;
 						} else
 						{
-							// Assign this lot to the next control station in
-							// the recipe
-							updatedState.nextController = 
+							nextState.nextController = 
 								steps[j + 1].stationController;
-							updatedState.lotStatus = ASSIGNED_TO_SC;
-							break;
+							nextState.lotStatus = ASSIGNED_TO_SC;
 						}
+
+						break;
 					}
 				}
 
+				// --- "Process" lot (really just sleep) --- 
+				DDS_Duration_t busySleep;
+				busySleep.sec = currentStep.seconds;
+				busySleep.nanosec = 0;
+				printf("Station controller %s processing lot #%d for "
+					"%d seconds\n", 
+						controllerKindString.c_str(), 
+						lotsToProcess[i].lotID,
+						currentStep.seconds);
+				NDDSUtility::sleep(busySleep);
+			
+				// --- Prepare the next state to publish --- 
+
+				// Add the ingredients from this station controller to the
+				// ingredient list in this lot.
+
+				// Increase the length of the ingredients list by 1
+				nextState.ingredients.ensure_length(
+					nextState.ingredients.length() + 1,
+					nextState.ingredients.length() + 1);
+				string ingredientName;
+					
+				// Add the ingredient to the list in the chocolate lot state
+				StationControllerType::GetControllerIngredientName(
+						_stationControllerKind, ingredientName);
+				nextState.ingredients[nextState.ingredients.length() - 1] =
+					new char [ingredientName.size() + 1];
+				strcpy(nextState.ingredients[nextState.ingredients.length() - 1],
+					const_cast<char *>(ingredientName.c_str()));
+
+				// Fill in the next controller based on the recipe we queried
+				// earlier
 				string nextControllerKindString;
 				StationControllerType::GetControllerPrettyName(
-					updatedState.nextController, nextControllerKindString);
+					nextState.nextController, nextControllerKindString);
 				printf("Station controller %s sending lot #%d to %s\n", 
 						controllerKindString.c_str(), 
-						updatedState.lotID,
+						nextState.lotID,
 						nextControllerKindString.c_str());
 
+				// --- Publish updated state --- 
 				// Update to say we are done with lot, and it is time for
 				// the next station controller to process it, or that it is 
 				// completed.
 				_networkInterface->GetChocolateLotStateWriter()->
-					PublishChocolateLotState(updatedState);
+					PublishChocolateLotState(nextState);
 
 			}
 
@@ -292,15 +368,11 @@ void StationController::ProcessLots()
 	}
 }
 
-
-// TODO comment this
-void StationController::GetControllerKind(std::string &kindOut)
-{
-	StationControllerType::GetControllerPrettyName(
-		_stationControllerKind, 
-		kindOut);
-}
-
+// ----------------------------------------------------------------------------
+// PrintHelp:
+// Function that prints out the help if somebody runs the application with 
+// --help
+//
 void PrintHelp()
 {
 	cout << "Valid options are: " << endl;
