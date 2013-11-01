@@ -46,7 +46,9 @@ public:
 	{
 		srand(time(NULL));
 		_streamId = rand();
-		printf("Created frame publisher with unique stream ID: %d\n", _streamId);
+		std::cout << "Created frame publisher with unique stream ID: " << 
+			_streamId << std::endl;
+
 	}
 
 	// ------------------------------------------------------------------------
@@ -100,6 +102,7 @@ private:
 	// --- Private members --- 
 	int _seqNum;
 
+	// Each video streamer has a different stream ID
 	int _streamId;
 
 };
@@ -159,10 +162,9 @@ private:
 int main (int argc, char *argv[])
 {
 
-	printf("--- Starting publisher application. --- \n");
-	printf("This application will read a video file, and publish it over RTI"
-		" Connext DDS \nmiddleware\n");
-	vector<string> xmlFiles;
+	cout << "--- Starting publisher application. --- " << endl;
+	cout << "This application will read a video file, and publish it over RTI"
+		<< " Connext DDS " << endl << "middleware" << endl;
 	bool multicastAvailable = true;
 
 	for (int i = 0; i < argc; i++)
@@ -184,6 +186,12 @@ int main (int argc, char *argv[])
 		}
 
 	}
+
+	// Set up paths for XML files.  The profiles are for applications that 
+	// have no multicast available at all, or that have multicast available
+	// on the network.
+	vector<string> xmlFiles;
+
 	if (multicastAvailable)
 	{
 		// Adding the XML files that contain profiles used by this application
@@ -208,7 +216,7 @@ int main (int argc, char *argv[])
 
     if (NULL == _fullpath(fullPath, relativePath.c_str(), 512))
 	{
-		printf("Error getting file path\n");
+		cout << "Error getting file path" << endl;
 	}
 	EMDSVideoSource *videoSource = new EMDSVideoSource(
 		fullPath);
@@ -217,7 +225,7 @@ int main (int argc, char *argv[])
 	char fullPath[PATH_MAX];
 	if (NULL == realpath(relativePath.c_str(), fullPath))
 	{
-		printf("Error getting the file path\n");
+		cout << "Error getting the file path" << endl;
 	}
 	EMDSVideoSource *videoSource = new EMDSVideoSource(
 		fullPath);
@@ -226,14 +234,14 @@ int main (int argc, char *argv[])
 	// If the video source was not created correctly, return an error.
 	if (videoSource == NULL)
 	{
-		printf("Failed to create video source\n");
+		cout << "Failed to create video source" << endl;
 		return -1;
 	}
 
 	// Initialize the video source, including opening the file
 	if (videoSource->Initialize() != 0)
 	{
-		printf("Failed to initialize video\n");
+		cout << "Failed to initialize video" << endl;
 		return -1;
 	}
 
@@ -268,7 +276,8 @@ int main (int argc, char *argv[])
 		while (!compatibilityCheck.DiscoveredCompatibleReader())
 		{
 			DDS_Duration_t send_period = {2,0};
-			printf("Waiting for a compatible video subscriber to come online\n");
+			cout << "Waiting for a compatible video subscriber to come "
+				<< "online" << endl;
 			NDDSUtility::sleep(send_period);
 		}
 

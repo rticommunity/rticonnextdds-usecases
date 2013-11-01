@@ -7,6 +7,7 @@ any warranty for fitness for any purpose. RTI is under no obligation to maintain
 support the Software.  RTI shall not be liable for any incidental or consequential 
 damages arising out of the use or inability to use the software.
 **********************************************************************************************/
+#include <iostream>
 #include "VideoPublisherInterface.h"
 
 
@@ -167,8 +168,8 @@ bool VideoPublisherInterface::Write(DdsAutoType<VideoStream> data)
 		return false;
 	}
 
-/*	printf("Writing sample #%d, length: %d\n", 
-		data.equence_number, data.frame.length());*/
+/*	cout << "Writing sample #" << data.equence_number
+		<< ", length: " << data.frame.length() << endl;*/
 
 	return true;
 
@@ -240,7 +241,8 @@ void VideoPublisherDiscoveryListener::on_data_available(DDSDataReader *reader)
 
 	if (retcode != DDS_RETCODE_OK) 
 	{
-		printf("Error: failed to access data from the built-in reader\n");
+		std::cout << "Error: failed to access data from the built-in reader" 
+			<< std::endl;
 		return;
 	}
 
@@ -284,14 +286,14 @@ void VideoPublisherDiscoveryListener::on_data_available(DDSDataReader *reader)
 		{
 			// Will not write to this DataReader.  Using the ignore() 
 			// API to ignore the participant and 
-			printf("Discovered a DataReader with an incompatible codec. "
-				"Ignoring it (not sending it any data)\n");
+			std::cout << "Discovered a DataReader with an incompatible codec. "
+				<< "Ignoring it (not sending it any data)" << std::endl;
 			DDSDomainParticipant *participant =
 				reader->get_subscriber()->get_participant();
 			retcode = participant->ignore_subscription(info_seq[i].instance_handle);
 			if (retcode != DDS_RETCODE_OK) 
 			{
-				printf("Error ignoring participant: %d\n", retcode);
+				std::cout << "Error ignoring participant: " << retcode << std::endl;
 				return;
 			}
 		}

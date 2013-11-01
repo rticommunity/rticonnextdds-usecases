@@ -8,6 +8,7 @@ support the Software.  RTI shall not be liable for any incidental or consequenti
 damages arising out of the use or inability to use the software.
 **********************************************************************************************/
 
+#include <iostream>
 #include <vector>
 #include <sstream>
 #include "../Generated/VideoData.h"
@@ -171,7 +172,7 @@ void VideoStreamListener::on_data_available(DataReader *reader)
 		if ((retCode != DDS_RETCODE_OK) &&
 			(retCode != DDS_RETCODE_NO_DATA))
 		{
-			printf("Error receiving data\n");
+			std::cout << "Error receiving data" << std::endl;
 			return;
 		}
 
@@ -183,7 +184,7 @@ void VideoStreamListener::on_data_available(DataReader *reader)
 				if ((infoSeq[i].publication_sequence_number.low
 						% 50) == 1)
 				{
-					printf(". ");
+					std::cout << ". ";
 				}
 
 				double timestamp = infoSeq[i].source_timestamp.sec + 
