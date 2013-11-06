@@ -233,8 +233,8 @@ ChocolateLotStateReader::ChocolateLotStateReader(
 	if (topic == NULL)
 	{
 
-		topic = _communicator->GetCommunicator()->CreateTopic<ChocolateLotState>(
-													CHOCOLATE_LOT_TOPIC);
+		topic = _communicator->GetCommunicator()->
+			CreateTopic<ChocolateLotState>(CHOCOLATE_LOT_TOPIC);
 	}
 
 	// If this ChocolateLotStateReader is receiving data for a real station 
@@ -247,17 +247,20 @@ ChocolateLotStateReader::ChocolateLotStateReader(
 	{
 		_parameters.ensure_length(1,1);
 
-		// Static helper method that converts an enumeration into the string that 
-		// represents that enumeration
+		// Static helper method that converts an enumeration into the string 
+		// that represents that enumeration
 		std::string enumName;
 		StationControllerType::GetControllerEnumName(
 			stationControllerKind, 
 			enumName);
 
-		// Filter to receive updates if: 1) This is assigned to me or 2) this lot 
-		// is in state LOT_COMPLETED (at which point I unregister the instance)
+		// Filter to receive updates if: 1) This is assigned to me or 2) this  
+		// lot is in state LOT_COMPLETED (at which point I unregister the 
+		// instance) Note: The _parameters StringSeq will delete this 
+		// char * when the ChocolateLotStateReader class is deleted, so must
+		// duplicate the string using DDS::String_dup.
 		_parameters[0] = 
-			const_cast<char *>(enumName.c_str());
+			DDS::String_dup(const_cast<char *>(enumName.c_str()));
 		ContentFilteredTopic *cft = 
 			_communicator->GetCommunicator()->
 				GetParticipant()->create_contentfilteredtopic("ContentFilter",
