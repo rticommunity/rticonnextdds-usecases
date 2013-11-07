@@ -327,19 +327,3 @@ Subscriber* DDSCommunicator::CreateSubscriber(
 
 }
 
-// ------------------------------------------------------------------------- //
-// Constructor
-ApplicationNetInterface::ApplicationNetInterface(
-	std::vector<std::string>qosFileNames)
-{
-	_communicator = new DDSCommunicator();
-
-}
-
-// ------------------------------------------------------------------------- //
-// Destructor
-ApplicationNetInterface::~ApplicationNetInterface()
-{
-	delete _communicator;
-}
-

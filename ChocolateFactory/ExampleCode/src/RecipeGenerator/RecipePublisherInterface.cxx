@@ -44,8 +44,8 @@ using namespace com::rti::chocolatefactory::generated;
 RecipePublisherInterface::RecipePublisherInterface(std::vector<std::string> xmlFiles) 
 {
 
+	// Creating the communicator object
 	_communicator = new DDSCommunicator();
-
 
 	// Create a DomainParticipant
 	// Start by creating a DomainParticipant.  Generally you will have only

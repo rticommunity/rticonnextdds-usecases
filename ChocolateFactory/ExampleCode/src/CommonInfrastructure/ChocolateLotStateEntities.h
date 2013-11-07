@@ -40,7 +40,7 @@ public:
 	// files were previously configured when the StationControllerInterface's 
 	// DDSCommunicator was created.
 	ChocolateLotStateReader(
-		ApplicationNetInterface *comm, 
+		DDSCommunicator *comm, 
 		DDS::Subscriber *sub, 
 		const std::string &qosLibrary, 
 		const std::string &qosProfile,
@@ -74,7 +74,7 @@ private:
 	// --- Private members ---
 
 	// Contains all the components needed to create the DataReader
-	ApplicationNetInterface *_communicator;
+	DDSCommunicator *_communicator;
 
 	// Application-specific DDS DataReader for receiving chocolate lot state data
 	com::rti::chocolatefactory::generated::ChocolateLotStateDataReader *_reader;
@@ -101,7 +101,7 @@ public:
 
 	// --- Constructor --- 
 	// This creates a DDS DataWriter that publishes the chocolate lot state
-	ChocolateLotStateWriter(ApplicationNetInterface *comm, 
+	ChocolateLotStateWriter(DDSCommunicator *comm, 
 		DDS::Publisher *pub, 
 		const std::string &qosLibrary, 
 		const std::string &qosProfile);
@@ -128,7 +128,7 @@ private:
 	// --- Private members ---
 
 	// Contains all the components needed to create the DataWriter
-	ApplicationNetInterface *_communicator;
+	DDSCommunicator *_communicator;
 
 	// The application-specific DDS DataWriter that sends chocolate lot state
 	// updates over the network or shared memory

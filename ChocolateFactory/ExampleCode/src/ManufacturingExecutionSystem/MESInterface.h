@@ -44,7 +44,7 @@ using namespace com::rti::chocolatefactory::generated;
 // recipe_profiles_no_multicast.xml file.
 //
 // ----------------------------------------------------------------------------
-class MESInterface : public ApplicationNetInterface
+class MESInterface 
 {
 
 public:
@@ -69,6 +69,7 @@ public:
 		return _chocolateLotStateWriter;
 	}
 
+	// --- Getter for the ChocolateLotStateReader --- 
 	// This returns the ChocolateLotState reader - a small wrapper around the 
 	// ChocolateLotStateDataReader that initializes the reader, the
 	// topic, and uses the DDS "WaitSet" object to wait for the chocolate lot 
@@ -78,8 +79,23 @@ public:
 		return _chocolateLotStateReader;
 	}
 
+	// --- Getter for Communicator --- 
+	// Accessor for the communicator (the class that sets up the basic
+	// DDS infrastructure like the DomainParticipant).
+	// This allows access to the DDS DomainParticipant/Publisher/Subscriber
+	// classes
+	DDSCommunicator *GetCommunicator() 
+	{
+		return _communicator; 
+	}
+
 private:
 	// --- Private members ---
+
+	// This contains the calls that allow the interface to create a 
+	// "DomainParticipant", the first object that must be created to 
+	// communicate over a DDS middleware.
+	DDSCommunicator *_communicator;
 
 
 	// Wrapper class around RTI Connext DDS for writing chocolate lot state

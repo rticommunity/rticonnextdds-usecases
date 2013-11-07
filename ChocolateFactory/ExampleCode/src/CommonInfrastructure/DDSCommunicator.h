@@ -212,36 +212,5 @@ private:
 
 };
 
-class ApplicationNetInterface
-{
-
-public:
-
-	// --- Constructor --- 
-	ApplicationNetInterface(std::vector<std::string>qosFileNames);
-
-	// --- Destructor --- 
-	virtual ~ApplicationNetInterface();
-	
-	// --- Getter for Communicator --- 
-	// Accessor for the communicator (the class that sets up the basic
-	// DDS infrastructure like the DomainParticipant).
-	// This allows access to the DDS DomainParticipant/Publisher/Subscriber
-	// classes
-	DDSCommunicator *GetCommunicator() 
-	{
-		return _communicator; 
-	}
-
-private:
-
-	// --- Private members ---
-
-	// This contains the calls that allow the interface to create a 
-	// "DomainParticipant", the first object that must be created to 
-	// communicate over a DDS middleware.
-	DDSCommunicator *_communicator;
-
-};
 
 #endif

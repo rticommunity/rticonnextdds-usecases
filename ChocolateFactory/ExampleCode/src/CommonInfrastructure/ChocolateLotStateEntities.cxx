@@ -18,24 +18,24 @@ using namespace com::rti::chocolatefactory::generated;
 // ApplicationNetInterface's DomainParticipant object to create a 
 // DataWriter and Topic.
 ChocolateLotStateWriter::ChocolateLotStateWriter(
-						ApplicationNetInterface *netInterface,
+						DDSCommunicator *communicator,
 						Publisher *pub, 
 						const std::string &qosLibrary,
 						const std::string &qosProfile) 
 {
 
-	if (netInterface == NULL) 
+	if (communicator == NULL) 
 	{
 		std::stringstream errss;
-		errss << "ChocolateLotStateWriter(): Bad parameter app";
+		errss << "ChocolateLotStateWriter(): Bad parameter communicator";
 		throw errss.str();
 	}
 
 	_chocolateLotStateWriter = NULL;
 
-	_communicator = netInterface;
+	_communicator = communicator;
 	DomainParticipant *participant = 
-		netInterface->GetCommunicator()->GetParticipant();
+		_communicator->GetParticipant();
 		
 	if (participant == NULL) 
 	{
@@ -62,13 +62,13 @@ ChocolateLotStateWriter::ChocolateLotStateWriter(
 	// all at once - especially in applications that read and write the same 
 	// topic
 	Topic *topic = (DDS::Topic *)
-		_communicator->GetCommunicator()->
+		_communicator->
 				GetParticipant()->lookup_topicdescription(CHOCOLATE_LOT_TOPIC);
 
 	if (topic == NULL)
 	{
 
-		topic = _communicator->GetCommunicator()->CreateTopic<ChocolateLotState>(
+		topic = _communicator->CreateTopic<ChocolateLotState>(
 													CHOCOLATE_LOT_TOPIC);
 	}
 
@@ -197,7 +197,7 @@ void ChocolateLotStateWriter::UnregisterChocolateLotState(
 // ------------------------------------------------------------------------- //
 // This creates the DDS DataReader that receives updates about chocolate lots.
 ChocolateLotStateReader::ChocolateLotStateReader(
-	ApplicationNetInterface *comm, 
+	DDSCommunicator *comm, 
 	Subscriber *sub, 
 	const std::string &qosLibrary, 
 	const std::string &qosProfile,
@@ -227,13 +227,13 @@ ChocolateLotStateReader::ChocolateLotStateReader(
 	// Generally you can register all topics and types up-front if
 	// necessary.
 	Topic *topic = (DDS::Topic *)
-		_communicator->GetCommunicator()->
+		_communicator->
 				GetParticipant()->lookup_topicdescription(CHOCOLATE_LOT_TOPIC);
 
 	if (topic == NULL)
 	{
 
-		topic = _communicator->GetCommunicator()->
+		topic = _communicator->
 			CreateTopic<ChocolateLotState>(CHOCOLATE_LOT_TOPIC);
 	}
 
@@ -262,8 +262,9 @@ ChocolateLotStateReader::ChocolateLotStateReader(
 		_parameters[0] = 
 			DDS::String_dup(const_cast<char *>(enumName.c_str()));
 		ContentFilteredTopic *cft = 
-			_communicator->GetCommunicator()->
-				GetParticipant()->create_contentfilteredtopic("ContentFilter",
+			_communicator->
+				GetParticipant()->create_contentfilteredtopic(
+				"ContentFilter",
 				topic, 
 				"lotStatus = 'LOT_COMPLETED' OR nextController = %0",
 				_parameters);

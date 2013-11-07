@@ -86,7 +86,7 @@ class ChocolateRecipeReader;
 // all other DDS objects.
 //
 // ------------------------------------------------------------------------- //
-class StationControllerInterface : public ApplicationNetInterface
+class StationControllerInterface
 {
 
 public:
@@ -122,6 +122,7 @@ public:
 		return _chocolateLotStateWriter;
 	}
 
+	// --- Getter for the ChocolateLotStateReader --- 
 	// This returns the ChocolateLotState reader - a small wrapper around the 
 	// ChocolateLotStateReader that initializes the reader, the content filtered
 	// topic, and uses the DDS "WaitSet" object to wait for the chocolate lot 
@@ -131,6 +132,7 @@ public:
 		return _chocolateLotStateReader;
 	}
 
+	// --- Getter for the RecipeReader --- 
 	// This returns the Chocolate recipe reader - a small wrapper around the 
 	// ChocolateRecipeDataReader that initializes the reader and uses the 
 	// DDS "WaitSet" object to wait for recipes
@@ -140,6 +142,15 @@ public:
 	}
 
 
+	// --- Getter for Communicator --- 
+	// Accessor for the communicator (the class that sets up the basic
+	// DDS infrastructure like the DomainParticipant).
+	// This allows access to the DDS DomainParticipant/Publisher/Subscriber
+	// classes
+	DDSCommunicator *GetCommunicator() 
+	{
+		return _communicator; 
+	}
 
 	// --- Getter for Controller ID --- 
 	// Accessor for the controller ID
@@ -151,6 +162,11 @@ public:
 
 private:
 	// --- Private members ---
+
+	// This contains the calls that allow the interface to create a 
+	// "DomainParticipant", the first object that must be created to 
+	// communicate over a DDS middleware.
+	DDSCommunicator *_communicator;
 
 	// If this is a controller, this filed is used to identify which station 
 	// controller this is, and what part of the recipe it is responsible for.

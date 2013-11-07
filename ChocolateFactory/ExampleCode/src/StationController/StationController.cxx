@@ -233,18 +233,16 @@ void StationController::ProcessLots()
 			// --- Update lots assigned to me to waiting state --- 
 			// If this lot is being assigned to me, update its status to say 
 			// it is waiting at my station
-			if (lotsToProcess[i].nextController == _stationControllerKind)
-			{
-				// Next station is invalid until I am complete
-				updatedState.nextController = INVALID_CONTROLLER;
 
-				// State is waiting at the controller
- 				updatedState.lotStatus = WAITING_AT_SC;
+			// Next station is invalid until I am complete
+			updatedState.nextController = INVALID_CONTROLLER;
 
-				// Write this update to the network
-				_networkInterface->GetChocolateLotStateWriter()->
-					PublishChocolateLotState(updatedState);
-			}
+			// State is waiting at the controller
+ 			updatedState.lotStatus = WAITING_AT_SC;
+
+			// Write this update to the network
+			_networkInterface->GetChocolateLotStateWriter()->
+				PublishChocolateLotState(updatedState);
 		}
 
 		// --- Process lots --- 
@@ -286,17 +284,14 @@ void StationController::ProcessLots()
 					= lotsToProcess[i];
 
 				// Iterate over the recipe steps 
-				RecipeStep *steps = new RecipeStep[MAX_RECIPE_STEPS];
-				recipe.steps.to_array(steps, recipe.steps.length());
-
 				for (int j = 0; j < MAX_RECIPE_STEPS; j++)
 				{
 					// Iterate over the recipe until reaching the current step
 					// in the process.
-					if (steps[j].stationController == _stationControllerKind)
+					if (recipe.steps[j].stationController == _stationControllerKind)
 					{
 						// Set currentStep to the current recipe step
-						currentStep = steps[j];
+						currentStep = recipe.steps[j];
 
 						// If this is the last step in the recipe, we can mark
 						// this lot as completed.
@@ -307,7 +302,7 @@ void StationController::ProcessLots()
 						} else
 						{
 							nextState.nextController = 
-								steps[j + 1].stationController;
+								recipe.steps[j + 1].stationController;
 							nextState.lotStatus = ASSIGNED_TO_SC;
 						}
 

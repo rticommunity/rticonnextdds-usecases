@@ -78,11 +78,12 @@ using namespace com::rti::chocolatefactory::generated;
 StationControllerInterface::StationControllerInterface(
 		StationControllerKind stationControllerID, 
 		std::vector<std::string>qosFileNames) 
-		: ApplicationNetInterface(qosFileNames)
 { 
 
 	_stationControllerID = stationControllerID;
 
+	// Creating the communicator object
+	_communicator = new DDSCommunicator();
 
 	// All data in this example is "state data."  The string constants with the
 	// QoS library name and the QoS profile name are configured as constants in
@@ -121,7 +122,9 @@ StationControllerInterface::StationControllerInterface(
 	// Creating the application's ChocolateLotStateWriter object.  
 	// This could use the RTI Connext DDS writer directly as a way to write.
 	// This DataWriter is configured with QoS for state data.
-	_chocolateLotStateWriter = new ChocolateLotStateWriter(this, publisher,
+	_chocolateLotStateWriter = new ChocolateLotStateWriter(
+		GetCommunicator(), 
+		publisher,
 		QOS_LIBRARY, QOS_PROFILE_STATE_DATA);
 	if (_chocolateLotStateWriter == NULL) 
 	{
@@ -148,7 +151,9 @@ StationControllerInterface::StationControllerInterface(
 	// is received that notifies this Station Controller that it needs to 
 	// process a chocolate lot.
 	// This DataReader is configured with QoS for state data.
-	_chocolateLotStateReader = new ChocolateLotStateReader(this, subscriber, 
+	_chocolateLotStateReader = new ChocolateLotStateReader(
+		GetCommunicator(),
+		subscriber, 
 		"RTIExampleQosLibrary",
 		"FactoryStateData",
 		_stationControllerID);
