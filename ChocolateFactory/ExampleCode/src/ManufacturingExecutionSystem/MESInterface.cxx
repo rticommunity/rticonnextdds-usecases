@@ -73,13 +73,11 @@ MESInterface::MESInterface(
 		: ApplicationNetInterface(qosFileNames)
 { 
 
-	std::string libName;
-	std::string profileName;
 
-	// All data in this example is "state data" - see the .xml file for more
-	// details on the definition of state data.
-	libName = "RTIExampleQosLibrary";
-	profileName = "FactoryStateData";
+	// Note: all data in this example is "state data."  The string constants with the
+	// QoS library name and the QoS profile name are configured as constants in
+	// the .idl file.  The profiles themselves are configured in the .xml file.
+	// Look in the XML for more details on the definition of state data.
 
 
 	// Calling the DDSCommunicator class's CreateParticipant method.
@@ -90,8 +88,8 @@ MESInterface::MESInterface(
 	if (NULL == GetCommunicator()->CreateParticipant(
 					0, 
 					qosFileNames, 
-					libName.c_str(), 
-					profileName.c_str())) 
+					QOS_LIBRARY, 
+					QOS_PROFILE_STATE_DATA)) 
 	{
 		std::stringstream errss;
 		errss << "Failed to create DomainParticipant object";
@@ -114,7 +112,7 @@ MESInterface::MESInterface(
 	// This could use the RTI Connext DDS writer directly as a way to write.
 	// This DataWriter is configured with QoS for state data.
 	_chocolateLotStateWriter = new ChocolateLotStateWriter(this, publisher,
-		libName, profileName);
+		QOS_LIBRARY, QOS_PROFILE_STATE_DATA);
 	if (_chocolateLotStateWriter == NULL) 
 	{
 		std::stringstream errss;
@@ -141,8 +139,8 @@ MESInterface::MESInterface(
 	// updated.
 	// This DataReader is configured with QoS for state data.
 	_chocolateLotStateReader = new ChocolateLotStateReader(this, subscriber, 
-		"RTIExampleQosLibrary",
-		"FactoryStateData",
+		QOS_LIBRARY,
+		QOS_PROFILE_STATE_DATA,
 		INVALID_CONTROLLER);
 
 	if (_chocolateLotStateReader == NULL) 

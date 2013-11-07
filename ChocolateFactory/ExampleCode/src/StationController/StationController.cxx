@@ -321,9 +321,9 @@ void StationController::ProcessLots()
 				busySleep.nanosec = 0;
 				cout << "Station controller "
 					<< controllerKindString.c_str()
-					<< "processing lot #" 
+					<< " processing lot #" 
 					<< lotsToProcess[i].lotID
-					<< "for " 
+					<< " for " 
 					<< currentStep.seconds
 					<< " seconds" << endl;
 				NDDSUtility::sleep(busySleep);

@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
 			// controller.
 			lotState.lotStatus = ASSIGNED_TO_SC;
 			
-			cout << "Sending command to start lot with recipe" << 
+			cout << "Sending command to start lot with recipe " << 
 				lotState.recipeName << endl;
 
 			// Write the data to the network.  This is a thin wrapper 

@@ -17,10 +17,12 @@ module generated {
 const string RECIPE_TOPIC = "ChocolateRecipes";
 const string CHOCOLATE_LOT_TOPIC = "ChocolateLot";
 
+const string QOS_LIBRARY = "RTIExampleQosLibrary";
+const string QOS_PROFILE_STATE_DATA = "FactoryStateData";
+
 const long MAX_INGREDIENT_LIST = 9;
 const long MAX_RECIPE_STEPS = 9;
 const long MAX_STRING_LENGTH = 256;
-
 
 // The kind of station controller that is processing the chocolate. Note that
 // a real recipe includes more types of controllers and more steps, but this 

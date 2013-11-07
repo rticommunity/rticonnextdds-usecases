@@ -46,14 +46,21 @@ RecipePublisherInterface::RecipePublisherInterface(std::vector<std::string> xmlF
 
 	_communicator = new DDSCommunicator();
 
+
 	// Create a DomainParticipant
 	// Start by creating a DomainParticipant.  Generally you will have only
 	// one DomainParticipant per application.  A DomainParticipant is
 	// responsible for starting the discovery process, allocating resources,
 	// and being the factory class used to create Publishers, Subscribers, 
 	// Topics, etc.
+
+	// Note: all data in this example is "state data."  The string constants with the
+	// QoS library name and the QoS profile name are configured as constants in
+	// the .idl file.  The profiles themselves are configured in the .xml file.
+	// Look in the XML for more details on the definition of state data.
 	if (NULL == _communicator->CreateParticipant(0, xmlFiles, 
-				"RTIExampleQosLibrary", "FactoryStateData")) 
+				QOS_LIBRARY, 
+				QOS_PROFILE_STATE_DATA)) 
 	{
 		std::stringstream errss;
 		errss << "Failed to create DomainParticipant object";
@@ -97,7 +104,7 @@ RecipePublisherInterface::RecipePublisherInterface(std::vector<std::string> xmlF
 	// This creates a single DataWriter that writes recipe data, with QoS
 	// that is used for State Data.
 	DDS::DataWriter *writer = pub->create_datawriter_with_profile(topic, 
-		"RTIExampleQosLibrary", "FactoryStateData",
+		QOS_LIBRARY, QOS_PROFILE_STATE_DATA,
 		NULL, DDS_STATUS_MASK_NONE);
 
 	// Downcast the generic datawriter to a recipe DataWriter 
