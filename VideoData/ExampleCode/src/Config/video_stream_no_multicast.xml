@@ -47,12 +47,6 @@ RTI Connext user manual.
                     <depth>50</depth>
                 </history>
 
-
-                <publish_mode>
-                    <kind>ASYNCHRONOUS_PUBLISH_MODE_QOS</kind>
-                    <!--                    <flow_controller_name>DDS_FIXED_RATE_FLOW_CONTROLLER_NAME</flow_controller_name>-->
-                </publish_mode>
-
                 <!-- Resource limits: to allow the application to specify
                    a different number of maximum frames that can be handled
                    at once, the resource limits are being set in code. 
@@ -62,6 +56,13 @@ RTI Connext user manual.
                     <max_instances>64</max_instances>
                     <max_samples_per_instance>2</max_samples_per_instance>
                   </resource_limits>-->
+
+                <!-- This data may be larger than 64K (the maximum transport 
+                     size for UDP) so this allows the middleware to fragment
+                     data into chunks to send over the UDP transport -->
+                <publish_mode>
+                    <kind>ASYNCHRONOUS_PUBLISH_MODE_QOS</kind>
+                </publish_mode>
 
                 <!-- Tuning the reliability protocol for faster reliable 
                      data repairs (at the expense of bandwidth). -->

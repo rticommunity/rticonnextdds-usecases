@@ -72,14 +72,15 @@ RadarInterface::RadarInterface(long radarId, int maxFlights,
 	std::string profileName;
 
 	// Depending on what is passed in, choose one of two XML profiles to 
-	// use - either for best latency or higher throughput
-	libName = "RTIExampleQosLibrary";
+	// use - either for best latency or higher throughput.  Note that the
+	// profile string is a constant defined in the .idl file.
+	libName = QOS_LIBRARY;
 	if (profile == LOW_LATENCY) 
 	{
-		profileName = "LowLatencyRadar";
+		profileName = QOS_PROFILE_RADAR_LOW_LATENCY;
 	} else if (profile == HIGH_THROUGHPUT) 
 	{
-		profileName = "HighThroughputRadar";
+		profileName = QOS_PROFILE_RADAR_HIGH_THROUGHPUT;
 	}
 
 	_communicator = new DDSCommunicator();
@@ -89,7 +90,8 @@ RadarInterface::RadarInterface(long radarId, int maxFlights,
 	// application.  This starts the discovery process.  For more information
 	// on what the DomainParticipant is responsible for, and how to configure
 	// it, see the DDSCommunicator class.
-	if (NULL == _communicator->CreateParticipant(0, qosFileNames, libName.c_str(), 
+	if (NULL == _communicator->CreateParticipant(0, 
+					qosFileNames, libName.c_str(), 
 					profileName.c_str())) 
 	{
 		std::stringstream errss;
@@ -148,8 +150,8 @@ RadarInterface::RadarInterface(long radarId, int maxFlights,
 	// Initialize the receiver with the QoS profile defined in the 
 	// flight_plan_profiles_multicast.xml file
 	_flightPlanReader = new FlightPlanReader(this, subscriber, 
-		"RTIExampleQosLibrary",
-		"FlightPlanStateData");
+		QOS_LIBRARY,
+		QOS_PROFILE_FLIGHT_PLAN);
 
 	if (_flightPlanReader == NULL) 
 	{
@@ -185,7 +187,7 @@ RadarWriter::RadarWriter(RadarInterface *netInterface,
 	if (netInterface == NULL) 
 	{
 		std::stringstream errss;
-		errss << "RadarWriter(): Bad parameter app";
+		errss << "RadarWriter(): Bad parameter \"netInterface\"";
 		throw errss.str();
 	}
 
@@ -240,8 +242,10 @@ RadarWriter::RadarWriter(RadarInterface *netInterface,
 	// Start with QoS gathered from the XML file, then update the value of 
 	// the max_samples and max_instances before creating the DataWriter
 	DDS_DataWriterQos writerQos;
-	retcode = TheParticipantFactory->get_datawriter_qos_from_profile(writerQos,
-											qosLibrary.c_str(), qosProfile.c_str());
+	retcode = TheParticipantFactory->get_datawriter_qos_from_profile(
+											writerQos,
+											qosLibrary.c_str(), 
+											qosProfile.c_str());
 
 	if (retcode != DDS_RETCODE_OK) 
 	{
@@ -364,7 +368,7 @@ FlightPlanReader::FlightPlanReader(RadarInterface *comm, Subscriber *sub,
 	if (comm == NULL) 
 	{
 		std::stringstream errss;
-		errss << "FlightPlanReader(): bad parameter \"app\"";
+		errss << "FlightPlanReader(): bad parameter \"comm\"";
 		throw errss.str();
 	}
 
@@ -387,13 +391,27 @@ FlightPlanReader::FlightPlanReader(RadarInterface *comm, Subscriber *sub,
 										AIRCRAFT_FLIGHT_PLAN_TOPIC);
 
 	// Creating a DataReader
-	// This DataReader will receive the flight plan, and will store thatflight
-	// plan data in the middleware's queue to be queried by the 
-	 DataReader *reader = sub->create_datareader_with_profile(topic, qosLibrary.c_str(),
+	// This DataReader will receive the flight plan. The application will 
+	// remove the flight plan data from the middleware's queue as it attaches 
+	// the flight ID to a particular radar track.
+	DataReader *reader = sub->create_datareader_with_profile(
+		topic,
+		qosLibrary.c_str(),
 		qosProfile.c_str(), NULL, DDS_STATUS_MASK_NONE);
+	if (reader == NULL)
+	{
+		std::stringstream errss;
+		errss << "FlightPlanReader(): failure to create DataReader.";
+		throw errss.str();
+	}
+
 	 // Down casting to the type-specific reader
 	 _reader = FlightPlanDataReader::narrow(reader);
-	_waitSet = new WaitSet();
+
+	// This WaitSet object will be used to block a thread until one or more 
+	// conditions become true.  In this case, there is a single condition that
+	// will wake up the WaitSet when the reader receives data
+	 _waitSet = new WaitSet();
 	if (_waitSet == NULL) 
 	{
 		std::stringstream errss;
@@ -401,13 +419,11 @@ FlightPlanReader::FlightPlanReader(RadarInterface *comm, Subscriber *sub,
 		throw errss.str();
 	}
 
-	// Creating the infrastructure that allows an application thread to block
-	// until some condition becomes true, such as data availability.
+	// Use this status condition to wake up the thread when data becomes 
+	// available
 	_condition = _reader->get_statuscondition();
 
-	//
-	// Wake up the thread when data is available, data is lost, or data is
-	// rejected
+	// Wake up the thread when data is available
 	_condition->set_enabled_statuses(DDS_DATA_AVAILABLE_STATUS);
 	if (_condition == NULL) 
 	{
@@ -416,10 +432,7 @@ FlightPlanReader::FlightPlanReader(RadarInterface *comm, Subscriber *sub,
 		throw errss.str();
 	}
 
-	// This WaitSet object will be used to block a thread until one or more 
-	// conditions become true.  In this case, there is a single condition that
-	// will wake up the WaitSet when the reader receives data, loses data, or
-	// rejects data.
+	// Attaching the condition to the WaitSet
 	_waitSet->attach_condition(_condition);
 
 }
@@ -534,7 +547,7 @@ std::vector< DdsAutoType<FlightPlan> > *plans)
 					(retcode != DDS_RETCODE_NO_DATA)) 
 		{
 			std::stringstream errss;
-			errss << "WaitForFlightPlans(): error " << retcode << 
+			errss << "ProcessFlightPlans(): error " << retcode << 
 				" when retrieving flight plans.";
 			throw errss.str();
 		}

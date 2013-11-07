@@ -1,0 +1,94 @@
+/*********************************************************************************************
+(c) 2005-2013 Copyright, Real-Time Innovations, Inc.  All rights reserved.    	                             
+RTI grants Licensee a license to use, modify, compile, and create derivative works 
+of the Software.  Licensee has the right to distribute object form only for use with RTI 
+products.  The Software is provided “as is”, with no warranty of any type, including 
+any warranty for fitness for any purpose. RTI is under no obligation to maintain or 
+support the Software.  RTI shall not be liable for any incidental or consequential 
+damages arising out of the use or inability to use the software.
+**********************************************************************************************/
+
+module com {
+module rti {
+module chocolatefactory {
+module generated {
+
+
+const string RECIPE_TOPIC = "ChocolateRecipes";
+const string CHOCOLATE_LOT_TOPIC = "ChocolateLot";
+
+const string QOS_LIBRARY = "RTIExampleQosLibrary";
+const string QOS_PROFILE_STATE_DATA = "FactoryStateData";
+
+const long MAX_INGREDIENT_LIST = 9;
+const long MAX_RECIPE_STEPS = 9;
+const long MAX_STRING_LENGTH = 256;
+
+// The kind of station controller that is processing the chocolate. Note that
+// a real recipe includes more types of controllers and more steps, but this 
+// is a simple example that only shows the steps where ingredients are added to
+// the chocolate lot.
+enum StationControllerKind
+{
+	INVALID_CONTROLLER,
+	SUGAR_CONTROLLER,
+	COCOA_BUTTER_CONTROLLER,
+	COCOA_LIQUOR_CONTROLLER,
+	VANILLA_CONTROLLER,
+	MILK_CONTROLLER
+};
+
+// A lot is either assigned to station controller, waiting to be processed at
+// a station controller, being processed at a station controller, or completed.
+enum LotStatusKind
+{
+	ASSIGNED_TO_SC,
+	WAITING_AT_SC,
+	PROCESSING_AT_SC,
+	LOT_COMPLETED
+};
+
+// This is a placeholder for a real step in a recipe, describing only which 
+// station controller should be processing the lot and how long that station 
+// controller should process the lot for.
+struct RecipeStep
+{
+	StationControllerKind stationController;
+	long seconds;
+}; //@top-level false
+
+
+struct ChocolateRecipe 
+{
+	string<MAX_STRING_LENGTH> recipeName; //@key
+	sequence<RecipeStep,MAX_RECIPE_STEPS> steps;
+};
+
+
+struct ChocolateLotState 
+{
+	// ID of the lot whose status is being updated
+	long lotID; //@key 
+
+	// ID of the station controller producing the status
+	StationControllerKind controller; //@key
+
+	// Name of the recipe being used
+	string<MAX_STRING_LENGTH> recipeName;
+
+	// This will be the same as the controller if the controller producing the
+	// status is currently processing the lot
+	StationControllerKind nextController;
+
+	// Current status of the lot: Waiting/Procesing/Completed
+	LotStatusKind lotStatus;
+
+	// List of ingredients added to the recipe at this point
+	sequence<string<MAX_STRING_LENGTH>, MAX_INGREDIENT_LIST> ingredients;
+	
+};
+
+}; // generated
+}; // chocolate
+}; // rti
+}; // com 

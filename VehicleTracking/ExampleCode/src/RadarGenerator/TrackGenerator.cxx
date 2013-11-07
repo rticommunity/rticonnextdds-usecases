@@ -9,6 +9,7 @@ damages arising out of the use or inability to use the software.
 **********************************************************************************************/
 #include <math.h>
 #include <sstream>
+#include <iostream>
 #include "ndds/ndds_cpp.h"
 #include "ndds/ndds_namespace_cpp.h"
 #include "../CommonInfrastructure/OSAPI.h"
@@ -530,8 +531,8 @@ void TrackGenerator::CalculateRandomPoint80KmFromSFO(LatLong *latLong,
 	latLong->latitude = newLatInRads / M_PI * 180;
 	latLong->longitude = newLongInRads / M_PI * 180;
 
-	printf("New aircraft being updated.  Lat, Long: %f, %f\n", 
-		latLong->latitude, latLong->longitude);
+	std::cout << "New aircraft being updated.  Lat, Long: " <<  
+		latLong->latitude <<  latLong->longitude << std::endl;
 
 }
 

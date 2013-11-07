@@ -7,6 +7,7 @@ any warranty for fitness for any purpose. RTI is under no obligation to maintain
 support the Software.  RTI shall not be liable for any incidental or consequential 
 damages arising out of the use or inability to use the software.
 **********************************************************************************************/
+#include <iostream>
 #include "VideoPublisherInterface.h"
 
 
@@ -80,8 +81,10 @@ VideoPublisherInterface::VideoPublisherInterface(
 	// responsible for starting the discovery process, allocating resources,
 	// and being the factory class used to create Publishers, Subscribers, 
 	// Topics, etc.
+	// Note that the QoS profile and QoS library names are constants that are 
+	// defined in the .idl file. 
 	if (NULL == _communicator->CreateParticipant(0, xmlFiles, 
-				"RTIExampleQosLibrary", "StreamingVideoData",
+				QOS_LIBRARY, QOS_PROFILE_STREAMING_DATA,
 				discoveryListener, DATAREADER_DISCOVERY_KIND)) 
 	{
 		std::stringstream errss;
@@ -121,8 +124,13 @@ VideoPublisherInterface::VideoPublisherInterface(
 	// Create a DataWriter.  
 	// This creates a single DataWriter that writes video stream data, with QoS
 	// that is used for streaming data.
+
+	// Choose a QoS policy for streaming data (the choice to use multicast is
+	// decided by the DataReader, not the DataWriter)
+	// Note that the QoS profile and QoS library names are constants that are 
+	// defined in the .idl file. 
 	DDS::DataWriter *writer = pub->create_datawriter_with_profile(topic, 
-		"RTIExampleQosLibrary", "StreamingVideoData", 
+		QOS_LIBRARY, QOS_PROFILE_STREAMING_DATA, 
 		NULL, DDS_STATUS_MASK_NONE);
 
 	// Downcast the generic datawriter to a video stream DataWriter 
@@ -167,8 +175,8 @@ bool VideoPublisherInterface::Write(DdsAutoType<VideoStream> data)
 		return false;
 	}
 
-/*	printf("Writing sample #%d, length: %d\n", 
-		data.equence_number, data.frame.length());*/
+/*	cout << "Writing sample #" << data.equence_number
+		<< ", length: " << data.frame.length() << endl;*/
 
 	return true;
 
@@ -240,7 +248,8 @@ void VideoPublisherDiscoveryListener::on_data_available(DDSDataReader *reader)
 
 	if (retcode != DDS_RETCODE_OK) 
 	{
-		printf("Error: failed to access data from the built-in reader\n");
+		std::cout << "Error: failed to access data from the built-in reader" 
+			<< std::endl;
 		return;
 	}
 
@@ -284,14 +293,14 @@ void VideoPublisherDiscoveryListener::on_data_available(DDSDataReader *reader)
 		{
 			// Will not write to this DataReader.  Using the ignore() 
 			// API to ignore the participant and 
-			printf("Discovered a DataReader with an incompatible codec. "
-				"Ignoring it (not sending it any data)\n");
+			std::cout << "Discovered a DataReader with an incompatible codec. "
+				<< "Ignoring it (not sending it any data)" << std::endl;
 			DDSDomainParticipant *participant =
 				reader->get_subscriber()->get_participant();
 			retcode = participant->ignore_subscription(info_seq[i].instance_handle);
 			if (retcode != DDS_RETCODE_OK) 
 			{
-				printf("Error ignoring participant: %d\n", retcode);
+				std::cout << "Error ignoring participant: " << retcode << std::endl;
 				return;
 			}
 		}

@@ -7,9 +7,9 @@ any warranty for fitness for any purpose. RTI is under no obligation to maintain
 support the Software.  RTI shall not be liable for any incidental or consequential 
 damages arising out of the use or inability to use the software.
 **********************************************************************************************/
+#include <iostream>
 #include "TrackGenerator.h"
 #include "RadarInterface.h"
-
 
 // ------------------------------------------------------------------------- //
 //
@@ -69,7 +69,8 @@ public:
 			_writer->PublishTrack(_track);
 		} catch (std::string str) 
 		{
-			printf("Failure to write track data: %s", str.c_str());
+			std::cout << "Failure to write track data: " << str.c_str() << 
+				std::endl;
 			return false;
 		}
 
@@ -93,7 +94,8 @@ public:
 			_writer->DeleteTrack(_track);
 		} catch (std::string str) 
 		{
-			printf("Failure to delete track data: %s", str.c_str());
+			std::cout << "Failure to delete track data: " << str.c_str() << 
+				std::endl;
 			return false;
 		}
 		return true;

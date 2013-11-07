@@ -33,6 +33,8 @@ Real-Time Innovations, Inc. (RTI).  The above license is granted with
  the permission of RTI.
 
 -------------------------------------------- */
+
+#include <iostream>
 #include <fcntl.h>
 
 #include <glib-object.h>
@@ -157,8 +159,8 @@ void EMDSVideoDisplayOutput::Initialize()
 	//     - Source code change to load different plugins
 	if (_displayPipeline == NULL)
 	{
-		printf("Error: Failed to create pipeline.  Are gstreamer "
-			"plugins installed correctly?\n");
+		std::cout << "Error: Failed to create pipeline.  Are gstreamer "
+			<< "plugins installed correctly?" << std::endl;
 		return;
 	}
 
@@ -186,7 +188,7 @@ EMDSVideoDisplayOutput::EMDSVideoDisplayOutput()
 	
 	if (_displayPipeline == NULL)
 	{
-		printf("Failed to create output");
+		std::cout << "Failed to create output" << std::endl;
 		return;
 	} else 
 	{
@@ -208,44 +210,5 @@ std::string EMDSVideoDisplayOutput::GetStreamMetadata()
 	return capsStr;
 }
 
-
-#ifndef WIN32
-
-// ----------------------------------------------------------------------------
-void
-_frame_process_write_trace_fn(EMDSVideoOutput *self,EMDSBuffer *buffer){
-	EMDSVideoTraceOutput *tracer = (EMDSVideoTraceOutput *)self;
-	unsigned long seqn = 0;
-	int written = 0;
-	char line[1024];
-	struct timeval recvtime;
-	gettimeofday(&recvtime, NULL);
-	seqn = buffer->GetSeqn();
-	sprintf(line,
-		"%lf %lf %lu %lu\n",
-		buffer->GetTimestamp(),
-		(double)recvtime.tv_sec + (recvtime.tv_usec/1000000.0),
-		seqn, buffer->GetSize());
-	written = write(tracer->_fd, line, strlen(line));
-	if (written == 0){
-		printf("Failed to write to trace file\n");
-	}
-}
-
-// ----------------------------------------------------------------------------
-EMDSVideoTraceOutput::EMDSVideoTraceOutput(std::string path)
-{
-	int fd;
-	fd = open(path.c_str(), O_WRONLY | O_TRUNC | O_CREAT, 0600);
-	if (fd < 1)
-	{
-		printf("Failed to open trace file '%s'\n", path.c_str());
-	}
-
-	EMDSVideoOutput::Initialize();
-	_fd = fd;
-	_filepath = strdup(path.c_str());
-}
-#endif
 
 

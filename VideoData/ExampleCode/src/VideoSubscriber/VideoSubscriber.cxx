@@ -61,6 +61,7 @@ public:
 		{
 			return;
 		}
+
 		_outputHandler->GetFrameHandler()->FrameReady(_outputHandler, buffer);
 	}
 
@@ -95,11 +96,10 @@ private:
 // ------------------------------------------------------------------------- //
 int main (int argc, char *argv[])
 {
-	printf("--- Starting subscriber application. ---\n");
-	printf("This application will subscribe to a video feed over RTI"
-		" Connext DDS \nmiddleware\n");
+	std::cout << "--- Starting subscriber application. ---" << std::endl;
+	std::cout << "This application will subscribe to a video feed over RTI"
+		<< " Connext DDS " << std::endl << "middleware" << std::endl;
 
-	vector<string> xmlFiles;
 	bool multicastAvailable = true;
 	bool multicastVideoData = false;
 
@@ -138,6 +138,10 @@ int main (int argc, char *argv[])
 
 	}
 
+	// Set up paths for XML files.  The profiles are for applications that 
+	// have no multicast available at all, or that have multicast available
+	// on the network.
+	vector<string> xmlFiles;
 
 	if (multicastAvailable)
 	{
@@ -163,7 +167,7 @@ int main (int argc, char *argv[])
 		EMDSVideoOutput *vout = new EMDSVideoDisplayOutput();
 		if (vout == NULL) 
 		{
-			printf("Error, video not created\n");
+			std::cout << "Error, video not created" << std::endl;
 		}
 
 		// Query the metadata from the framework, such as what codecs this 
@@ -177,7 +181,8 @@ int main (int argc, char *argv[])
 		// sends it using the DDS USER_DATA QoS as a part of the discovery process.
 		// Publishing applications use that metadata to decide whether to send to
 		// this application or not.  
-		VideoSubscriberInterface videoInterface(xmlFiles, videoMetadata);
+		VideoSubscriberInterface videoInterface(xmlFiles, videoMetadata, 
+			multicastVideoData);
 
 		bool isDone = false;
 

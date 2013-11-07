@@ -33,6 +33,7 @@ Real-Time Innovations, Inc. (RTI).  The above license is granted with
  the permission of RTI.
 
 -------------------------------------------- */
+#include <iostream>
 #include <sstream>
 #include "VideoSource.h"
 #include <gst/gst.h>
@@ -55,7 +56,7 @@ void *video_source_worker(void *src)
 
 	if (videoSource->GetFrameReadyHandler() == NULL)
 	{
-		printf("Callback handler is NULL\n");
+		std::cout << "Callback handler is NULL" << std::endl;
 		return NULL;
 	}
 
@@ -73,7 +74,8 @@ void *video_source_worker(void *src)
 		if (GST_BUFFER_SIZE(buffer) > 
 			com::rti::media::generated::MAX_BUFFER_SIZE)
 		{
-			printf("Buffer is larger than the max buffer size\n");
+			std::cout << "Buffer is larger than the max buffer size" 
+				<< std::endl;
 		}
 		EMDSBuffer *emdsBuffer
 			= new EMDSBuffer(GST_BUFFER_SIZE(buffer));
@@ -101,7 +103,8 @@ EMDSVideoSource::EMDSVideoSource(std::string url)
 
 	if (url.empty())
 	{
- 		printf("Video Source: Creating source from 'null' url");
+ 		std::cout << "Video Source: Creating source from 'null' url" 
+			<< std::endl;
  		return;
  	}
 
@@ -138,7 +141,8 @@ static void EMDSVideoSource_detect_new_pad(GstElement *element, GstPad *pad,
 
 		if (GST_PAD_LINK_FAILED(gst_pad_link(pad, sinkPad)))
 		{
-			printf("Failed to link the decoder and the app sink\n");
+			std::cout << "Failed to link the decoder and the app sink" 
+				<< std::endl;
 		}
 
 		gst_element_set_state(linkElement, GST_STATE_PLAYING);
@@ -165,7 +169,7 @@ int EMDSVideoSource::Initialize()
 
 	if (_videoEncodingPipeline == NULL)
 	{
-		printf("Error creating video pipeline\n");
+		std::cout << "Error creating video pipeline" << std::endl;
 		return -1;
 	}
 
@@ -173,7 +177,7 @@ int EMDSVideoSource::Initialize()
 	GstElement *source = gst_element_factory_make("filesrc", "filesrc");
 	if (source == NULL)
 	{
-		printf("Error creating file source\n");
+		std::cout << "Error creating file source" << std::endl;
 		return -1;
 	}
 
@@ -184,7 +188,7 @@ int EMDSVideoSource::Initialize()
 	GstElement *demux = gst_element_factory_make("matroskademux", "demux");
 	if (demux == NULL)
 	{
-		printf("Error creating demux\n");
+		std::cout << "Error creating demux" << std::endl;
 		return -1;
 	}
 
@@ -197,7 +201,7 @@ int EMDSVideoSource::Initialize()
 	GstElement *muxer = gst_element_factory_make("matroskamux", "muxer");
 	if (muxer == NULL)
 	{
-		printf("Error creating muxer\n");
+		std::cout << "Error creating muxer" << std::endl;
 		return -1;
 	}
 
@@ -213,7 +217,7 @@ int EMDSVideoSource::Initialize()
 	_appSink = gst_element_factory_make("appsink", "appsink");
 	if (_appSink == NULL)
 	{
-		printf("Failed to create appSink\n");
+		std::cout << "Failed to create appSink" << std::endl;
 		return -1;
 	}
 
@@ -230,14 +234,15 @@ int EMDSVideoSource::Initialize()
 		G_CALLBACK (EMDSVideoSource_detect_new_pad), _appSink))
 #endif
 	{
-		printf("Failed to connect signal\n");
+		std::cout << "Failed to connect signal" << std::endl;
 		return -1;
 	}
 
 	// Link the source and the demuxer
 	if (!gst_element_link(source, demux))
 	{
-		printf("Failed to link file source and matraoskademux\n");
+		std::cout << "Failed to link file source and matraoskademux"
+			<< std::endl;
 		return -1;
 	}
 
@@ -245,7 +250,7 @@ int EMDSVideoSource::Initialize()
 	// Link the muxer and the app sink
 	if (!gst_element_link(muxer, _appSink))
 	{
-		printf("Failed to link muxer and appsink\n");
+		std::cout << "Failed to link muxer and appsink" << std::endl;
 		return -1;
 	}
 #endif 
@@ -256,9 +261,9 @@ int EMDSVideoSource::Initialize()
 		gst_element_set_state(GST_ELEMENT (_videoEncodingPipeline), 
 		GST_STATE_PLAYING))
 	{
-		printf("Failed to create the video source.  "
-			"Is the file path correct?\n");
-		printf("File path: %s\n", _url.c_str());
+		std::cout << "Failed to create the video source.  " 
+			<< "Is the file path correct?" << std::endl;
+		std::cout << "File path: " << _url.c_str() << std::endl;
 		return -1;
 	}
 
@@ -300,21 +305,21 @@ bool EMDSVideoSource::IsMetadataCompatible(
 //
 int EMDSVideoSource::Start()
 {
-	printf("Initializing and starting video source\n");
+	std::cout << "Initializing and starting video source" << std::endl;
 
 	// Create video thread
 	_worker = new OSThread(video_source_worker, (void *)this);
 
 	if (_worker == NULL)
 	{
-		printf("Failed to create video thread\n");
+		std::cout << "Failed to create video thread" << std::endl;
 		return -1;
 	}
 
 	// Start video thread
 	_worker->Run();
 
-	printf("Video Source: VideoSource started\n");
+	std::cout << "Video Source: VideoSource started" << std::endl;
 
 	return 0;
 }

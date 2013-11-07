@@ -5,6 +5,7 @@ objs/
 Debug/
 Release/
 ipch/
+Generated/
 
 # Compiled source #
 ###################
@@ -17,6 +18,7 @@ ipch/
 ######################
 *.suo
 *.sdf
+*.opensdf
 
 # Packages #
 ############
@@ -39,3 +41,4 @@ ipch/
 Icon?
 ehthumbs.db
 Thumbs.db
+.cvsignore

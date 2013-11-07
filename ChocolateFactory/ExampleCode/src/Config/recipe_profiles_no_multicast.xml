@@ -1,0 +1,176 @@
+<?xml version="1.0"?>
+<!-- 
+
+(c) 2005-2013 Copyright, Real-Time Innovations, Inc.  All rights reserved.    	                             
+RTI grants Licensee a license to use, modify, compile, and create derivative works 
+of the Software.  Licensee has the right to distribute object form only for use with RTI 
+products.  The Software is provided “as is”, with no warranty of any type, including 
+any warranty for fitness for any purpose. RTI is under no obligation to maintain or 
+support the Software.  RTI shall not be liable for any incidental or consequential 
+damages arising out of the use or inability to use the software.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Description:
+XML QoS Profile for Factory data
+
+For more information about XML QoS Profiles see Chapter 15 in the 
+RTI Connext user manual.
+-->
+<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="C:/Program Files/RTI/5.0.0/ndds.5.0.0/scripts/../resource/rtiddsgen/../qos_profiles_5.0.0/schema/rti_dds_qos_profiles.xsd"
+     version="5.0.0">
+    <!-- QoS Library containing the QoS profile used in the example.
+        A QoS library is a named set of QoS profiles.
+    -->
+    <qos_library name="RTIExampleQosLibrary">
+
+
+      
+        <qos_profile name="FactoryStateData" base_name="MulticastNotAvailable">
+            <!-- QoS used to configure the data writer created in the example code -->
+            <datawriter_qos>
+
+                <!-- Factory data is not sent periodically, so enabling 
+                     reliability -->
+                <reliability>
+                    <kind>RELIABLE_RELIABILITY_QOS</kind>
+                </reliability>
+
+                <!-- Factory data must be available after the time when it 
+                     is initially written, so late-joining DataReaders will 
+                     receive it when starting up. -->
+                <durability>
+                    <kind>TRANSIENT_LOCAL_DURABILITY_QOS</kind>
+                </durability>
+
+                <!-- Reliably deliver only the most recent update to each 
+                     factory update -->
+                <history>
+                    <!-- If you need strict reliability, this should be changed to 
+                         keep all history. -->
+                    <kind>KEEP_LAST_HISTORY_QOS</kind>
+                    <depth>1</depth>
+                </history>
+
+                <!-- Resource limits: to allow the application to specify
+                       a different number of maximum updates that can be 
+                       handled at once, the resource limits are being set 
+                       in code. -->
+                <!--<resource_limits>
+                    <max_samples>128</max_samples>
+                    <max_instances>64</max_instances>
+                    <max_samples_per_instance>2</max_samples_per_instance>
+                  </resource_limits>-->
+
+                <!-- Tuning the reliability protocol for faster reliable 
+                     data repairs (at the expense of bandwidth). -->
+                <protocol>
+
+                    <rtps_reliable_writer>
+
+                        <!-- Send reliability heartbeats every 50 ms if there 
+                             is a reader waiting for data.  Send reliability 
+                             heartbeats every 10 ms if the queue is starting to
+                             fill and there is a reader waiting for data. (Note
+                             that no heartbeats are sent if there are no 
+                             readers waiting for data).  These heartbeats 
+                             determine how quickly data is re-sent if it was 
+                             lost the first time. -->
+                        <heartbeat_period>
+                            <sec>0</sec>
+                            <nanosec>50000000</nanosec>
+                        </heartbeat_period>
+                        <fast_heartbeat_period>
+                            <sec>0</sec>
+                            <nanosec>10000000</nanosec>
+                        </fast_heartbeat_period>
+                        <late_joiner_heartbeat_period>
+                            <sec>0</sec>
+                            <nanosec>50000000</nanosec>
+                        </late_joiner_heartbeat_period>
+
+                        <!-- Tells the DataWriter to not delay when it 
+                             receives a negative acknowledgement (NACK). -->
+                        <max_nack_response_delay>
+                            <sec>0</sec>
+                            <nanosec>0</nanosec>
+                        </max_nack_response_delay>
+
+                        <!-- Does not change behavior in a system with no 
+                             multicast.  However, if somebody does enable 
+                             multicast on a DataReader, this will prevent 
+                             potential delays. -->
+                        <enable_multicast_periodic_heartbeat>true</enable_multicast_periodic_heartbeat>
+                    </rtps_reliable_writer>
+                </protocol>
+
+            </datawriter_qos>
+
+            <!-- QoS used to configure the data reader created in the example code -->
+            <datareader_qos>
+
+                <!-- Factory data is not sent periodically, so enabling 
+                     reliability.  Note that reliability must be enabled on
+                     both the DataWriter and the DataReader. -->
+                <reliability>
+                    <kind>RELIABLE_RELIABILITY_QOS</kind>
+                </reliability>
+
+                <!-- Factory data must be available after the time when it 
+                     is initially written, so late-joining DataReaders will 
+                     receive it when starting up. -->
+                <durability>
+                    <kind>TRANSIENT_LOCAL_DURABILITY_QOS</kind>
+                </durability>
+
+                <!-- Reliably deliver only the most recent update to each 
+                     factory update -->
+                <history>
+                    <!-- If you need strict reliability, this should be changed
+                         to keep all history. -->
+                    <kind>KEEP_LAST_HISTORY_QOS</kind>
+                    <depth>1</depth>
+                </history>
+
+                <!-- Resource limits: to allow the application to specify
+                       a different number of maximum updates that can be 
+                       handled at once, the resource limits are being set 
+                       in code. -->
+                <!--<resource_limits>
+                    <max_samples>128</max_samples>
+                    <max_instances>64</max_instances>
+                    <max_samples_per_instance>2</max_samples_per_instance>
+                  </resource_limits>-->
+
+                <!-- Response delays in the DataReader are useful if there is a
+                       large fanout of readers to writers - they prevent the 
+                       readers from simultaneously resonding to heartbeats and 
+                       flooding the writers.  With smaller numbers of readers the
+                       delays can be set to zero.  -->
+                <protocol>
+                    <rtps_reliable_reader>
+                        <min_heartbeat_response_delay>
+                            <sec>0</sec>
+                            <nanosec>0</nanosec>
+                        </min_heartbeat_response_delay>
+                        <max_heartbeat_response_delay>
+                            <sec>0</sec>
+                            <nanosec>0</nanosec>
+                        </max_heartbeat_response_delay>
+                    </rtps_reliable_reader>
+                </protocol>
+
+            </datareader_qos>
+
+            <participant_qos>
+                <participant_name>
+                    <name>Chocolate Factory Application</name>
+                </participant_name>
+            </participant_qos>
+            
+        </qos_profile>
+
+    </qos_library>
+    
+</dds>

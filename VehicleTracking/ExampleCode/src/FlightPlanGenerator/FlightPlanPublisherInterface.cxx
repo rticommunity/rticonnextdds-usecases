@@ -48,9 +48,11 @@ FlightPlanPublisherInterface::FlightPlanPublisherInterface(std::vector<std::stri
 	// one DomainParticipant per application.  A DomainParticipant is
 	// responsible for starting the discovery process, allocating resources,
 	// and being the factory class used to create Publishers, Subscribers, 
-	// Topics, etc.
+	// Topics, etc.  Note:  The string constants with the QoS library name and 
+	// the QoS profile name are configured as constants in the .idl file.  The
+	// profiles themselves are configured in the .xml file.
 	if (NULL == _communicator->CreateParticipant(0, xmlFiles, 
-				"RTIExampleQosLibrary", "FlightPlanStateData")) 
+				QOS_LIBRARY, QOS_PROFILE_FLIGHT_PLAN)) 
 	{
 		std::stringstream errss;
 		errss << "Failed to create DomainParticipant object";
@@ -92,9 +94,11 @@ FlightPlanPublisherInterface::FlightPlanPublisherInterface(std::vector<std::stri
 
 	// Create a DataWriter.  
 	// This creates a single DataWriter that writes flight plan data, with QoS
-	// that is used for State Data.
+	// that is used for State Data.	Note: The string constants with the QoS 
+	// library name and the QoS profile name are configured as constants in the
+	// .idl file.  The profiles themselves are configured in the .xml file.
 	DDS::DataWriter *writer = pub->create_datawriter_with_profile(topic, 
-		"RTIExampleQosLibrary", "FlightPlanStateData",
+		QOS_LIBRARY, QOS_PROFILE_FLIGHT_PLAN,
 		NULL, DDS_STATUS_MASK_NONE);
 
 	// Downcast the generic datawriter to a flight plan DataWriter 

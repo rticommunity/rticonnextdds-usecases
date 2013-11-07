@@ -49,8 +49,8 @@ NetworkInterface::NetworkInterface(
 	// on what the DomainParticipant is responsible for, and how to configure
 	// it, see the DDSCommunicator class.
 	if (NULL == _communicator->CreateParticipant(0, qosFileNames, 
-									"RTIExampleQosLibrary", 
-									"HighThroughputRadar")) 
+									QOS_LIBRARY, 
+									QOS_PROFILE_RADAR_HIGH_THROUGHPUT)) 
 	{
 		std::stringstream errss;
 		errss << "Failed to create DomainParticipant object";
@@ -62,18 +62,20 @@ NetworkInterface::NetworkInterface(
 	// Create the DataReader that receives flight plan data.  The profiles
 	// that are passed in define how the application will receive data,
 	// and how much data will be kept by the middleware.  Look at the 
-	// associated XML files for details.
+	// associated XML files for details. (Profile names are constant 
+	// strings pre-defined in the .idl file)
 	_flightPlanReader = new FlightPlanReader(this, sub, 
-								"RTIExampleQosLibrary",
-								"FlightPlanStateData");
+								QOS_LIBRARY,
+								QOS_PROFILE_FLIGHT_PLAN);
 
 	// Create the DataReader that receives track data.  The profiles
 	// that are passed in define how the application will receive data,
 	// and how much data will be kept by the middleware.  Look at the 
-	// associated XML files for details.
+	// associated XML files for details. (Profile names are constant 
+	// strings pre-defined in the .idl file)
 	_trackReader = new TrackReader(this, sub, 
-								"RTIExampleQosLibrary", 
-								"HighThroughputRadar");
+								QOS_LIBRARY, 
+								QOS_PROFILE_RADAR_HIGH_THROUGHPUT);
 }
 
 // ----------------------------------------------------------------------------
@@ -140,14 +142,25 @@ FlightPlanReader::FlightPlanReader(NetworkInterface *app,
 		AIRCRAFT_FLIGHT_PLAN_TOPIC);
 
 	// Creating a DataReader
-	// This DataReader will receive the flight plan, and will store thatflight
-	// plan data in the middleware's queue to be queried by the 
+	// This DataReader will receive the flight plan, and will store that flight
+	// plan data in the middleware's queue to be queried by the application
 	 DataReader *reader = sub->create_datareader_with_profile(topic, 
 		qosLibrary.c_str(),
 		qosProfile.c_str(), 
 		NULL, DDS_STATUS_MASK_NONE);
+	if (reader == NULL)
+	{
+		std::stringstream errss;
+		errss << "FlightPlanReader(): failure to create DataReader.";
+		throw errss.str();
+	}
+
 	 // Down casting to the type-specific reader
 	 _fpReader = FlightPlanDataReader::narrow(reader);
+
+	// This WaitSet object will be used to block a thread until one or more 
+	// conditions become true.  In this case, there is a single condition that
+	// will wake up the WaitSet when the reader receives data
 	_waitSet = new WaitSet();
 	if (_waitSet == NULL) 
 	{
@@ -156,10 +169,13 @@ FlightPlanReader::FlightPlanReader(NetworkInterface *app,
 		throw errss.str();
 	}
 
-	// Use this guard condition to wake up this reader if it is waiting later
+	// Use this guard condition to wake up the thread waiting for data to 
+	// notify it that the application is being shut down.
 	_shutDownNotifyCondition = new GuardCondition;
 	_waitSet->attach_condition(_shutDownNotifyCondition);
 
+	// Use this status condition to wake up the thread when data becomes 
+	// available
 	_condition = _fpReader->get_statuscondition();
 	_condition->set_enabled_statuses(DDS_DATA_AVAILABLE_STATUS);
 	if (_condition == NULL) 
@@ -170,8 +186,6 @@ FlightPlanReader::FlightPlanReader(NetworkInterface *app,
 	}
 
 	_waitSet->attach_condition(_condition);
-
-
 
 }
 
@@ -294,7 +308,7 @@ TrackReader::TrackReader(NetworkInterface *app,
 	if (app == NULL) 
 	{
 		std::stringstream errss;
-		errss << "FlightPlanReader(): bad parameter \"app\"";
+		errss << "TrackReader(): bad parameter \"app\"";
 		throw errss.str();
 	}
 
@@ -327,34 +341,51 @@ TrackReader::TrackReader(NetworkInterface *app,
 		AIR_TRACK_TOPIC);
 
 	// Creating a DataReader
-	// This DataReader will receive the flight plan, and will store thatflight
-	// plan data in the middleware's queue to be queried by the 
-	 DataReader *reader = sub->create_datareader_with_profile(topic, 
+	// This DataReader will receive the track data, and will make it available
+	// for the application to query (read) or remove (take) from the reader's
+	// queue
+	DataReader *reader = sub->create_datareader_with_profile(topic, 
 		qosLibrary.c_str(),
 		qosProfile.c_str(), 
 		NULL, DDS_STATUS_MASK_NONE);
-	 // Down casting to the type-specific reader
-	 _reader = TrackDataReader::narrow(reader);
+	if (reader == NULL)
+	{
+		std::stringstream errss;
+		errss << "TrackReader(): failure to create DataReader.";
+		throw errss.str();
+	}
+
+	// Down casting to the type-specific reader
+	_reader = TrackDataReader::narrow(reader);
+
+	// This WaitSet object will be used to block a thread until one or more 
+	// conditions become true.  In this case, there is a single condition that
+	// will wake up the WaitSet when the reader receives data, loses data, or
+	// rejects data.  There is also a condition that wakes up the thread 
+	// when it is time for the application to shut down.
 	_waitSet = new WaitSet();
 	if (_waitSet == NULL) 
 	{
 		std::stringstream errss;
-		errss << "FlightPlanReader(): failure to create WaitSet.";
+		errss << "TrackReader(): failure to create WaitSet.";
 		throw errss.str();
 	}
 
+	// Use this status condition to wake up the thread when data becomes 
+	// available
 	_condition = _reader->get_statuscondition();
 	_condition->set_enabled_statuses(DDS_DATA_AVAILABLE_STATUS);
 	if (_condition == NULL) 
 	{
 		std::stringstream errss;
-		errss << "FlightPlanReader(): failure to initialize condition.";
+		errss << "TrackReader(): failure to initialize condition.";
 		throw errss.str();
 	}
 
-
 	_waitSet->attach_condition(_condition);	
 
+	// Use this guard condition to wake up the thread waiting for data to 
+	// notify it that the application is being shut down.
 	_shutDownNotifyCondition = new GuardCondition;
 	_waitSet->attach_condition(_shutDownNotifyCondition);
 
