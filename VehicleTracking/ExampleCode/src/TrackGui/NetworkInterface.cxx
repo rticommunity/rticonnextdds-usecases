@@ -49,8 +49,8 @@ NetworkInterface::NetworkInterface(
 	// on what the DomainParticipant is responsible for, and how to configure
 	// it, see the DDSCommunicator class.
 	if (NULL == _communicator->CreateParticipant(0, qosFileNames, 
-									"RTIExampleQosLibrary", 
-									"HighThroughputRadar")) 
+									QOS_LIBRARY, 
+									QOS_PROFILE_RADAR_HIGH_THROUGHPUT)) 
 	{
 		std::stringstream errss;
 		errss << "Failed to create DomainParticipant object";
@@ -62,18 +62,20 @@ NetworkInterface::NetworkInterface(
 	// Create the DataReader that receives flight plan data.  The profiles
 	// that are passed in define how the application will receive data,
 	// and how much data will be kept by the middleware.  Look at the 
-	// associated XML files for details.
+	// associated XML files for details. (Profile names are constant 
+	// strings pre-defined in the .idl file)
 	_flightPlanReader = new FlightPlanReader(this, sub, 
-								"RTIExampleQosLibrary",
-								"FlightPlanStateData");
+								QOS_LIBRARY,
+								QOS_PROFILE_FLIGHT_PLAN);
 
 	// Create the DataReader that receives track data.  The profiles
 	// that are passed in define how the application will receive data,
 	// and how much data will be kept by the middleware.  Look at the 
-	// associated XML files for details.
+	// associated XML files for details. (Profile names are constant 
+	// strings pre-defined in the .idl file)
 	_trackReader = new TrackReader(this, sub, 
-								"RTIExampleQosLibrary", 
-								"HighThroughputRadar");
+								QOS_LIBRARY, 
+								QOS_PROFILE_RADAR_HIGH_THROUGHPUT);
 }
 
 // ----------------------------------------------------------------------------

@@ -72,14 +72,15 @@ RadarInterface::RadarInterface(long radarId, int maxFlights,
 	std::string profileName;
 
 	// Depending on what is passed in, choose one of two XML profiles to 
-	// use - either for best latency or higher throughput
-	libName = "RTIExampleQosLibrary";
+	// use - either for best latency or higher throughput.  Note that the
+	// profile string is a constant defined in the .idl file.
+	libName = QOS_LIBRARY;
 	if (profile == LOW_LATENCY) 
 	{
-		profileName = "LowLatencyRadar";
+		profileName = QOS_PROFILE_RADAR_LOW_LATENCY;
 	} else if (profile == HIGH_THROUGHPUT) 
 	{
-		profileName = "HighThroughputRadar";
+		profileName = QOS_PROFILE_RADAR_HIGH_THROUGHPUT;
 	}
 
 	_communicator = new DDSCommunicator();
@@ -89,7 +90,8 @@ RadarInterface::RadarInterface(long radarId, int maxFlights,
 	// application.  This starts the discovery process.  For more information
 	// on what the DomainParticipant is responsible for, and how to configure
 	// it, see the DDSCommunicator class.
-	if (NULL == _communicator->CreateParticipant(0, qosFileNames, libName.c_str(), 
+	if (NULL == _communicator->CreateParticipant(0, 
+					qosFileNames, libName.c_str(), 
 					profileName.c_str())) 
 	{
 		std::stringstream errss;
@@ -148,8 +150,8 @@ RadarInterface::RadarInterface(long radarId, int maxFlights,
 	// Initialize the receiver with the QoS profile defined in the 
 	// flight_plan_profiles_multicast.xml file
 	_flightPlanReader = new FlightPlanReader(this, subscriber, 
-		"RTIExampleQosLibrary",
-		"FlightPlanStateData");
+		QOS_LIBRARY,
+		QOS_PROFILE_FLIGHT_PLAN);
 
 	if (_flightPlanReader == NULL) 
 	{
@@ -240,8 +242,10 @@ RadarWriter::RadarWriter(RadarInterface *netInterface,
 	// Start with QoS gathered from the XML file, then update the value of 
 	// the max_samples and max_instances before creating the DataWriter
 	DDS_DataWriterQos writerQos;
-	retcode = TheParticipantFactory->get_datawriter_qos_from_profile(writerQos,
-											qosLibrary.c_str(), qosProfile.c_str());
+	retcode = TheParticipantFactory->get_datawriter_qos_from_profile(
+											writerQos,
+											qosLibrary.c_str(), 
+											qosProfile.c_str());
 
 	if (retcode != DDS_RETCODE_OK) 
 	{
