@@ -181,7 +181,8 @@ int main (int argc, char *argv[])
 		// sends it using the DDS USER_DATA QoS as a part of the discovery process.
 		// Publishing applications use that metadata to decide whether to send to
 		// this application or not.  
-		VideoSubscriberInterface videoInterface(xmlFiles, videoMetadata);
+		VideoSubscriberInterface videoInterface(xmlFiles, videoMetadata, 
+			multicastVideoData);
 
 		bool isDone = false;
 

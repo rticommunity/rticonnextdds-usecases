@@ -63,20 +63,21 @@ VideoSubscriberInterface::VideoSubscriberInterface(
 							bool multicastVideoStreams)
 { 
 
-	std::string libName;
 	std::string profileName;
 
-	// Depending on what is passed in, choose one of two XML profiles to 
-	// use - either for best latency or higher throughput
-	libName = "RTIExampleQosLibrary";
 
+	
+	// Choose a QoS policy for streaming data, and if you plan to use multicast
+	// video data, select a QoS profile that supports multicast streaming data.
+	// Note that the QoS profile and QoS library names are constants that are 
+	// defined in the .idl file. 
 	if (multicastVideoStreams)
 	{
-		profileName = "OneToManyMulticast";
+		profileName = QOS_PROFILE_MULTICAST_DATA;
 	}
 	else
 	{
-		profileName = "StreamingVideoData";
+		profileName = QOS_PROFILE_STREAMING_DATA;
 	}
 	_communicator = new DDSCommunicator();
 
@@ -85,7 +86,8 @@ VideoSubscriberInterface::VideoSubscriberInterface(
 	// application.  This starts the discovery process.  For more information
 	// on what the DomainParticipant is responsible for, and how to configure
 	// it, see the DDSCommunicator class.
-	if (NULL == _communicator->CreateParticipant(0, qosFileNames, libName.c_str(), 
+	if (NULL == _communicator->CreateParticipant(0, qosFileNames, 
+					QOS_LIBRARY, 
 					profileName.c_str())) 
 	{
 		std::stringstream errss;
@@ -120,8 +122,8 @@ VideoSubscriberInterface::VideoSubscriberInterface(
 	_VideoStreamReader = new VideoStreamReader(
 		this, 
 		subscriber, 
-		"RTIExampleQosLibrary",
-		"StreamingVideoData",
+		QOS_LIBRARY,
+		profileName.c_str(),
 		videoMetadata);
 
 	if (_VideoStreamReader == NULL) 

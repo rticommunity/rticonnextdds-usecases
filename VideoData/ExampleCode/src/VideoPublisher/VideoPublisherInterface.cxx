@@ -81,8 +81,10 @@ VideoPublisherInterface::VideoPublisherInterface(
 	// responsible for starting the discovery process, allocating resources,
 	// and being the factory class used to create Publishers, Subscribers, 
 	// Topics, etc.
+	// Note that the QoS profile and QoS library names are constants that are 
+	// defined in the .idl file. 
 	if (NULL == _communicator->CreateParticipant(0, xmlFiles, 
-				"RTIExampleQosLibrary", "StreamingVideoData",
+				QOS_LIBRARY, QOS_PROFILE_STREAMING_DATA,
 				discoveryListener, DATAREADER_DISCOVERY_KIND)) 
 	{
 		std::stringstream errss;
@@ -122,8 +124,13 @@ VideoPublisherInterface::VideoPublisherInterface(
 	// Create a DataWriter.  
 	// This creates a single DataWriter that writes video stream data, with QoS
 	// that is used for streaming data.
+
+	// Choose a QoS policy for streaming data (the choice to use multicast is
+	// decided by the DataReader, not the DataWriter)
+	// Note that the QoS profile and QoS library names are constants that are 
+	// defined in the .idl file. 
 	DDS::DataWriter *writer = pub->create_datawriter_with_profile(topic, 
-		"RTIExampleQosLibrary", "StreamingVideoData", 
+		QOS_LIBRARY, QOS_PROFILE_STREAMING_DATA, 
 		NULL, DDS_STATUS_MASK_NONE);
 
 	// Downcast the generic datawriter to a video stream DataWriter 

@@ -15,6 +15,11 @@ module generated {
 
 const string VIDEO_TOPIC = "VideoData";
 
+const string QOS_LIBRARY = "RTIExampleQosLibrary";
+const string QOS_PROFILE_STREAMING_DATA = "StreamingVideoData";
+const string QOS_PROFILE_MULTICAST_DATA = "MulticastVideo";
+
+
 // 1024 * 1024 is the maximum frame size
 // Data will be allocated at this size, but
 // only the actual size of the frame will 

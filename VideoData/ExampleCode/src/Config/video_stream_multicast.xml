@@ -163,7 +163,7 @@ RTI Connext user manual.
             
         </qos_profile>
 
-        <qos_profile name="OneToManyMulticast" base_name="StreamingVideoData">
+        <qos_profile name="MulticastVideo" base_name="StreamingVideoData">
 
             <datareader_qos>
                 <!-- Uncomment this to enable user data over multicast.  This is 
