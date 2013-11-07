@@ -144,7 +144,8 @@ int main(int argc, char *argv[])
 
 		DDS_Duration_t send_period = {timeBetweenLotCommands,0};
 
-		printf("Sending chocolate lot commands over RTI Connext DDS\n");
+		cout << "Sending chocolate lot commands over RTI Connext DDS\n" 
+			<< endl;
 		vector<string> recipeNames;
 		recipeNames.push_back("Dark");
 		recipeNames.push_back("Milk");
@@ -176,8 +177,8 @@ int main(int argc, char *argv[])
 			// controller.
 			lotState.lotStatus = ASSIGNED_TO_SC;
 			
-			printf("Sending command to start lot with recipe %s\n", 
-				lotState.recipeName);
+			cout << "Sending command to start lot with recipe" << 
+				lotState.recipeName << endl;
 
 			// Write the data to the network.  This is a thin wrapper 
 			// around the RTI Connext DDS DataWriter that writes data to
@@ -244,10 +245,6 @@ void *PrintLotUpdates(void *param)
 				StationControllerType::GetControllerPrettyName(
 					lotStates[i].controller,
 					controllerName);
-				printf("Lot #%d is in state: %s at controller: %s\n",
-					lotStates[i].lotID,
-					lotStatus.c_str(),
-					controllerName.c_str());
 			} else
 			{
 				// If the lot is "assigned to station controller," print the
@@ -255,11 +252,14 @@ void *PrintLotUpdates(void *param)
 				StationControllerType::GetControllerPrettyName(
 					lotStates[i].nextController,
 					controllerName);
-				printf("Lot #%d is in state: %s at controller: %s\n",
-					lotStates[i].lotID,
-					lotStatus.c_str(),
-					controllerName.c_str());
 			}
+
+			cout << "Lot #" << lotStates[i].lotID
+				<< " is in state: "
+				<< lotStatus.c_str() 
+				<< " at controller: "
+				<< controllerName.c_str() << endl;
+
 		}
 	}
 }

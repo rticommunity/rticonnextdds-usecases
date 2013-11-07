@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
 
 		DDS_Duration_t send_period = {0,100000000};
 
-		printf("Sending recipes over RTI Connext DDS\n");
+		cout << "Sending recipes over RTI Connext DDS" << endl;
 
 
 		// Write all recipes up to the number specified

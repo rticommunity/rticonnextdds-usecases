@@ -188,8 +188,9 @@ void StationController::ProcessLots()
 		string controllerKindString;
 		StationControllerType::GetControllerPrettyName(
 			_stationControllerKind, controllerKindString);
-		printf("Station controller %s waiting for data\n", 
-			controllerKindString.c_str());
+		cout << "Station controller "
+			<< controllerKindString.c_str()
+			<< " waiting for data" << endl;
 
 		vector< DdsAutoType<ChocolateLotState> > lotsToProcess;
 
@@ -318,11 +319,13 @@ void StationController::ProcessLots()
 				DDS_Duration_t busySleep;
 				busySleep.sec = currentStep.seconds;
 				busySleep.nanosec = 0;
-				printf("Station controller %s processing lot #%d for "
-					"%d seconds\n", 
-						controllerKindString.c_str(), 
-						lotsToProcess[i].lotID,
-						currentStep.seconds);
+				cout << "Station controller "
+					<< controllerKindString.c_str()
+					<< "processing lot #" 
+					<< lotsToProcess[i].lotID
+					<< "for " 
+					<< currentStep.seconds
+					<< " seconds" << endl;
 				NDDSUtility::sleep(busySleep);
 			
 				// --- Prepare the next state to publish --- 
@@ -349,10 +352,12 @@ void StationController::ProcessLots()
 				string nextControllerKindString;
 				StationControllerType::GetControllerPrettyName(
 					nextState.nextController, nextControllerKindString);
-				printf("Station controller %s sending lot #%d to %s\n", 
-						controllerKindString.c_str(), 
-						nextState.lotID,
-						nextControllerKindString.c_str());
+				cout << "Station controller "
+					<< controllerKindString.c_str()
+					<< " sending lot #" 
+					<< nextState.lotID 
+					<< " to " 
+					<< nextControllerKindString.c_str() << endl; 
 
 				// --- Publish updated state --- 
 				// Update to say we are done with lot, and it is time for
