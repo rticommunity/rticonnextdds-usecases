@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
 	}
 	catch (string message)
 	{
-		cout << "Application exception" << message << endl;
+		cout << "Application exception: " << message << endl;
 	}
 
 
