@@ -6,10 +6,20 @@ executable_name="rtiroutingservice"
 
 if [ -f $ROUTER_HOME/scripts/$executable_name ]
 then
-    cd $script_dir/../routing
-    $ROUTER_HOME/scripts/$executable_name \
-	-cfgFile Routing-UDP-LAN.xml \
-	-cfgName $1
+    if [ "$1" = "Router1" ] || [ "$1" = "Router2" ]
+    then 
+        cd $script_dir/../routing
+        $ROUTER_HOME/scripts/$executable_name \
+            -cfgFile Routing-UDP-LAN.xml \
+            -cfgName $1
+    else
+        echo "*************************************************************"
+        echo " $0: Wrong parameters"
+        echo "" 
+        echo " Usage:"
+        echo " $0 [Router1|Router2]"
+        echo "*************************************************************"
+    fi
 else
     echo "*****************************************************************"
     echo "The ROUTER_HOME environment variable must be set to"
