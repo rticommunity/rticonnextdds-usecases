@@ -172,7 +172,15 @@ void TrackGenerator::NotifyListenersUpdateTrack(const GeneratorTrack &track)
 void *TrackGenerator::GenerateTracksFunc(void *arg) 
 {
 	TrackGenerator *gen = (TrackGenerator *)arg;
-	gen->GenerateTracks();
+
+	try 
+	{
+		gen->GenerateTracks();
+	}
+	catch (std::string message)
+	{
+		std::cout << "Application exception: " << message << std::endl;
+	}
 
     return NULL;
 }
