@@ -15,7 +15,7 @@ using namespace com::rti::chocolatefactory::generated;
 
 // ------------------------------------------------------------------------- //
 // Create the ChocolateLotState DataWriter.  This uses the 
-// ApplicationNetInterface's DomainParticipant object to create a 
+// DDSCommunicator's DomainParticipant object to create a 
 // DataWriter and Topic.
 ChocolateLotStateWriter::ChocolateLotStateWriter(
 						DDSCommunicator *communicator,
