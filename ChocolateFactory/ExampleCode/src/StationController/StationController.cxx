@@ -287,8 +287,25 @@ void StationController::ProcessLot(DdsAutoType<ChocolateLotState> *lotState)
 	// The GetRecipe() call queries recipes that are stored in the
 	// middleware's queue.
 	DdsAutoType<ChocolateRecipe> recipe;
-	_networkInterface->GetRecipeReader()->GetRecipe(
-		lotState->recipeName, &recipe);
+	bool haveRecipe = false;
+	while (!haveRecipe)
+	{
+		haveRecipe = 
+			_networkInterface->GetRecipeReader()->GetRecipe(
+				lotState->recipeName, &recipe);
+		if (!haveRecipe)
+		{ 
+			DDS_Duration_t recipeWait;
+			// 10 ms
+			recipeWait.sec = 10;
+			recipeWait.nanosec = 0;
+
+			cout << "Have not received the required recipe.  Waiting for " <<
+				recipeWait.sec << " seconds for recipe." << 
+				endl;
+				NDDSUtility::sleep(recipeWait);
+		}
+	}
 
 	// Get the current recipe step information to know how to
 	// process the lot
