@@ -15,7 +15,7 @@ module generated {
 
 
 const string RECIPE_TOPIC = "ChocolateRecipes";
-const string CHOCOLATE_LOT_TOPIC = "ChocolateLot";
+const string CHOCOLATE_LOT_TOPIC = "ChocolateLotState";
 
 const string QOS_LIBRARY = "RTIExampleQosLibrary";
 const string QOS_PROFILE_STATE_DATA = "FactoryStateData";
