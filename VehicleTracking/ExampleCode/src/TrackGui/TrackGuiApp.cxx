@@ -78,7 +78,19 @@ bool TrackApp::OnInit()
 		xmlFiles.push_back(
 			"file://../../../src/Config/flight_plan_profiles_no_multicast.xml");
 	}
-	_netInterface = new NetworkInterface(xmlFiles);
+
+	// If the DDS network interface fails to run (due to mising XML files or
+	// a missing license) catch the exception here instead of letting the GUI
+	// framework handle it.
+	try 
+	{
+		_netInterface = new NetworkInterface(xmlFiles);
+	}
+	catch (string message)
+	{
+		cout << message << endl;
+		return false;
+	}
 
 	// This class accesses the data that arrives over the network.  This 
 	// creates a thread, and uses it so periodically poll the network interface
@@ -107,7 +119,13 @@ bool TrackApp::OnInit()
 bool TrackApp::RemoveDataSource(wxPanel *panel)
 {
 	FlightInfoListener *listener = _dataSources[panel];
-	_networkFlightInfoReceiver->RemoveListener(listener);
+
+	// This can be null if an error occurs while initializing
+	if (listener != NULL)
+	{
+		_networkFlightInfoReceiver->RemoveListener(listener);
+	}
+
 	return true;
 }
 
