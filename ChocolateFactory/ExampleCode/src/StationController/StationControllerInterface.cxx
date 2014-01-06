@@ -10,6 +10,7 @@ damages arising out of the use or inability to use the software.
 
 #include <vector>
 #include <sstream>
+#include <iostream>
 #include "../Generated/ChocolateFactory.h"
 #include "../Generated/ChocolateFactorySupport.h"
 #include "StationControllerInterface.h"
@@ -291,7 +292,7 @@ ChocolateRecipeReader::~ChocolateRecipeReader()
 //    A simple example of this can be found at:
 //    http://community.rti.com/examples/polling-read
 
-void ChocolateRecipeReader::GetRecipe(
+bool ChocolateRecipeReader::GetRecipe(
 		std::string recipeName,
 		DdsAutoType<ChocolateRecipe> *recipe)
 {
@@ -309,10 +310,9 @@ void ChocolateRecipeReader::GetRecipe(
 	// error!
 	if (DDS_InstanceHandle_is_nil(&handle))
 	{
-		std::stringstream errss;
-		errss << "GetRecipe(): error - " << 
-			"Do not have the recipe needed to process this lot.";
-		throw errss.str();
+		std::cout << "GetRecipe(): warning - " << 
+			"Do not have the recipe needed to process this lot." << std::endl;
+		return false;
 
 	}
 
@@ -337,5 +337,6 @@ void ChocolateRecipeReader::GetRecipe(
 	}
 	_reader->return_loan(recipeSeq, infoSeq);
 
+	return true;
 }
 

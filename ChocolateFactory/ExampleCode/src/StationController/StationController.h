@@ -26,6 +26,16 @@ public:
 	// --- Process lots --- 
 	void ProcessLots();
 
+	// --- Update lot state --- 
+	void UpdateState(
+		DdsAutoType<com::rti::chocolatefactory::generated::ChocolateLotState> 
+			*updatedState);
+	
+	// --- Process lot --- 
+	void ProcessLot(
+		DdsAutoType<com::rti::chocolatefactory::generated::ChocolateLotState> 
+			*lotState);
+
 private:
 
 	// --- Private members --- 

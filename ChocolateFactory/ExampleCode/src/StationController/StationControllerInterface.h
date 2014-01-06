@@ -222,7 +222,7 @@ public:
 	// This example receives all recipes, and leaves them in the middleware's
 	// queue.  It queries for a particular recipe when it receives an update
 	// about a lot and it needs to check the recipe for that lot.
-	void GetRecipe(
+	bool GetRecipe(
 		std::string recipeName,
 		DdsAutoType<com::rti::chocolatefactory::generated::ChocolateRecipe>
 			*recipe);
