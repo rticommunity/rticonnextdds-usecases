@@ -21,5 +21,5 @@ uses of the RTI Connext DDS product, focusing on:
 
 These use case examples should be a stepping stone for creating real 
 distributed applications based on RTI Connext DDS. Additional information 
-about each use case can be found on [RTI's Case + Code page][www.rti.com/resources/usecases/index.html]
+about each use case can be found on [RTI's Case + Code page](www.rti.com/resources/usecases/index.html).
 and in the Docs/ directory of the individual use case examples.
