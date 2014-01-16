@@ -1,2 +1,1 @@
-rticonnext-usecases
-===================
+# RTI Connext DDS Use Cases
