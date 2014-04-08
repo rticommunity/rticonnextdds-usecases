@@ -72,18 +72,18 @@ DDSCommunicator::~DDSCommunicator()
 // Creating a DomainParticipant with a specified domain ID  
 DomainParticipant* DDSCommunicator::CreateParticipant(long domain) 
 {
-	DomainParticipant* participant = 
+	_participant = 
 		TheParticipantFactory->create_participant(domain, 
 		PARTICIPANT_QOS_DEFAULT, NULL, STATUS_MASK_NONE);
 
-	if (participant == NULL) 
+	if (_participant == NULL) 
 	{
 		std::stringstream errss;
 		errss << "Failed to create DomainParticipant object";
 		throw errss.str();
 	} 
 
-	return participant;
+	return _participant;
 }
 
 // ------------------------------------------------------------------------- //
