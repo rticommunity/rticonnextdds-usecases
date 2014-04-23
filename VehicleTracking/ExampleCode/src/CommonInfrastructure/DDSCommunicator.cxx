@@ -147,7 +147,7 @@ DomainParticipant* DDSCommunicator::CreateParticipant(long domain,
 	DomainParticipantFactoryQos factoryQos;
 	TheParticipantFactory->get_qos(factoryQos);
 	factoryQos.profile.url_profile.ensure_length(fileNames.size(),
-												fileNames.size());
+												fileNames.size());																																		
 
 	for (unsigned int i = 0; i < fileNames.size(); i++) 
 	{
@@ -157,9 +157,9 @@ DomainParticipant* DDSCommunicator::CreateParticipant(long domain,
 			fileNames[i].c_str());
 	}
 
-	DDS_ReturnCode_t retcode = TheParticipantFactory->set_qos(factoryQos);
+	ReturnCode_t retcode = TheParticipantFactory->set_qos(factoryQos);
 		
-	if (retcode != DDS_RETCODE_OK) 
+	if (retcode != RETCODE_OK) 
 	{
 		std::stringstream errss;
 		errss << "Failed to create DomainParticipant object";
