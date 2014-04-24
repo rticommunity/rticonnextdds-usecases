@@ -31,5 +31,5 @@ RTI Connext DDS software includes the world's leading implementation of the
 Object Management Group (OMG) Data Distribution Service (DDS). DDS is the only 
 open standard for messaging that supports the unique needs of both enterprise 
 and real-time systems. Its open interfaces and advanced integration 
-capabilities slash costs across a system’s lifecycle, from initial development 
+capabilities slash costs across a system's lifecycle, from initial development 
 and integration through on-going maintenance and upgrades.
