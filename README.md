@@ -10,8 +10,8 @@ a project to create code for real-world RTI Connext DDS use cases.
 The respository contains examples that illustrate a variety of DDS use cases, 
 from vehicle tracking to manufacturing and automation.  Some of the use case
 examples will be focused on real applications such as air traffic control, 
-and some will be focused on deployment scenarios such as connecting real-time
-networks over the cloud.
+and some will be focused on deployment scenarios such as monitoring remote
+devices over a wide area network.
 
 The examples in this repository are meant to illustrate simplified real-world 
 uses of the RTI Connext DDS product, focusing on:
