@@ -18,34 +18,18 @@ For more information about XML QoS Profiles see Chapter 15 in the
 RTI Connext user manual.
 -->
 <dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:noNamespaceSchemaLocation="C:/Program Files/RTI/5.0.0/ndds.5.0.0/scripts/../resource/rtiddsgen/../qos_profiles_5.0.0/schema/rti_dds_qos_profiles.xsd"
-     version="5.0.0">
+     xsi:noNamespaceSchemaLocation="http://community.rti.com/schema/5.1.0/rti_dds_qos_profiles.xsd"
+     version="5.1.0">
     <!-- QoS Library containing the QoS profile used in the example.
         A QoS library is a named set of QoS profiles.
     -->
     <qos_library name="RTIExampleQosLibrary">
-
-
-
         <qos_profile name="StreamingVideoData" base_name="MaxTransportThroughput">
             <!-- QoS used to configure the data writer created in the example code -->
-            <datawriter_qos>
+            <datawriter_qos base_name="BuiltinQosLibExp::Pattern.ReliableStreaming">
 
 				<!-- Video data can be best-effort or reliable, depending on network
 				     characteristics -->
-                <reliability>
-                    <kind>RELIABLE_RELIABILITY_QOS</kind>
-                </reliability>
-
-
-                <!-- Reliably deliver 50 video frames, but do not block if 
-					 the reader does not receive data -->
-                <history>
-                    <!-- If you need strict reliability, this should be changed to 
-                         keep all history. -->
-                    <kind>KEEP_LAST_HISTORY_QOS</kind>
-                    <depth>50</depth>
-                </history>
 
                 <!-- Resource limits: to allow the application to specify
                        a different number of maximum frames that can be handled
@@ -66,37 +50,7 @@ RTI Connext user manual.
                 <!-- Tuning the reliability protocol for faster reliable 
                      data repairs (at the expense of bandwidth). -->
                 <protocol>
-                    
                     <rtps_reliable_writer>
-                        
-                        <!-- Send reliability heartbeats every 50 ms if there 
-                             is a reader waiting for data.  Send reliability 
-                             heartbeats every 10 ms if the queue is starting to
-                             fill and there is a reader waiting for data. (Note
-                             that no heartbeats are sent if there are no 
-                             readers waiting for data).  These heartbeats 
-                             determine how quickly data is re-sent if it was 
-                             lost the first time. -->
-                        <heartbeat_period>
-                            <sec>0</sec>
-                            <nanosec>50000000</nanosec>
-                        </heartbeat_period>
-                        <fast_heartbeat_period>
-                            <sec>0</sec>
-                            <nanosec>10000000</nanosec>
-                        </fast_heartbeat_period>
-                        <late_joiner_heartbeat_period>
-                            <sec>0</sec>
-                            <nanosec>50000000</nanosec>
-                        </late_joiner_heartbeat_period>
-
-                        <!-- Tells the DataWriter to not delay when it 
-                             receives a negative acknowledgement (NACK). -->
-                        <max_nack_response_delay>
-                            <sec>0</sec>
-                            <nanosec>0</nanosec>
-                        </max_nack_response_delay>
-
                         <!-- Does not change behavior in a system with no 
                              multicast.  However, if somebody does enable 
                              multicast on a DataReader, this will prevent 
@@ -108,22 +62,7 @@ RTI Connext user manual.
             </datawriter_qos>
 
             <!-- QoS used to configure the data reader created in the example code -->
-            <datareader_qos>
-
-				<!-- Streaming video data can be reliable or best-effort depending on
-				     network characteristics -->
-                <reliability>
-                    <kind>BEST_EFFORT_RELIABILITY_QOS</kind>
-                </reliability>
-
-                <!-- Reliably deliver 50 video frames, but do not block if 
-					 the reader does not receive data -->
-                <history>
-                    <!-- If you need strict reliability, this should be changed
-                         to keep all history. -->
-                    <kind>KEEP_LAST_HISTORY_QOS</kind>
-                    <depth>50</depth>
-                </history>
+            <datareader_qos base_name="BuiltinQosLibExp::Generic.BestEffort">
 
                 <!-- Resource limits: to allow the application to specify
                    a different number of maximum frames that can be handled
@@ -177,11 +116,7 @@ RTI Connext user manual.
                       </element>
                     </value>
                 </multicast>
-
             </datareader_qos>
-
         </qos_profile>
-
     </qos_library>
-    
 </dds>
