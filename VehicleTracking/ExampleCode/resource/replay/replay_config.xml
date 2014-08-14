@@ -26,7 +26,7 @@ XML configuration for replaying all network data, using high-throughput settings
 
         <time_control>
             <rate>10</rate>      <!-- Optional Rate Multiplier -->
-            <start_mode>AUTO</start_mode>
+            <start_mode>AUTOMATIC</start_mode>
             <start_offset>
                 <sec>0</sec>
             </start_offset>
