@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <!--
  (c) 2005-2014 Copyright, Real-Time Innovations, Inc.  All rights reserved.
  RTI grants Licensee a license to use, modify, compile, and create derivative
@@ -8,14 +9,18 @@
  any incidental or consequential damages arising out of the use or inability to
  use the software.
  -->
-<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="c:\program files\rti\5.0.0\RTI Recording Service 5.0.0\resource\schema\rti_record.xsd">
 <!-- 
 Description
 XML configuration for recording all network data using high-throughput transport
 settings
 
 -->
+
     <!-- This simple configuration records all topics from domain ID 0 -->
+<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+     xsi:noNamespaceSchemaLocation="http://community.rti.com/schema/5.1.0/rti_record.xsd"
+     version="5.1.0">
+     
     <recorder name="flightdata">
         <!-- Specify where to store the recorded data. -->
         <recorder_database>
@@ -26,51 +31,9 @@ settings
              for high throughput data. -->
         <domain name="domain0">
             
-            <participant_qos>
-                <receiver_pool>
-                    <buffer_size>65507</buffer_size>
-                </receiver_pool>
+            <participant_qos base_name="BuiltinQosLib::Baseline">
                 <property>
                     <value>
-
-                        <!--
-                            Configure UDP transport for higher throughput:
-                          -->
-                        <element>
-                            <name>dds.transport.UDPv4.builtin.parent.message_size_max</name>
-                            <value>65507</value>
-                        </element>
-
-                        <!--
-                          The next setting is to setup the buffers for sending and recieving data 
-                          on the transport to be at least double what our expected message size will be.
-                          In this case our expected message size is 1MB, so therefore we are setting
-                          the buffer sizes to 2MB.
-                          -->
-                        <element>
-                            <name>dds.transport.UDPv4.builtin.send_socket_buffer_size</name>
-                            <value>2097152</value>
-                        </element>
-                        <element>
-                            <name>dds.transport.UDPv4.builtin.recv_socket_buffer_size</name>
-                            <value>2097152</value>
-                        </element>
-                        <!-- Configure shared memory transport for higher 
-                             throughput: -->
-                        <element>
-                            <!--  Set the shared memory maximum message size to
-                                  the same value that was set for UDP.   -->
-                            <name>dds.transport.shmem.builtin.parent.message_size_max</name>
-                            <value>65507</value>
-                            <!-- 64 KB - header sizes -->
-                        </element>
-                        <element>
-                            <!-- Set the size of the shared memory transport's
-                                 receive buffer to some large value.  -->
-                            <name>dds.transport.shmem.builtin.receive_buffer_size</name>
-                            <value>2097152</value>
-                            <!-- 2 MB -->
-                        </element>
                         <element>
                             <!--  Set the maximum number of messages that the 
                                   shared memory transport can cache while 

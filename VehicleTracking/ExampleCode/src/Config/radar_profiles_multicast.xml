@@ -17,8 +17,8 @@ For more information about XML QoS Profiles see Chapter 15 in the
 RTI Connext user manual.
 -->
 <dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:noNamespaceSchemaLocation="C:/Program Files/RTI/5.0.0/ndds.5.0.0/scripts/../resource/rtiddsgen/../qos_profiles_5.0.0/schema/rti_dds_qos_profiles.xsd"
-     version="5.0.0">
+     xsi:noNamespaceSchemaLocation="http://community.rti.com/schema/5.1.0/rti_dds_qos_profiles.xsd"
+     version="5.1.0">
     <!-- QoS Library containing the QoS profile used in the example.
 
         A QoS library is a named set of QoS profiles.
@@ -28,22 +28,6 @@ RTI Connext user manual.
         <qos_profile name="LowLatencyRadar" base_name="OneToManyMulticast">
             <!-- QoS used to configure the data writer created in the example code -->                
             <datawriter_qos>
-
-                <!-- Enabling reliability to ensure that the last update of
-                     each radar track is guaranteed to be delivered to the 
-                     DataReader -->
-                <reliability>
-                    <kind>RELIABLE_RELIABILITY_QOS</kind>
-                </reliability>
-
-                <!-- Reliably deliver the _most recent_ radar update -->
-                <history>
-                    <!-- If you need strict reliability, this should be changed to 
-                         keep all history. -->
-                    <kind>KEEP_LAST_HISTORY_QOS</kind>
-                    <depth>1</depth>
-                </history>
-
                 <!-- Resource limits: to allow the application to specify
                      a different number of maximum tracks that can be handled
                      at once, the resource limits are being set in code. 
@@ -60,36 +44,7 @@ RTI Connext user manual.
                 <protocol>
                  
                     <rtps_reliable_writer>
-                        
-                        <!-- Send reliability heartbeats every 50 ms if there 
-                             is a reader waiting for data.  Send reliability 
-                             heartbeats every 10 ms if the queue is starting to
-                             fill and there is a reader waiting for data. (Note
-                             that no heartbeats are sent if there are no 
-                             readers waiting for data).  These heartbeats 
-                             determine how quickly data is re-sent if it was 
-                             lost the first time. -->
-                        <heartbeat_period>
-                            <sec>0</sec>
-                            <nanosec>50000000</nanosec>
-                        </heartbeat_period>
-                        <fast_heartbeat_period>
-                            <sec>0</sec>
-                            <nanosec>10000000</nanosec>
-                        </fast_heartbeat_period>
-                        <late_joiner_heartbeat_period>
-                            <sec>0</sec>
-                            <nanosec>50000000</nanosec>
-                        </late_joiner_heartbeat_period>
-                        
-                        <!-- Tells the DataWriter to not delay when it 
-                             receives a negative acknowledgement (NACK). -->
-                        <max_nack_response_delay>
-                            <sec>0</sec>
-                            <nanosec>0</nanosec>
-                        </max_nack_response_delay>
-
-                        <!-- Does not change behavior in a system with no
+                    <!-- Does not change behavior in a system with no
                              multicast.  However, if somebody does enable 
                              multicast on a DataReader, this will prevent 
                              potential delays. -->
@@ -101,22 +56,6 @@ RTI Connext user manual.
 
             <!-- QoS used to configure the data reader created in the example code -->                
             <datareader_qos>
-
-                <!-- Enabling reliability to ensure that the last update of
-                     each radar track is guaranteed to be delivered to the 
-                     DataReader -->
-                <reliability>
-                    <kind>RELIABLE_RELIABILITY_QOS</kind>
-                </reliability>
-
-              <!-- Reliably deliver the _most recent_ radar update -->
-              <history>
-                  <!-- If you need strict reliability, this should be changed 
-                       to keep all history. -->
-                  <kind>KEEP_LAST_HISTORY_QOS</kind>
-                  <depth>1</depth>
-                </history>
-              
               <!-- Resource limits: to allow the application to specify
                    a different number of maximum tracks that can be handled
                    at once, the resource limits are being set in code. 
@@ -175,22 +114,6 @@ RTI Connext user manual.
                     </max_flush_delay>
                 </batch>
 
-                <!-- Enabling reliability to ensure that the last update of
-                     each radar track is guaranteed to be delivered to the 
-                     DataReader -->
-                <reliability>
-                    <kind>RELIABLE_RELIABILITY_QOS</kind>
-                </reliability>
-
-                <!-- Reliably deliver the _most recent_ radar update for each 
-                     flight -->
-                <history>
-                    <!-- If you need strict reliability, this should be changed  
-                         to keep all history. -->
-                    <kind>KEEP_LAST_HISTORY_QOS</kind>
-                    <depth>1</depth>
-                </history>
-
                 <!-- Resource limits: to allow the application to specify
                      a different number of maximum tracks that can be handled
                      at once, the resource limits are being set in code. -->
@@ -238,8 +161,7 @@ RTI Connext user manual.
                              multicast.  However, if somebody does enable 
                              multicast on a DataReader, this will prevent 
                              potential delays. -->
-                        <enable_multicast_periodic_heartbeat>true
-                        </enable_multicast_periodic_heartbeat>
+                        <enable_multicast_periodic_heartbeat>true</enable_multicast_periodic_heartbeat>
                     </rtps_reliable_writer>
                 </protocol>
 
@@ -248,22 +170,6 @@ RTI Connext user manual.
             <!-- QoS used to configure the data reader created in the example 
                  code -->
             <datareader_qos>
-
-                <!-- Enabling reliability to ensure that the last update of
-                     each radar track is guaranteed to be delivered to the 
-                     DataReader -->
-                <reliability>
-                    <kind>RELIABLE_RELIABILITY_QOS</kind>
-                </reliability>
-
-                <!-- Reliably deliver the _most recent_ radar update -->
-                <history>
-                    <!-- If you need strict reliability, this should be changed
-                         to keep all history. -->
-                    <kind>KEEP_LAST_HISTORY_QOS</kind>
-                    <depth>1</depth>
-                </history>
-
                 <!-- Resource limits: to allow the application to specify
                      a different number of maximum tracks that can be handled
                      at once, the resource limits are being set in code. -->

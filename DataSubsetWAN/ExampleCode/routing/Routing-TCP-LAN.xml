@@ -10,38 +10,27 @@
  use the software.
  -->
 <dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:noNamespaceSchemaLocation="c:/program files/rti/5.0.0/RTI_Routing_Service_5.0.0/resource/schema/rti_routing_service.xsd">
+   xsi:noNamespaceSchemaLocation="http://community.rti.com/schema/5.1.0/rti_routing_service.xsd"
+   version="5.1.0">
 
     <qos_library name="RoutingLibrary">
-        <datareader_qos name="StateDataReader">
+        <datareader_qos name="StateDataReader" base_name="BuiltinQosLibExp::Generic.KeepLastReliable.TransientLocal">
 
             <!-- The Alarm topic is:  -->
             <!--   1) Reliable        -->
             <!--   2) Durable         -->
             <!--   3) History of 1    -->
-            <reliability>
-                <kind>RELIABLE_RELIABILITY_QOS</kind>
-            </reliability>
-            <durability>
-                <kind>TRANSIENT_LOCAL_DURABILITY_QOS</kind>
-            </durability>
             <history>
                 <kind>KEEP_LAST_HISTORY_QOS</kind>
                 <depth>1</depth>
             </history>
 
         </datareader_qos>
-        <datawriter_qos name="StateDataWriter">
+        <datawriter_qos name="StateDataWriter" base_name="BuiltinQosLibExp::Generic.KeepLastReliable.TransientLocal">
             <!-- The Alarm topic is:  -->
             <!--   1) Reliable        -->
             <!--   2) Durable         -->
             <!--   3) History of 1    -->
-            <reliability>
-                <kind>RELIABLE_RELIABILITY_QOS</kind>
-            </reliability>
-            <durability>
-                <kind>TRANSIENT_LOCAL_DURABILITY_QOS</kind>
-            </durability>
             <history>
                 <kind>KEEP_LAST_HISTORY_QOS</kind>
                 <depth>1</depth>
