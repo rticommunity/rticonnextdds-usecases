@@ -23,6 +23,6 @@ then
 else
     echo "******************************************************************"
     echo "The ROUTER_HOME environment variable must be set to"
-    echo "Connext_install_dir/RTI_Routing_service_5.0.0 to run this example"
+    echo "Connext_install_dir/RTI_Routing_service_5.1.0 to run this example"
     echo "******************************************************************"
 fi
