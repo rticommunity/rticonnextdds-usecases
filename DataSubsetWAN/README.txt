@@ -47,10 +47,8 @@ Connext here: http://www.rti.com/downloads/
 Download RTI Prototyper with Lua
 --------------------------------
 
-This example depends on the RTI Prototyper with Lua experimental product.
-This is not required to send data across a WAN, but the example uses this to
-generate interesting-looking data.  You can download this from here:
-http://community.rti.com/downloads/experimental/rti-prototyper-with-lua
+This example depends on the RTI Prototyper with Lua experimental product. From 
+RTI Connext DDS 5.1.0, the RTI Prototyper with Lua is included itself.
 
 
 How to Run this Example
@@ -59,14 +57,10 @@ How to Run this Example
 To run this example, on all platforms you must set two environment variables.
 
 The first thing you must do is set an environment variable called ROUTER_HOME. 
-This environment variable must point to the RTI_Routing_Service_5.0.0 
+This environment variable must point to the RTI_Routing_Service_5.1.0 
 directory inside your RTI Connext DDS installation. For more information on 
 how to set an environment variable, please see the RTI Core Libraries and 
 Utilities Getting Started Guide.
-
-For this example, you must also set an environment variable called 
-PROTOTYPER_HOME. This must be set to the directory where you installed RTI 
-Prototyper with Lua.
 
 We will refer to the location where you unzipped the example in this document 
 as EXAMPLE_HOME.  
