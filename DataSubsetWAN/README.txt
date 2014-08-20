@@ -44,13 +44,6 @@ will include the libraries that are required to run the example, and tools you
 can use to visualize and debug your distributed system. You can download RTI
 Connext here: http://www.rti.com/downloads/
 
-Download RTI Prototyper with Lua
---------------------------------
-
-This example depends on the RTI Prototyper with Lua experimental product. From 
-RTI Connext DDS 5.1.0, the RTI Prototyper with Lua is included itself.
-
-
 How to Run this Example
 -----------------------
 
