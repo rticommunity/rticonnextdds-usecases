@@ -1,0 +1,30 @@
+@echo off
+setlocal
+
+set executableName=Video${DDS_ENTITY}.exe
+set appName=Video${DDS_ENTITY}
+
+set scriptDir=%~dp0
+set args=%*
+set releaseBinDir=%scriptDir%..\src\bin\${ARCHITECTURE}
+set debugBinDir=%scriptDir%..\src\bin\${ARCHITECTURE}
+
+set Path=%NDDSHOME%\lib\${ARCHITECTURE};%scriptDir%..\thirdparty\gstreamer-sdk\win32\0.10\x86\bin;%Path%
+
+if exist "%releaseBinDir%\%executableName%" (
+    cd %releaseBinDir%
+    call "%executableName%" %args%
+) else if exist "%debugBinDir%\%executableName%" (
+    cd %debugBinDir%
+	call "%executableName%" %args%
+) else (
+    echo.
+	echo Error: Could not find %executableName% under %releaseBinDir%
+    echo or %debugBinDir%.
+	echo.
+	echo First, please build %appName% using
+	echo the perl script called Build.pl you will find under
+	echo %scriptDir%
+	echo.
+	exit /b 1
+)

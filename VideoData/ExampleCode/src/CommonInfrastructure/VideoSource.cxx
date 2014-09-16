@@ -174,7 +174,7 @@ int EMDSVideoSource::Initialize()
 	}
 
 	// Create a file source that will load the file pointed to by the URL
-	GstElement *source = gst_element_factory_make("filesrc", "filesrc");
+	GstElement *source = gst_element_factory_make("filesrc", NULL);
 	if (source == NULL)
 	{
 		std::cout << "Error creating file source" << std::endl;
@@ -290,13 +290,28 @@ std::string EMDSVideoSource::GetStreamMetadata()
 bool EMDSVideoSource::IsMetadataCompatible(
 	std::string subscriberMetadata)
 {
-	GstCaps *sourceCaps = gst_caps_from_string(
-		GetStreamMetadata().c_str());
-	GstCaps *sinkCaps = gst_caps_from_string(
-		subscriberMetadata.c_str());
-	return (bool)gst_caps_is_always_compatible(
-		sourceCaps,
-		sinkCaps);
+    bool isCompatible = false;
+    bool strictCodecChecking = false;
+
+    GstCaps *sourceCaps = gst_caps_from_string(
+        GetStreamMetadata().c_str());
+    GstCaps *sinkCaps = gst_caps_from_string(
+        subscriberMetadata.c_str());
+		
+    isCompatible = (bool)gst_caps_is_always_compatible(
+        sourceCaps,
+        sinkCaps);
+    
+    // if you don't want a strict compatibility, allways return true
+    if (strictCodecChecking == false) {
+        if (isCompatible == false) {
+           std::cout << "The codecs are incompatibles. " <<
+                "Anyway, the video will be sent." << std::endl;
+        }
+     
+        isCompatible = true; 
+    } 
+    return isCompatible;
 }
 
 // ----------------------------------------------------------------------------
@@ -321,7 +336,7 @@ int EMDSVideoSource::Start()
 
 	std::cout << "Video Source: VideoSource started" << std::endl;
 
-	return 0;
+	return 0; 
 }
 
 // ----------------------------------------------------------------------------

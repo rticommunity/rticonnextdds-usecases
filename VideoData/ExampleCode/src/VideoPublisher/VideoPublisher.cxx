@@ -22,6 +22,7 @@
 
 #ifdef WIN32
 #include <stdlib.h>
+#include <Windows.h>
 #include "Shlwapi.h"
 #endif
 

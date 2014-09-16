@@ -55,8 +55,12 @@ extern "C" {
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
     /* "inline" and "restrict" are keywords */
 #else
-#   define inline           /* inline */
-#   define restrict         /* restrict */
+#   ifndef inline
+#      define inline           /* inline */
+#   endif
+#   ifndef restrict
+#       define restrict         /* restrict */
+#   endif
 #endif
 
 

@@ -91,7 +91,10 @@ static GstBusSyncReply bus_sync_handler(
 {
 	GstElement *outwin = NULL;
 	GValue *val = (GValue *)g_value_array_new(1);
-
+//if we aren't using windows we will set their initial value
+#ifndef WIN32    
+    *val = G_VALUE_INIT;
+#endif
 	outwin = gst_bin_get_by_name((GstBin*)user_data,"sink");
 
 	if (GST_MESSAGE_TYPE (message) != GST_MESSAGE_ELEMENT)

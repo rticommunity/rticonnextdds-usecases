@@ -20,7 +20,6 @@
  */
 
 /* SimCList implementation, version 1.6 */
-
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>          /* for setting errno */
@@ -30,7 +29,9 @@
 #   include <unistd.h>
 #   include <stdint.h>
 #else
-//#define _WINSOCKAPI_
+#define _WINSOCKAPI_
+// if we want to use timeGetTime() we need to undef WIN32_LEAN_AND_MEAN
+#undef WIN32_LEAN_AND_MEAN
 #include <WinSock2.h>
 #include <windows.h>
 #endif
