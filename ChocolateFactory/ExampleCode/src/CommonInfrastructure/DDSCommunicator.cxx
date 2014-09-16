@@ -10,7 +10,7 @@
  ******************************************************************************/
 #include "DDSCommunicator.h"
 
-using namespace DDS;
+using namespace DDS; 
 
 // ------------------------------------------------------------------------- //
 // Destruction of a DDS communication interface.  This first deletes all the

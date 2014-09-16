@@ -61,29 +61,42 @@ Getting Started Guide.
 We will refer to the location where you unzipped the example in this document 
 as EXAMPLE_HOME.  
 
+IMPORTANT NOTE: the path EXAMPLE_HOME should not have blanks.
+
 All source and build files are located in EXAMPLE_HOME/ExampleCode/.  Before
 building or running, change directories into EXAMPLE_HOME/ExampleCode.
 
-Windows Systems
----------------
+Build the example
+-----------------
+For building this example is needed to have installed CMake. You can download
+from http://www.cmake.org/download/ . 
 
-On a Windows system, start by opening the file 
-win32\ChocolateFactory-<compilerver>.sln.
+Then you have to run the CMake project in order to create your building files,
+depending of the architecture you want to use. For this task you have to run in
+a command prompt windows the Build.pl script is inside of scripts folder. 
+Remember you have to run this scripts in the EXAMPLE_HOME\ExampleCode directory.
+You can use the next command:
+    perl ./scripts/Build.pl <architecture>
+where you can choose your own architecture.
 
-This code is made up of a combination of libraries, source, and IDL files that 
-represent the interface to the application. The Visual Studio solution files 
-are set up to automatically generate the necessary code and link against the 
-required libraries.
+This script will create a 'projects' folder where your Visual Studio project, or 
+your makefile will be stored. You can modify these files if you want.
 
-Linux Systems
--------------
+Besides, the script will compile the example:
+    - In Windows: run the msbuild compiler with the created solution.
+    - In Linux: run the created makefile.
 
-To build the applications on a Linux system, change directories to the 
-ExampleCode directory and use the command:
+Also, Build.pl script will create four custom running scripts. The running 
+scripts will be saved in the scripts directory following the template they have
+in the same folder. 
 
-gmake –f make/Makefile.<platform>
-The platform you choose will be the combination of your processor, OS, and 
-compiler version.  Right now this example only supports i86Linux2.6gcc4.5.5
+The four custom script created are:
+    - RecipeGenerator
+    - ManufacturingExecutionSystem
+    - AllStationController
+    - StationController 
+All of them with the corresponding architecture you wrote calling the Build.pl 
+script.
 
 Run the Example
 ---------------

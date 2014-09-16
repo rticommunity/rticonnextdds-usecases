@@ -1,0 +1,20 @@
+@echo off
+setlocal
+
+set dir=%~dp0
+set script_name=%~n0
+set executable_name=${EXE_NAME}
+
+set Path=%NDDSHOME%\lib\${ARCHITECTURE};%PATH%
+
+cd %dir%\..\src\bin\${ARCHITECTURE}\
+
+if "%script_name%" == "AllStationController" (
+    start %executable_name% --controller-type 1 %*
+    start %executable_name% --controller-type 2 %*
+    start %executable_name% --controller-type 3 %*
+    start %executable_name% --controller-type 4 %*
+    start %executable_name% --controller-type 5 %*
+) else (
+    call %executable_name% %*
+)
