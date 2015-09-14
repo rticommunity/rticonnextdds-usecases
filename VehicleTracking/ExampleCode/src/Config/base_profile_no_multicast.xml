@@ -61,13 +61,8 @@ RTI Connext user manual.
                             Configure shared memory transport for higher throughput:
                           -->
                         <element>
-                            <!-- 
-                            Set the shared memory maximum message size to the
-                            same value that was set for UDP.
-                            -->
                             <name>dds.transport.shmem.builtin.parent.message_size_max</name>
-                            <value>65507</value>
-                            <!-- 64 KB - header sizes -->
+                            <value>65536</value>
                         </element>
                         <element>
                             <!--
