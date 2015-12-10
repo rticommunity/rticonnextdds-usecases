@@ -20,7 +20,7 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(NDDSHOME)\bin\rtiddsgen" ..\src\Idl\VideoData.idl -replace -namespace -language C++ -d ..\src\Generated</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating .cxx files from .idl ... </Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)..\Generated\%(Filename).h;%(RootDir)%(Directory)..\Generated\%(Filename).cxx;%(RootDir)%(Directory)..\Generated\%(Filename)Plugin.h;%(RootDir)%(Directory)..\Generated\%(Filename)Plugin.cxx;%(RootDir)%(Directory)..\Generated\%(Filename)Support.h;%(RootDir)%(Directory)..\Generated\%(Filename)Support.cxx;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(NDDSHOME)\scripts\rtiddsgen" ..\src\Idl\VideoData.idl -replace -namespace -language C++ -d ..\src\Generated</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(NDDSHOME)\bin\rtiddsgen" ..\src\Idl\VideoData.idl -replace -namespace -language C++ -d ..\src\Generated</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating .cxx files from .idl ... </Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)..\Generated\%(Filename).h;%(RootDir)%(Directory)..\Generated\%(Filename).cxx;%(RootDir)%(Directory)..\Generated\%(Filename)Plugin.h;%(RootDir)%(Directory)..\Generated\%(Filename)Plugin.cxx;%(RootDir)%(Directory)..\Generated\%(Filename)Support.h;%(RootDir)%(Directory)..\Generated\%(Filename)Support.cxx;%(Outputs)</Outputs>
     </CustomBuild>
