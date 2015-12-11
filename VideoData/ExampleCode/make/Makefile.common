@@ -155,9 +155,9 @@ objs/$(ARCH)/VideoSubscriber/%.o: src/VideoSubscriber/%.cxx $(COMMON_H) $(HEADER
 $(SOURCES_IDL) $(HEADERS_IDL): src/Idl/VideoData.idl
 	@mkdir -p src/Generated
 ifeq ($(OS_ARCH), i86Win32)
-	call $(NDDSHOME)/scripts/rtiddsgen.bat -d src/idl src/VideoData.idl -replace -language C++
+	call $(NDDSHOME)/bin/rtiddsgen.bat -d src/idl src/VideoData.idl -replace -language C++
 else
-	$(NDDSHOME)/scripts/rtiddsgen -namespace -d src/Generated src/Idl/VideoData.idl -replace -language C++
+	$(NDDSHOME)/bin/rtiddsgen -namespace -d src/Generated src/Idl/VideoData.idl -replace -language C++
 endif
 
 generate: $(SOURCES_IDL) $(HEADERS_IDL)
