@@ -12,8 +12,8 @@
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\src\Idl\ChocolateFactory.idl">
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(NDDSHOME)\scripts\rtiddsgen" ..\src\Idl\ChocolateFactory.idl -replace -namespace -language C++ -d ..\src\Generated</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(NDDSHOME)\scripts\rtiddsgen" ..\src\Idl\ChocolateFactory.idl -replace -namespace -language C++ -d ..\src\Generated</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(NDDSHOME)\bin\rtiddsgen" ..\src\Idl\ChocolateFactory.idl -replace -namespace -language C++ -d ..\src\Generated</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(NDDSHOME)\bin\rtiddsgen" ..\src\Idl\ChocolateFactory.idl -replace -namespace -language C++ -d ..\src\Generated</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating .cxx files from .idl ... </Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating .cxx files from .idl ... </Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)..\Generated\%(Filename).h;%(RootDir)%(Directory)..\Generated\%(Filename).cxx;%(RootDir)%(Directory)..\Generated\%(Filename)Plugin.h;%(RootDir)%(Directory)..\Generated\%(Filename)Plugin.cxx;%(RootDir)%(Directory)..\Generated\%(Filename)Support.h;%(RootDir)%(Directory)..\Generated\%(Filename)Support.cxx;%(Outputs)</Outputs>
@@ -46,12 +46,14 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -64,11 +66,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IntDir>$(Configuration)\i86Win32VS2010\$(ProjectName)\</IntDir>
+    <IntDir>$(Configuration)\i86Win32VS2012\$(ProjectName)\</IntDir>
     <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IntDir>$(Configuration)\i86Win32VS2010\$(ProjectName)\</IntDir>
+    <IntDir>$(Configuration)\i86Win32VS2012\$(ProjectName)\</IntDir>
     <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
