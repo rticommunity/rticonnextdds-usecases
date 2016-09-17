@@ -58,15 +58,11 @@ How to Run this Example
 
 To run this example, on all platforms you must set two environment variables.
 
-The first thing you must do is set an environment variable called ROUTER_HOME. 
-This environment variable must point to the RTI_Routing_Service_5.0.0 
-directory inside your RTI Connext DDS installation. For more information on 
-how to set an environment variable, please see the RTI Core Libraries and 
-Utilities Getting Started Guide.
-
-For this example, you must also set an environment variable called 
-PROTOTYPER_HOME. This must be set to the directory where you installed RTI 
-Prototyper with Lua.
+The first thing you must do is set an environment variable called NDDSHOME. 
+This environment variable must point to the RTI Connext DDS installation, 
+such as rti_connext_dds-5.2.x. For more information on how to set an 
+environment variable, please see the RTI Core Libraries and Utilities Getting 
+Started Guide.
 
 We will refer to the location where you unzipped the example in this document 
 as EXAMPLE_HOME.  
