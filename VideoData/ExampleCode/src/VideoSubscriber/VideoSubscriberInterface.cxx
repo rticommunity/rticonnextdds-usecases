@@ -182,7 +182,6 @@ void VideoStreamListener::on_data_available(DataReader *reader)
 		{
 			if (infoSeq[i].valid_data == DDS_BOOLEAN_TRUE)
 			{
-
 				if ((infoSeq[i].publication_sequence_number.low
 						% 50) == 1)
 				{
@@ -191,6 +190,7 @@ void VideoStreamListener::on_data_available(DataReader *reader)
 
 				double timestamp = infoSeq[i].source_timestamp.sec + 
 						(infoSeq[i].source_timestamp.nanosec / NANOSEC_TO_SEC);
+//std::cout << "  Timestamp: " << timestamp << std::endl;
 
 				_reader->NotifyHandlers(&dataSeq[i], dataSeq[i].stream_id, 
 					timestamp);

@@ -49,9 +49,8 @@ endif
 
 # Define the sources and NDDS search path
 INCLUDES = -Isrc/CommonInfrastructure -Isrc/Generated -I$(NDDSHOME)/include \
-           -I$(NDDSHOME)/include/ndds -I/usr/include/gstreamer-0.10 \
-           -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include \
-           -I/usr/include/libxml2
+           -I$(NDDSHOME)/include/ndds -I/usr/include/libxml2 \
+           $(shell pkg-config --cflags gstreamer-app-1.0)
  
 
 ###############################################################################
@@ -73,7 +72,7 @@ NDDSLIBS = -lnddscppz -lnddscz -lnddscorez
 endif
 endif
 
-LIBS = -L$(NDDSHOME)/lib/$(ARCH) -L/usr/lib $(NDDSLIBS) $(SYSLIBS) -lglib-2.0 -lgstreamer-0.10 -lgstapp-0.10
+LIBS = -L$(NDDSHOME)/lib/$(ARCH) -L/usr/lib $(NDDSLIBS) $(SYSLIBS) $(shell pkg-config --libs gstreamer-app-1.0)
 
 COMMONSRC = src/CommonInfrastructure/DDSCommunicator.cxx     \
           src/CommonInfrastructure/OSAPI.cxx               \
@@ -121,7 +120,12 @@ SUBEXEC       = VideoSubscriber
 ###############################################################################
 # Build Rules
 ###############################################################################
-$(ARCH): VideoPublisher VideoSubscriber 
+
+.PHONY: generate clean veryclean \
+	objs/$(ARCH)/VideoPublisher/VideoPublisher.out \
+	objs/$(ARCH)/VideoSubscriber/VideoSubscriber.out
+
+all: VideoPublisher VideoSubscriber 
 
 VideoPublisher: $(DIRECTORIES) $(VIDEOPUBOBJS) $(EXEC:%=objs/$(ARCH)/VideoPublisher/%.o) \
 	$(EXEC:%=objs/$(ARCH)/VideoPublisher/%.out)
@@ -155,9 +159,9 @@ objs/$(ARCH)/VideoSubscriber/%.o: src/VideoSubscriber/%.cxx $(COMMON_H) $(HEADER
 $(SOURCES_IDL) $(HEADERS_IDL): src/Idl/VideoData.idl
 	@mkdir -p src/Generated
 ifeq ($(OS_ARCH), i86Win32)
-	call $(NDDSHOME)/scripts/rtiddsgen.bat -d src/idl src/VideoData.idl -replace -language C++
+	call $(NDDSHOME)/bin/rtiddsgen.bat -d src/idl src/VideoData.idl -replace -language C++
 else
-	$(NDDSHOME)/scripts/rtiddsgen -namespace -d src/Generated src/Idl/VideoData.idl -replace -language C++
+	$(NDDSHOME)/bin/rtiddsgen -namespace -d src/Generated src/Idl/VideoData.idl -replace -language C++
 endif
 
 generate: $(SOURCES_IDL) $(HEADERS_IDL)
@@ -180,5 +184,5 @@ clean:
 
 veryclean:
 	@rm -Rf objs
-	@rm -Rf src/idl
+	@rm -Rf src/Generated
 	@echo "Deleted all executables, objects and generated files"

@@ -132,6 +132,8 @@ public:
 
 	// Calls the gstreamer framework to see if the subscribing app's codec
 	// is compatible with what we are sending.  If not, we return false.
+        // Note: this looks like a simple function but the implementation  has
+        //       a side-effect of setting a private member -- this should be improved
 	virtual bool CodecsCompatible(std::string codecString)
 	{
 		if (_source->IsMetadataCompatible(codecString)) 

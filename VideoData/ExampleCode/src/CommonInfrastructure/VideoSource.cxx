@@ -38,7 +38,7 @@ Real-Time Innovations, Inc. (RTI).  The above license is granted with
 #include "VideoSource.h"
 #include <gst/gst.h>
 #include <gst/app/gstappsink.h>
-#include <gst/app/gstappbuffer.h>
+//#include <gst/app/gstappbuffer.h>
 #include "../Generated/VideoData.h"
 
 static int seqn = 0;
@@ -49,6 +49,7 @@ static int seqn = 0;
 // the provider (from the GStreamer framework) and notifies the frame 
 // ready handler that there is a frame available.
 //
+
 void *video_source_worker(void *src)
 {
 
@@ -62,26 +63,41 @@ void *video_source_worker(void *src)
 
 	while (1)
 	{
-	
-		GstBuffer * buffer = 
-			gst_app_sink_pull_buffer((GstAppSink *)videoSource->GetAppSink());
+	        GstSample * sample = 
+			gst_app_sink_pull_sample(GST_APP_SINK(videoSource->GetAppSink()));
+                if (sample == NULL) 
+                {
+                    return NULL;
+                }
 
+		GstBuffer * buffer = 
+                        gst_sample_get_buffer(sample);
 		if (buffer == NULL)
 		{
 			return NULL;
 		}
 
-		if (GST_BUFFER_SIZE(buffer) > 
-			com::rti::media::generated::MAX_BUFFER_SIZE)
+                GstMemory * memory = gst_buffer_get_memory (buffer, 0);
+                if (memory == NULL)
+                {
+                        return NULL;
+                }
+
+                GstMapInfo info;
+                if (gst_memory_map (memory, &info, GST_MAP_READ) == FALSE)
+                {
+                        return NULL;
+                }
+
+		if (info.size > com::rti::media::generated::MAX_BUFFER_SIZE)
 		{
 			std::cout << "Buffer is larger than the max buffer size" 
 				<< std::endl;
 		}
 		EMDSBuffer *emdsBuffer
-			= new EMDSBuffer(GST_BUFFER_SIZE(buffer));
+			= new EMDSBuffer(info.size);
 
-		emdsBuffer->SetData(GST_BUFFER_DATA(buffer),
-			GST_BUFFER_SIZE(buffer));
+		emdsBuffer->SetData(info.data, info.size);
 		emdsBuffer->SetSeqn(seqn);
 
 		seqn++;
@@ -90,6 +106,9 @@ void *video_source_worker(void *src)
 			videoSource->GetHandlerObj(), emdsBuffer);
 
 		delete emdsBuffer;
+
+                gst_buffer_unref (buffer);
+                gst_memory_unmap (memory, &info);
 	}
 
 	return NULL;
@@ -127,7 +146,7 @@ static void EMDSVideoSource_detect_new_pad(GstElement *element, GstPad *pad,
 	gpointer data)
 {
 	// May be muxer or may be appSink depending on platform
-	GstElement *linkElement = (GstElement *)data;
+	GstElement *linkElement = GST_ELEMENT(data);
 	GstPad *sinkPad = NULL;
 
 	if (0 == strncmp(gst_pad_get_name(pad), "video", 5))
@@ -305,8 +324,6 @@ bool EMDSVideoSource::IsMetadataCompatible(
 //
 int EMDSVideoSource::Start()
 {
-	std::cout << "Initializing and starting video source" << std::endl;
-
 	// Create video thread
 	_worker = new OSThread(video_source_worker, (void *)this);
 

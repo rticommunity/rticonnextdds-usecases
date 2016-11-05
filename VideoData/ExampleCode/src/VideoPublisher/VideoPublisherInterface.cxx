@@ -175,8 +175,8 @@ bool VideoPublisherInterface::Write(DdsAutoType<VideoStream> data)
 		return false;
 	}
 
-/*	cout << "Writing sample #" << data.equence_number
-		<< ", length: " << data.frame.length() << endl;*/
+	/* std::cout << "Writing sample #" << data.sequence_number
+		<< ", length: " << data.frame.length() << std::endl; */
 
 	return true;
 
