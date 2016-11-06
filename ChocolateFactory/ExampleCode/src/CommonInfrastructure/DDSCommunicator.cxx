@@ -72,18 +72,18 @@ DDSCommunicator::~DDSCommunicator()
 // Creating a DomainParticipant with a specified domain ID  
 DomainParticipant* DDSCommunicator::CreateParticipant(long domain) 
 {
-	DomainParticipant* participant = 
+	_participant = 
 		TheParticipantFactory->create_participant(domain, 
 		PARTICIPANT_QOS_DEFAULT, NULL, STATUS_MASK_NONE);
 
-	if (participant == NULL) 
+	if (_participant == NULL) 
 	{
 		std::stringstream errss;
 		errss << "Failed to create DomainParticipant object";
 		throw errss.str();
 	} 
 
-	return participant;
+	return _participant;
 }
 
 // ------------------------------------------------------------------------- //
@@ -158,9 +158,9 @@ DomainParticipant* DDSCommunicator::CreateParticipant(long domain,
 			fileNames[i].c_str());
 	}
 
-	DDS_ReturnCode_t retcode = TheParticipantFactory->set_qos(factoryQos);
+	ReturnCode_t retcode = TheParticipantFactory->set_qos(factoryQos);
 		
-	if (retcode != DDS_RETCODE_OK) 
+	if (retcode != RETCODE_OK) 
 	{
 		std::stringstream errss;
 		errss << "Failed to create DomainParticipant object";
@@ -207,8 +207,8 @@ Publisher* DDSCommunicator::CreatePublisher()
 	// can actually send data.  
 	// 
 	_pub = GetParticipant()->create_publisher(
-									DDS_PUBLISHER_QOS_DEFAULT, 
-									NULL, DDS_STATUS_MASK_NONE);	
+									PUBLISHER_QOS_DEFAULT, 
+									NULL, STATUS_MASK_NONE);	
 
 	if (_pub == NULL) 
 	{
@@ -243,7 +243,7 @@ Publisher* DDSCommunicator::CreatePublisher(
 	_pub = GetParticipant()->create_publisher_with_profile(
 						qosLibrary.c_str(), 
 						qosProfile.c_str(),
-						NULL, DDS_STATUS_MASK_NONE);	
+						NULL, STATUS_MASK_NONE);	
 
 	if (_pub == NULL) 
 	{
@@ -277,8 +277,8 @@ Subscriber* DDSCommunicator::CreateSubscriber()
 	//  create multiple DDS DataReaders. 
 	// 
 	_sub = GetParticipant()->create_subscriber(
-								DDS_SUBSCRIBER_QOS_DEFAULT, 
-								NULL, DDS_STATUS_MASK_NONE);	
+								SUBSCRIBER_QOS_DEFAULT, 
+								NULL, STATUS_MASK_NONE);	
 
 	if (_sub == NULL) 
 	{
@@ -315,7 +315,7 @@ Subscriber* DDSCommunicator::CreateSubscriber(
 	_sub = GetParticipant()->create_subscriber_with_profile(
 						qosLibrary.c_str(), 
 						qosProfile.c_str(), 
-						NULL, DDS_STATUS_MASK_NONE);	
+						NULL, STATUS_MASK_NONE);	
 	if (_sub == NULL) 
 	{
 		std::stringstream errss;
