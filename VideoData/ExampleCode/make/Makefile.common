@@ -24,31 +24,28 @@
 # Ensure this Makefile is invoked with the right variable set
 ###############################################################################
 ifeq ($(ARCH), )
-all:
-	@echo "***************************************************************"
-	@echo "You cannot use this Makefile directly, instead use the"
-	@echo "architecture-specific Makefile. For example:"
-	@echo "         gmake -f make/Makefile.i86Linux2.6gcc4.4.5"
-	@echo "***************************************************************"
-	@false
-else
+$(info ***************************************************************)
+$(info You cannot use this Makefile directly, instead use the         )
+$(info architecture-specific Makefile. For example:                   )
+$(info         gmake -f make/Makefile.i86Linux2.6gcc4.4.5             )
+$(info ***************************************************************)
+$(error Makefile variable ARCH is not set)
+endif
 ###############################################################################
 # Ensure $NDDSHOME is defined
 ###############################################################################
 ifeq ($(NDDSHOME), )
-all:
-	@echo "***************************************************************"
-	@echo "The environment variable 'NDDSHOME' is not set!"
-	@echo "To use this makefile you need to set NDDSHOME to the directory"
-	@echo "where you have RTI Connext installed."
-	@echo "***************************************************************"
-	@false
-endif
+$(info ***************************************************************)
+$(info The environment variable 'NDDSHOME' is not set!                )
+$(info To use this makefile you need to set NDDSHOME to the directory )
+$(info where you have RTI Connext installed.                          )
+$(info ***************************************************************)
+$(error Makefile variable NDDSHOME is not set)
 endif
 
 
 # Define the sources and NDDS search path
-INCLUDES = -Isrc/CommonInfrastructure -Isrc/Generated -I$(NDDSHOME)/include \
+INCLUDES := -Isrc -I$(NDDSHOME)/include \
            -I$(NDDSHOME)/include/ndds -I/usr/include/libxml2 \
            $(shell pkg-config --cflags gstreamer-app-1.0)
  
@@ -59,130 +56,202 @@ INCLUDES = -Isrc/CommonInfrastructure -Isrc/Generated -I$(NDDSHOME)/include \
 ifeq ($(DEBUG),1)
 CXXFLAGS += -g -O0 -D__STDC_CONSTANT_MACROS
 ifeq ($(SHAREDLIB),1)
-NDDSLIBS = -lnddscppd -lnddscd -lnddscored
+NDDSLIBS := -lnddscppd -lnddscd -lnddscored
 else
-NDDSLIBS = -lnddscppzd -lnddsczd -lnddscorezd
+NDDSLIBS := -lnddscppzd -lnddsczd -lnddscorezd
 endif
 else
 CXXFLAGS += -O2 -D__STDC_CONSTANT_MACROS
 ifeq ($(SHAREDLIB),1)
-NDDSLIBS = -lnddscpp -lnddsc -lnddscore
+NDDSLIBS := -lnddscpp -lnddsc -lnddscore
 else
-NDDSLIBS = -lnddscppz -lnddscz -lnddscorez
+NDDSLIBS := -lnddscppz -lnddscz -lnddscorez
 endif
 endif
 
-LIBS = -L$(NDDSHOME)/lib/$(ARCH) -L/usr/lib $(NDDSLIBS) $(SYSLIBS) $(shell pkg-config --libs gstreamer-app-1.0)
+LIBS := -L$(NDDSHOME)/lib/$(ARCH) -L/usr/lib $(NDDSLIBS) $(SYSLIBS) $(shell pkg-config --libs gstreamer-app-1.0)
 
-COMMONSRC = src/CommonInfrastructure/DDSCommunicator.cxx     \
-          src/CommonInfrastructure/OSAPI.cxx               \
-          src/CommonInfrastructure/VideoBuffer.cxx \
-          src/CommonInfrastructure/VideoSource.cxx \
-          src/CommonInfrastructure/VideoOutput.cxx \
-          src/CommonInfrastructure/SimCList.cxx
+MAKEDEPEND := $(CXX)
 
-COMMON_H  = src/CommonInfrastructure/DDSCommunicator.h \
-          src/CommonInfrastructure/OSAPI.h               \
-          src/CommonInfrastructure/DDSTypeWrapper.h       \
-          src/CommonInfrastructure/VideoBuffer.h \
-          src/CommonInfrastructure/VideoSource.h
+OBJDIR := objs
+ARCH_OBJDIR := $(OBJDIR)/$(ARCH)
+SRCDIR := src
 
-SOURCES_IDL = src/Generated/VideoData.cxx    \
-          src/Generated/VideoDataPlugin.cxx  \
-          src/Generated/VideoDataSupport.cxx
+IDL_NAME := VideoData
+IDL_SRCDIR := $(SRCDIR)/Idl
+IDL_FILE := $(IDL_SRCDIR)/$(IDL_NAME).idl
+IDL_GENDIR := $(SRCDIR)/Generated
+IDL_GENPAT := % %Support %Plugin 
 
-VIDEOPUB_H = src/VideoPublisher/VideoPublisher.h
+IDL_GENPAT_ABS := $(addprefix $(IDL_GENDIR)/,$(IDL_GENPAT))
+IDL_GENPAT_SOURCES := $(addsuffix .cxx,$(IDL_GENPAT_ABS))
+IDL_GENPAT_HEADERS := $(addsuffix .h,$(IDL_GENPAT_ABS))
+IDL_SOURCES := $(subst %,VideoData,$(IDL_GENPAT_SOURCES))
+IDL_HEADERS := $(subst %,VideoData,$(IDL_GENPAT_HEADERS))
 
-VIDEOPUBSRC = src/VideoPublisher/VideoPublisher.cxx \
-              src/VideoPublisher/VideoPublisherInterface.cxx 
+IDL_OBJDIR := $(ARCH_OBJDIR)/Common
+IDL_OBJPAT_ABS := $(addprefix $(IDL_OBJDIR)/,$(IDL_GENPAT))
+IDL_OBJPAT_OBJS := $(addsuffix .o,$(IDL_OBJPAT_ABS))
+IDL_OBJS := $(subst %,VideoData,$(IDL_OBJPAT_OBJS))
 
-VIDEOSUB_H = src/VideoSubscriber/VideoSubscriber.h
+COMMON_NAME := Common
+COMMON_SRCDIR := $(SRCDIR)/CommonInfrastructure
+COMMON_OBJDIR := $(ARCH_OBJDIR)/$(COMMON_NAME)
+COMMON_SRCS := $(wildcard $(COMMON_SRCDIR)/*.cxx)
+COMMON_OBJS := $(addprefix $(COMMON_OBJDIR)/,$(notdir $(COMMON_SRCS:.cxx=.o)))
+COMMON_DEPS := $(COMMON_OBJS:.o=.d)
 
-VIDEOSUBSRC = src/VideoSubscriber/VideoSubscriber.cxx \
-              src/VideoSubscriber/VideoSubscriberInterface.cxx 
+PUB_NAME := VideoPublisher
+PUB_SRCDIR := $(SRCDIR)/$(PUB_NAME)
+PUB_OBJDIR := $(ARCH_OBJDIR)/$(PUB_NAME)
+PUB_SRCS := $(wildcard $(PUB_SRCDIR)/*.cxx)
+PUB_OBJS := $(addprefix $(PUB_OBJDIR)/,$(notdir $(PUB_SRCS:.cxx=.o)))
+PUB_DEPS := $(PUB_OBJS:.o=.d)
+PUB_EXECDIR := $(PUB_OBJDIR)
+PUB_EXEC := $(PUB_EXECDIR)/$(PUB_NAME)
 
-HEADERS_IDL = src/Generated/VideoData.h      \
-          src/Generated/VideoDataPlugin.h    \
-          src/Generated/VideoDataSupport.h
+SUB_NAME := VideoSubscriber
+SUB_SRCDIR := $(SRCDIR)/$(SUB_NAME)
+SUB_OBJDIR := $(ARCH_OBJDIR)/$(SUB_NAME)
+SUB_SRCS := $(wildcard $(SUB_SRCDIR)/*.cxx)
+SUB_OBJS := $(addprefix $(SUB_OBJDIR)/,$(notdir $(SUB_SRCS:.cxx=.o)))
+SUB_DEPS := $(SUB_OBJS:.o=.d)
+SUB_EXECDIR := $(SUB_OBJDIR)
+SUB_EXEC := $(SUB_EXECDIR)/$(SUB_NAME)
 
-DIRECTORIES   = objs.dir objs/$(ARCH).dir objs/$(ARCH)/VideoPublisher.dir \
-                objs/$(ARCH)/Common.dir objs/$(ARCH)/VideoSubscriber.dir
-SOURCES_NODIR = $(notdir $(COMMONSRC)) $(notdir $(SOURCES_IDL))
-VIDEOPUBSRC_NODIR = $(notdir $(VIDEOPUBSRC))
-VIDEOSUBSRC_NODIR = $(notdir $(VIDEOSUBSRC))
-
-COMMONOBJS    = $(SOURCES_NODIR:%.cxx=objs/$(ARCH)/Common/%.o)
-VIDEOPUBOBJS  = $(VIDEOPUBSRC_NODIR:%.cxx=objs/$(ARCH)/VideoPublisher/%.o) $(COMMONOBJS)
-VIDEOSUBOBJS  = $(VIDEOSUBSRC_NODIR:%.cxx=objs/$(ARCH)/VideoSubscriber/%.o) $(COMMONOBJS)
-EXEC          = VideoPublisher 
-SUBEXEC       = VideoSubscriber
+ALL_DEPS := $(COMMON_DEPS) $(PUB_DEPS) $(SUB_DEPS)
+ALL_OBJS := $(IDL_OBJS) $(COMMON_OBJS) $(PUB_OBJS) $(SUB_OBJS)
 
 ###############################################################################
 # Build Rules
 ###############################################################################
 
-.PHONY: generate clean veryclean \
-	objs/$(ARCH)/VideoPublisher/VideoPublisher.out \
-	objs/$(ARCH)/VideoSubscriber/VideoSubscriber.out
+.PHONY: all link compile generate clean veryclean
 
-all: VideoPublisher VideoSubscriber 
+all: link
 
-VideoPublisher: $(DIRECTORIES) $(VIDEOPUBOBJS) $(EXEC:%=objs/$(ARCH)/VideoPublisher/%.o) \
-	$(EXEC:%=objs/$(ARCH)/VideoPublisher/%.out)
+###############################################################################
+# Linking the executables from their objects
+###############################################################################
 
-VideoSubscriber: $(DIRECTORIES) $(VIDEOSUBOBJS) $(@:%=objs/$(ARCH)/VideoSubscriber/%.o) \
-	$(SUBEXEC:%=objs/$(ARCH)/VideoSubscriber/%.out)
+#dependencies
+link: $(PUB_EXEC) $(SUB_EXEC)
 
+$(PUB_EXEC): $(PUB_OBJS) $(COMMON_OBJS) $(IDL_OBJS) | $(PUB_EXECDIR)
+$(SUB_EXEC): $(SUB_OBJS) $(COMMON_OBJS) $(IDL_OBJS) | $(SUB_EXECDIR)
 
-# Building the video publisher application
-objs/$(ARCH)/VideoPublisher/%.out: objs/$(ARCH)/VideoPublisher/%.o
-	$(CXXLD) $(CXXLDFLAGS) -o $(@:%.out=%) $(VIDEOPUBOBJS) $(LIBS)
+#recipes
 
-# Building the video subscriber application
-objs/$(ARCH)/VideoSubscriber/%.out: objs/$(ARCH)/VideoSubscriber/%.o
-	$(CXXLD) $(CXXLDFLAGS) -o $(@:%.out=%) $(VIDEOSUBOBJS) $(LIBS)
+$(PUB_EXEC) $(SUB_EXEC):
+	@echo Linking $@; \
+	$(CXXLD) $(CXXLDFLAGS) $^ $(LIBS) -o $@
 
-objs/$(ARCH)/Common/%.o: src/CommonInfrastructure/%.cxx $(COMMON_H)
-	$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
-	
-objs/$(ARCH)/Common/%.o: src/Generated/%.cxx $(COMMON_H)
-	$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
+###############################################################################
+# Compiling the objects from source
+###############################################################################
 
-objs/$(ARCH)/VideoPublisher/%.o: src/VideoPublisher/%.cxx $(COMMON_H) $(HEADERS_IDL)
-	$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
+#dependencies
 
-objs/$(ARCH)/VideoSubscriber/%.o: src/VideoSubscriber/%.cxx $(COMMON_H) $(HEADERS_IDL)
-	$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
+compile: $(ALL_OBJS)
 
+$(IDL_OBJS):    | $(IDL_OBJDIR)
+$(COMMON_DEPS): | $(COMMON_OBJDIR)
+$(PUB_DEPS):    | $(PUB_OBJDIR)
+$(SUB_DEPS):    | $(SUB_OBJDIR)
 
-# Rule to rebuild the generated files when the .idl file change
-$(SOURCES_IDL) $(HEADERS_IDL): src/Idl/VideoData.idl
-	@mkdir -p src/Generated
-ifeq ($(OS_ARCH), i86Win32)
-	call $(NDDSHOME)/bin/rtiddsgen.bat -d src/idl src/VideoData.idl -replace -language C++
-else
-	$(NDDSHOME)/bin/rtiddsgen -namespace -d src/Generated src/Idl/VideoData.idl -replace -language C++
+#automatic generation of the dependencies (.o depends on .cxx and .h files)
+# -MM  generate dependency rule for prerequisite, skipping system headers
+# -MT  add a target to the generated dependency
+# -MF  write the generated dependency rule to a file
+define do-dep
+set -e; rm -f $@; \
+echo Creating dependencies file for $<; \
+$(MAKEDEPEND) -MM -MT$(@:.d=.o) -MT$@ -MF$@ $(CXXFLAGS) $(DEFINES) $(INCLUDES) $<
+endef
+
+$(ALL_DEPS): $(IDL_SOURCES) $(IDL_HEADERS)
+
+$(COMMON_DEPS): $(COMMON_OBJDIR)/%.d: $(COMMON_SRCDIR)/%.cxx
+	@$(do-dep)
+
+$(PUB_DEPS): $(PUB_OBJDIR)/%.d: $(PUB_SRCDIR)/%.cxx
+	@$(do-dep)
+
+$(SUB_DEPS): $(SUB_OBJDIR)/%.d: $(SUB_SRCDIR)/%.cxx
+	@$(do-dep)
+
+#ony generate dependencies for relevant targets
+ifeq (,$(filter $(MAKECMDGOALS), clean veryclean generate))
+$(info Including dependencies files)
+-include $(ALL_DEPS)
 endif
 
-generate: $(SOURCES_IDL) $(HEADERS_IDL)
+#recipes
 
+define do-compile
+echo Compiling $@; \
+$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
+endef
+
+$(IDL_OBJS): $(IDL_OBJDIR)/%.o: $(IDL_GENDIR)/%.cxx
+	@$(do-compile)
+
+$(COMMON_OBJS): $(COMMON_OBJDIR)%.o: $(COMMON_SRCDIR)/%.cxx
+	@$(do-compile)
+
+$(PUB_OBJS): $(PUB_OBJDIR)%.o: $(PUB_SRCDIR)/%.cxx
+	@$(do-compile)
+
+$(SUB_OBJS): $(SUB_OBJDIR)%.o: $(SUB_SRCDIR)/%.cxx
+	@$(do-compile)
+
+###############################################################################
+# Generate source files from the .idl file
+###############################################################################
+
+#dependendies
+
+generate: $(IDL_SOURCES) $(IDL_HEADERS)
+
+$(IDL_SOURCES) $(IDL_HEADERS): $(IDL_FILE) | $(IDL_GENDIR)
+
+#recipes
+
+$(IDL_GENPAT_SOURCES) $(IDL_GENPAT_HEADERS): $(IDL_FILE)
+ifeq ($(OS_ARCH), i86Win32)
+	call $(NDDSHOME)/bin/rtiddsgen.bat -namespace -d $(IDL_GENDIR) $< -replace -language C++
+else
+	@echo Generating code from IDL file $<; \
+	$(NDDSHOME)/bin/rtiddsgen -namespace -d $(IDL_GENDIR) $< -replace -language C++
+endif
+
+###############################################################################
 # Here is how we create those subdirectories automatically.
-%.dir : 
-	@echo "Checking directory $*"
-	@if [ ! -d $* ]; then \
-		echo "Making directory $*"; \
-		mkdir -p $* ; \
+###############################################################################
+
+#dependencies: none here
+
+#recipes
+
+ALL_DIRS := $(IDL_GENDIR) $(COMMON_OBJDIR) $(PUB_OBJDIR) $(SUB_OBJDIR) $(DEPSDIR)
+
+$(ALL_DIRS): 
+	@if [ ! -d $@ ]; then \
+	  echo "Creating directory $@"; \
+	  mkdir -p $@ ; \
 	fi;
 
 ###############################################################################
 # Clean target: removes the objs dir
 ###############################################################################
+
 clean:
-	@rm -Rf objs/$(ARCH)
+	@rm -Rf $(ARCH_OBJDIR)
 	@echo "Successfully deleted object and executable files for architecture $(ARCH)"
 	@echo "To delete ALL the architectures and any generated file use target 'veryclean'"
 
 veryclean:
-	@rm -Rf objs
-	@rm -Rf src/Generated
-	@echo "Deleted all executables, objects and generated files"
+	@rm -Rf $(OBJDIR)
+	@rm -Rf $(IDL_GENDIR)
+	@rm -Rf $(DEPSDIR)
+	@echo "Deleted all executables, objects, dependency files and IDL-generated files"

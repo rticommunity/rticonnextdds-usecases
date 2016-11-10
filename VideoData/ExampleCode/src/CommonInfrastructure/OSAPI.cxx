@@ -7,7 +7,7 @@ any warranty for fitness for any purpose. RTI is under no obligation to maintain
 support the Software.  RTI shall not be liable for any incidental or consequential 
 damages arising out of the use or inability to use the software.
 **********************************************************************************************/
-#include "../CommonInfrastructure/OSAPI.h"
+#include "CommonInfrastructure/OSAPI.h"
 
 OSThread::OSThread(
 	ThreadFunction function, 

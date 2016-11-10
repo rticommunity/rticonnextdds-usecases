@@ -11,12 +11,13 @@ damages arising out of the use or inability to use the software.
 #include <vector>
 #include <iostream>
 
-#include "../CommonInfrastructure/VideoSource.h"
-#include "../Generated/VideoData.h"
-#include "../Generated/VideoDataSupport.h"
+#include "CommonInfrastructure/VideoSource.h"
+#include "Generated/VideoData.h"
+#include "Generated/VideoDataSupport.h"
 #include "ndds/ndds_cpp.h"
 #include "ndds/ndds_namespace_cpp.h"
-#include "../CommonInfrastructure/DDSCommunicator.h"
+#include "CommonInfrastructure/DDSCommunicator.h"
+
 #include "VideoPublisherInterface.h"
 
 #ifdef WIN32

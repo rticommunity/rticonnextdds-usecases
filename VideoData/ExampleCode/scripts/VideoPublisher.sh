@@ -5,11 +5,20 @@ script_dir=`dirname $filename`
 executable_name="VideoPublisher"
 
 #Find NDDS architecture currently in use
+SEARCH_PATH="<unset>"
+SEARCH_FILE="<unset>"
+case "$OSTYPE" in
+  darwin*)  SEARCH_PATH="${DYLD_LIBRARY_PATH}"; SEARCH_FILE=libnddsc.dylib ;; 
+  linux*)   SEARCH_PATH="${LD_LIBRARY_PATH}"; SEARCH_FILE=libnddsc.so ;;
+  msys*)    echo "Windows MSYS environment not (yet) tested..." ;;
+  *)        echo "Untested operating system: $OSTYPE" ;;
+esac
 oIFS="${IFS}"
 IFS=:
-for p in ${LD_LIBRARY_PATH}; do
-    if [ -e ${p}/libnddsc.so ]; then
+for p in ${SEARCH_PATH}; do
+    if [ -e ${p}/${SEARCH_FILE} ]; then
         ARCH=$(basename ${p})
+        break
     fi
 done
 IFS="${oIFS}"

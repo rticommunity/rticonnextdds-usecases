@@ -50,10 +50,13 @@ extern "C" {
 #   endif
 #endif
 
-
 /* Be friend of both C90 and C99 compilers */
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
     /* "inline" and "restrict" are keywords */
+#elif defined(__clang__)
+#if !defined(restrict)
+#   define restrict __restrict__
+#endif
 #else
 #   define inline           /* inline */
 #   define restrict         /* restrict */

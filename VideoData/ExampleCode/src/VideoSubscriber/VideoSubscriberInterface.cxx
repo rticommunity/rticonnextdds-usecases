@@ -11,10 +11,10 @@ damages arising out of the use or inability to use the software.
 #include <iostream>
 #include <vector>
 #include <sstream>
-#include "../Generated/VideoData.h"
-#include "../Generated/VideoDataSupport.h"
+#include "Generated/VideoData.h"
+#include "Generated/VideoDataSupport.h"
 #include "VideoSubscriberInterface.h"
-#include "../CommonInfrastructure/VideoBuffer.h"
+#include "CommonInfrastructure/VideoBuffer.h"
 
 using namespace DDS;
 using namespace com::rti::media::generated;

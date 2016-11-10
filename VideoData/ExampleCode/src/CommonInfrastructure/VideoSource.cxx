@@ -39,7 +39,7 @@ Real-Time Innovations, Inc. (RTI).  The above license is granted with
 #include <gst/gst.h>
 #include <gst/app/gstappsink.h>
 //#include <gst/app/gstappbuffer.h>
-#include "../Generated/VideoData.h"
+#include "Generated/VideoData.h"
 
 static int seqn = 0;
 

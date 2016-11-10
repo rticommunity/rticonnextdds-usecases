@@ -13,11 +13,11 @@ damages arising out of the use or inability to use the software.
 
 #include "ndds/ndds_cpp.h"
 #include "ndds/ndds_namespace_cpp.h"
-#include "../CommonInfrastructure/DDSCommunicator.h"
-#include "../Generated/VideoData.h"
-#include "../Generated/VideoDataSupport.h"
-#include "../CommonInfrastructure/DDSTypeWrapper.h"
-#include "../CommonInfrastructure/VideoBuffer.h"
+#include "CommonInfrastructure/DDSCommunicator.h"
+#include "Generated/VideoData.h"
+#include "Generated/VideoDataSupport.h"
+#include "CommonInfrastructure/DDSTypeWrapper.h"
+#include "CommonInfrastructure/VideoBuffer.h"
 
 #include <map>
 

@@ -123,30 +123,39 @@ void EMDSVideoDisplayOutput::Initialize()
 	_frameHandler = 
 		new DisplayFrameHandler(this);
 
+#ifdef _WIN32
 	// Create the video pipeline on Windows (sending to DirectDraw)
-#ifdef WIN32
-
-	_displayPipeline =
-		GST_PIPELINE(gst_parse_launch(
-		"appsrc name=\"src\" is-live=\"true\" do-timestamp=\"true\" "
-		"caps=\"video/x-vp8, width=(int)640, height=(int)360, "
-		"pixel-aspect-ratio=(fraction)1/1, framerate=(fraction)1000/1\" ! "
-		"queue2 ! vp8dec ! queue2 ! "
-		"videorate ! video/x-raw-yuv,framerate=25/1 ! "
-		"videoconvert ! "
-		"directdrawsink name=\"sink\"",
-		NULL));
-
-#else
-	// Create the video pipeline on Linux (sending to XImageSink)
-	_displayPipeline = 
-		GST_PIPELINE(gst_parse_launch(
-		"appsrc name=\"src\" is-live=\"true\" do-timestamp=\"true\" "
-		"caps=\"video/x-vp8, width=(int)640, height=(int)360, "
-		"framerate=1000/1\" ! queue2 ! " 
-		"vp8dec ! videoconvert ! ximagesink sync=\"false\" ",
-		NULL));
+#define PIPELINE_STRING                                                     \
+	"appsrc name=\"src\" is-live=\"true\" do-timestamp=\"true\" "       \
+	"caps=\"video/x-vp8, width=(int)640, height=(int)360, "             \
+	"pixel-aspect-ratio=(fraction)1/1, framerate=(fraction)1000/1\" ! " \
+	"queue2 ! vp8dec ! queue2 ! "                                       \
+	"videorate ! video/x-raw-yuv,framerate=25/1 ! "                     \
+	"videoconvert ! directdrawsink name=\"sink\""
 #endif
+
+#ifdef __APPLE__
+	// Create the video pipeline on Linux (sending to OSXImageSink)
+#define PIPELINE_STRING                                               \
+	"appsrc name=\"src\" is-live=\"true\" do-timestamp=\"true\" " \
+	"caps=\"video/x-vp8, width=(int)640, height=(int)360, "       \
+	"framerate=1000/1\" ! queue2 ! "                              \
+	"matroskademux ! vp8dec ! videoconvert ! osximagesink"
+#endif
+
+#ifdef __linux__
+	// Create the video pipeline on Linux (sending to XImageSink)
+#define PIPELINE_STRING                                               \
+	"appsrc name=\"src\" is-live=\"true\" do-timestamp=\"true\" " \
+	"caps=\"video/x-vp8, width=(int)640, height=(int)360, "       \
+	"framerate=1000/1\" ! queue2 ! "                              \
+	"vp8dec ! videoconvert ! ximagesink sync=\"false\" "
+#endif
+
+        const char *pipelineString = PIPELINE_STRING;
+        printf("Doing pipeline: %s\n", pipelineString);
+	_displayPipeline = 
+		GST_PIPELINE(gst_parse_launch( pipelineString, NULL));
 
 	// If the video pipeline was not created correctly, exit. 
 	// The common causes for this include:

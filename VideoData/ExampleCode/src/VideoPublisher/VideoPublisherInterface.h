@@ -12,10 +12,10 @@ damages arising out of the use or inability to use the software.
 #define VIDEO_PUBLISHER_INTERFACE_H
 
 #include <sstream>
-#include "../CommonInfrastructure/DDSCommunicator.h"
-#include "../CommonInfrastructure/DDSTypeWrapper.h"
-#include "../Generated/VideoData.h"
-#include "../Generated/VideoDataSupport.h"
+#include "CommonInfrastructure/DDSCommunicator.h"
+#include "CommonInfrastructure/DDSTypeWrapper.h"
+#include "Generated/VideoData.h"
+#include "Generated/VideoDataSupport.h"
 
 using namespace com::rti::media::generated;
 
