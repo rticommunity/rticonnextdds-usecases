@@ -45,5 +45,4 @@ CXXLDFLAGS = -m64
 SYSLIBS = -ldl -lm -lpthread
 
 # The rest of the rules are in the 'Makefile.common'
-#include make/Makefile.common
-include make/Makefile.reinier
+include make/Makefile.common

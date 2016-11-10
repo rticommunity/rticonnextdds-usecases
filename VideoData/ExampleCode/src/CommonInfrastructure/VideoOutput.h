@@ -38,7 +38,6 @@ Real-Time Innovations, Inc. (RTI).  The above license is granted with
 
 #include <gst/gst.h>
 #include <gst/app/gstappsrc.h>
-//#include <gst/app/gstappbuffer.h>
 
 #include "VideoBuffer.h"
 #include "VideoEvent.h"
