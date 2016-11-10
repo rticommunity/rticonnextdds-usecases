@@ -295,7 +295,6 @@ void VideoPublisherDiscoveryListener::on_data_available(DDSDataReader *reader)
 			// API to ignore the participant and 
 			std::cout << "Discovered a DataReader with an incompatible codec. "
 				<< "Ignoring it (not sending it any data)" << std::endl;
-#if 0
 			DDSDomainParticipant *participant =
 				reader->get_subscriber()->get_participant();
 			retcode = participant->ignore_subscription(info_seq[i].instance_handle);
@@ -304,9 +303,6 @@ void VideoPublisherDiscoveryListener::on_data_available(DDSDataReader *reader)
 				std::cout << "Error ignoring participant: " << retcode << std::endl;
 				return;
 			}
-#else
-std::cout << "Participant ignoring functionality is switched off for now..." << std::endl;
-#endif
 		}
 	}
 	
