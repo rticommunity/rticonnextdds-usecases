@@ -236,10 +236,8 @@ endif
 ALL_DIRS := $(IDL_GENDIR) $(COMMON_OBJDIR) $(PUB_OBJDIR) $(SUB_OBJDIR) $(DEPSDIR)
 
 $(ALL_DIRS): 
-	@if [ ! -d $@ ]; then \
-	  echo "Creating directory $@"; \
-	  mkdir -p $@ ; \
-	fi;
+	@echo "Creating directory $@"; \
+	mkdir -p $@
 
 ###############################################################################
 # Clean target: removes the objs dir
