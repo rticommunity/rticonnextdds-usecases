@@ -88,6 +88,7 @@ IDL_GENPAT_SOURCES := $(addsuffix .cxx,$(IDL_GENPAT_ABS))
 IDL_GENPAT_HEADERS := $(addsuffix .h,$(IDL_GENPAT_ABS))
 IDL_SOURCES := $(subst %,VideoData,$(IDL_GENPAT_SOURCES))
 IDL_HEADERS := $(subst %,VideoData,$(IDL_GENPAT_HEADERS))
+IDL_GENERATED := $(IDL_SOURCES) $(IDL_HEADERS)
 
 IDL_OBJDIR := $(ARCH_OBJDIR)/Common
 IDL_OBJPAT_ABS := $(addprefix $(IDL_OBJDIR)/,$(IDL_GENPAT))
@@ -99,14 +100,14 @@ COMMON_SRCDIR := $(SRCDIR)/CommonInfrastructure
 COMMON_OBJDIR := $(ARCH_OBJDIR)/$(COMMON_NAME)
 COMMON_SRCS := $(wildcard $(COMMON_SRCDIR)/*.cxx)
 COMMON_OBJS := $(addprefix $(COMMON_OBJDIR)/,$(notdir $(COMMON_SRCS:.cxx=.o)))
-COMMON_DEPS := $(COMMON_OBJS:.o=.d)
+COMMON_DEPS := $(addsuffix .d,$(COMMON_OBJS))
 
 PUB_NAME := VideoPublisher
 PUB_SRCDIR := $(SRCDIR)/$(PUB_NAME)
 PUB_OBJDIR := $(ARCH_OBJDIR)/$(PUB_NAME)
 PUB_SRCS := $(wildcard $(PUB_SRCDIR)/*.cxx)
 PUB_OBJS := $(addprefix $(PUB_OBJDIR)/,$(notdir $(PUB_SRCS:.cxx=.o)))
-PUB_DEPS := $(PUB_OBJS:.o=.d)
+PUB_DEPS := $(addsuffix .d,$(PUB_OBJS))
 PUB_EXECDIR := $(PUB_OBJDIR)
 PUB_EXEC := $(PUB_EXECDIR)/$(PUB_NAME)
 
@@ -115,7 +116,7 @@ SUB_SRCDIR := $(SRCDIR)/$(SUB_NAME)
 SUB_OBJDIR := $(ARCH_OBJDIR)/$(SUB_NAME)
 SUB_SRCS := $(wildcard $(SUB_SRCDIR)/*.cxx)
 SUB_OBJS := $(addprefix $(SUB_OBJDIR)/,$(notdir $(SUB_SRCS:.cxx=.o)))
-SUB_DEPS := $(SUB_OBJS:.o=.d)
+SUB_DEPS := $(addsuffix .d,$(SUB_OBJS))
 SUB_EXECDIR := $(SUB_OBJDIR)
 SUB_EXEC := $(SUB_EXECDIR)/$(SUB_NAME)
 
@@ -159,51 +160,36 @@ $(COMMON_DEPS): | $(COMMON_OBJDIR)
 $(PUB_DEPS):    | $(PUB_OBJDIR)
 $(SUB_DEPS):    | $(SUB_OBJDIR)
 
-#automatic generation of the dependencies (.o depends on .cxx and .h files)
-# -MM  generate dependency rule for prerequisite, skipping system headers
-# -MT  add a target to the generated dependency
-# -MF  write the generated dependency rule to a file
-define do-dep
-set -e; rm -f $@; \
-echo Creating dependencies file for $<; \
-$(MAKEDEPEND) -MM -MT$(@:.d=.o) -MT$@ -MF$@ $(CXXFLAGS) $(DEFINES) $(INCLUDES) $<
+#recipes
+#The compilation rule includes the 'side-effect' of generating dependency files
+#See http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/
+#  for an explanation
+
+define do-compile
+echo Compiling $(@F); \
+$(CXX) -MT $@ -MMD -MP -MF $@.Td $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
+mv -f $@.Td $@.d
 endef
 
-$(ALL_DEPS): $(IDL_SOURCES) $(IDL_HEADERS)
+$(IDL_OBJS): $(IDL_OBJDIR)/%.o: $(IDL_GENDIR)/%.cxx $(IDL_OBJDIR)/%.o.d
+	@$(do-compile)
 
-$(COMMON_DEPS): $(COMMON_OBJDIR)/%.d: $(COMMON_SRCDIR)/%.cxx
-	@$(do-dep)
+$(COMMON_OBJS): $(COMMON_OBJDIR)/%.o: $(COMMON_SRCDIR)/%.cxx $(COMMON_OBJDIR)/%.o.d
+	@$(do-compile)
 
-$(PUB_DEPS): $(PUB_OBJDIR)/%.d: $(PUB_SRCDIR)/%.cxx
-	@$(do-dep)
+$(PUB_OBJS): $(PUB_OBJDIR)/%.o: $(PUB_SRCDIR)/%.cxx $(PUB_OBJDIR)/%.o.d
+	@$(do-compile)
 
-$(SUB_DEPS): $(SUB_OBJDIR)/%.d: $(SUB_SRCDIR)/%.cxx
-	@$(do-dep)
+$(SUB_OBJS): $(SUB_OBJDIR)/%.o: $(SUB_SRCDIR)/%.cxx $(SUB_OBJDIR)/%.o.d
+	@$(do-compile)
 
-#ony generate dependencies for relevant targets
+$(IDL_OBJDIR)/%.o.d $(COMMON_OBJDIR)/%.o.d $(PUB_OBJDIR)/%.o.d $(SUB_OBJDIR)/%.o.d: ;
+.PRECIOUS: $(IDL_OBJDIR)/%.o.d $(COMMON_OBJDIR)/%.o.d $(PUB_OBJDIR)/%.o.d $(SUB_OBJDIR)/%.o.d
+
 ifeq (,$(filter $(MAKECMDGOALS), clean veryclean generate))
 $(info Including dependencies files)
 -include $(ALL_DEPS)
 endif
-
-#recipes
-
-define do-compile
-echo Compiling $@; \
-$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
-endef
-
-$(IDL_OBJS): $(IDL_OBJDIR)/%.o: $(IDL_GENDIR)/%.cxx
-	@$(do-compile)
-
-$(COMMON_OBJS): $(COMMON_OBJDIR)%.o: $(COMMON_SRCDIR)/%.cxx
-	@$(do-compile)
-
-$(PUB_OBJS): $(PUB_OBJDIR)%.o: $(PUB_SRCDIR)/%.cxx
-	@$(do-compile)
-
-$(SUB_OBJS): $(SUB_OBJDIR)%.o: $(SUB_SRCDIR)/%.cxx
-	@$(do-compile)
 
 ###############################################################################
 # Generate source files from the .idl file
@@ -211,9 +197,10 @@ $(SUB_OBJS): $(SUB_OBJDIR)%.o: $(SUB_SRCDIR)/%.cxx
 
 #dependendies
 
-generate: $(IDL_SOURCES) $(IDL_HEADERS)
+generate: $(IDL_GENERATED)
+$(COMMON_OBJS) $(PUB_OBJS) $(SUB_OBJS): $(IDL_GENERATED)
 
-$(IDL_SOURCES) $(IDL_HEADERS): $(IDL_FILE) | $(IDL_GENDIR)
+$(IDL_GENERATED): $(IDL_FILE) | $(IDL_GENDIR)
 
 #recipes
 
