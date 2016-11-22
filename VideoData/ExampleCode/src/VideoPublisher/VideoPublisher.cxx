@@ -17,6 +17,7 @@ damages arising out of the use or inability to use the software.
 #include "ndds/ndds_cpp.h"
 #include "ndds/ndds_namespace_cpp.h"
 #include "CommonInfrastructure/DDSCommunicator.h"
+#include "CommonInfrastructure/OSAPI.h"
 
 #include "VideoPublisherInterface.h"
 
@@ -278,10 +279,9 @@ int main (int argc, char *argv[])
 		// Wait for compatible DataReaders to come online
 		while (!compatibilityCheck.DiscoveredCompatibleReader())
 		{
-			DDS_Duration_t send_period = {2,0};
 			cout << "Waiting for a compatible video subscriber to come "
 				<< "online" << endl;
-			NDDSUtility::sleep(send_period);
+			OSThread::Sleep(2,0);
 		}
 
 		// If we have found a compatible Video Subscriber, we start publishing.
@@ -290,8 +290,7 @@ int main (int argc, char *argv[])
 		// Loop forever here
 		while (1) 
 		{
-			DDS_Duration_t send_period = {0,100000000};
-			NDDSUtility::sleep(send_period);
+			OSThread::Sleep(0, 100000000);
 		}
 
 	} 

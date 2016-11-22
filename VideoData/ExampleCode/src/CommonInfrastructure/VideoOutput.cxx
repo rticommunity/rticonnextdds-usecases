@@ -134,22 +134,12 @@ void EMDSVideoDisplayOutput::Initialize()
 	"videoconvert ! directdrawsink name=\"sink\""
 #endif
 
-#ifdef __APPLE__
-	// Create the video pipeline on Linux (sending to OSXImageSink)
+#if defined(__linux__) || defined(__APPLE__)
 #define PIPELINE_STRING                                               \
 	"appsrc name=\"src\" is-live=\"true\" do-timestamp=\"true\" " \
 	"caps=\"video/x-vp8, width=(int)640, height=(int)360, "       \
 	"framerate=1000/1\" ! queue2 ! "                              \
-	"matroskademux ! vp8dec ! videoconvert ! osximagesink"
-#endif
-
-#ifdef __linux__
-	// Create the video pipeline on Linux (sending to XImageSink)
-#define PIPELINE_STRING                                               \
-	"appsrc name=\"src\" is-live=\"true\" do-timestamp=\"true\" " \
-	"caps=\"video/x-vp8, width=(int)640, height=(int)360, "       \
-	"framerate=1000/1\" ! queue2 ! "                              \
-	"vp8dec ! videoconvert ! ximagesink sync=\"false\" "
+	"vp8dec ! videoconvert ! autovideosink "
 #endif
 
         const char *pipelineString = PIPELINE_STRING;
