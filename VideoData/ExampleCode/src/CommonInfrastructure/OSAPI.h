@@ -65,6 +65,9 @@ public:
 	// Run the thread
 	void Run();
 
+        // A generic sleep function
+        static void Sleep(long seconds, long nano_seconds);
+
 private:
 	// --- Private members ---
 

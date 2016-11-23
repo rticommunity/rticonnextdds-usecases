@@ -41,6 +41,7 @@ using namespace std;
 #include "Generated/VideoDataSupport.h"
 #include "CommonInfrastructure/VideoBuffer.h"
 #include "CommonInfrastructure/VideoOutput.h"
+#include "CommonInfrastructure/OSAPI.h"
 
 #include "VideoSubscriberInterface.h"
 
@@ -216,8 +217,7 @@ int main (int argc, char *argv[])
 		// Continue while the video is not finished.
 		while (!isDone) 
 		{
-			DDS_Duration_t send_period = {0,100000000};
-			NDDSUtility::sleep(send_period);
+                        OSThread::Sleep(0, 100000000);
 		}
 	}		
 	catch (string message)

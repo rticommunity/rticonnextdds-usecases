@@ -37,6 +37,22 @@ void OSThread::Run()
   #endif
 }
 
+
+void OSThread::Sleep(long seconds, long nano_seconds)
+{
+#ifdef __APPLE__
+    struct timespec ts;
+    ts.tv_sec = seconds;
+    ts.tv_nsec = nano_seconds;
+    nanosleep(&ts, NULL);
+#else
+    DDS_Duration_t duration;
+    duration.sec = seconds;
+    duration.nanosec = nano_seconds;
+    NDDSUtilities::sleep(duration);
+#endif
+}
+
 OSMutex::OSMutex()
 {
 #ifdef _WIN32
