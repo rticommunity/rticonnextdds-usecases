@@ -7,23 +7,42 @@ any warranty for fitness for any purpose. RTI is under no obligation to maintain
 support the Software.  RTI shall not be liable for any incidental or consequential 
 damages arising out of the use or inability to use the software.
 **********************************************************************************************/
+
 #include <stdio.h>
 #include <vector>
 #include <iostream>
 
+#if defined(_WIN32)
+    #if !defined(RTI_WIN32)
+        #define RTI_WIN32
+    #endif
+    #if !defined(NDDS_DLL_VARIABLE)
+        #define NDDS_DLL_VARIABLE
+    #endif
+	#ifdef _DEBUG
+		#pragma comment( lib, "nddscppd.lib")
+		#pragma comment( lib, "nddscd.lib")
+		#pragma comment( lib, "nddscored.lib")
+	#else
+		#pragma comment( lib, "nddscpp.lib")
+		#pragma comment( lib, "nddsc.lib")
+		#pragma comment( lib, "nddscore.lib")
+	#endif /* #ifdef _DEBUG */
+#endif /* defined(_WIN32) */
+
+#include "ndds/ndds_cpp.h"
+#include "ndds/ndds_namespace_cpp.h"
 #include "CommonInfrastructure/VideoSource.h"
 #include "Generated/VideoData.h"
 #include "Generated/VideoDataSupport.h"
-#include "ndds/ndds_cpp.h"
-#include "ndds/ndds_namespace_cpp.h"
 #include "CommonInfrastructure/DDSCommunicator.h"
 
 #include "VideoPublisherInterface.h"
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <stdlib.h>
 #include "Shlwapi.h"
-#endif
+#endif /* _WIN32 */
 
 using namespace std;
 

@@ -19,12 +19,12 @@ damages arising out of the use or inability to use the software.
 // ------------------------------------------------------------------------- //
 
 
-#ifdef RTI_WIN32
+#ifdef _WIN32
   /* strtok, fopen warnings */
   #pragma warning( disable : 4996 )
 #endif 
 
-#ifdef RTI_WIN32
+#ifdef _WIN32
   #define DllExport __declspec( dllexport )
   #include <Winsock2.h>
   #include <process.h>
@@ -69,7 +69,7 @@ private:
 	// --- Private members ---
 
 	// OS-specific thread definition
-#ifdef RTI_WIN32
+#ifdef _WIN32
     HANDLE _thread;
 #else 
     pthread_t _thread;
@@ -100,7 +100,7 @@ private:
 	// --- Private members ---
 
 	// OS-specific mutex constructs
-#ifdef RTI_WIN32
+#ifdef _WIN32
     CRITICAL_SECTION _handleCriticalSection;
 #else
 	 pthread_mutex_t  _mutex; 

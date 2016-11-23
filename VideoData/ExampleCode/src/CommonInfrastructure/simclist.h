@@ -34,7 +34,7 @@ extern "C" {
 #endif
 
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <stdint.h>
 #else
 #include <inttypes.h>

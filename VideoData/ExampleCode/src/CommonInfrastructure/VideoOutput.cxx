@@ -125,13 +125,29 @@ void EMDSVideoDisplayOutput::Initialize()
 
 #ifdef _WIN32
 	// Create the video pipeline on Windows (sending to DirectDraw)
+#if 0
 #define PIPELINE_STRING                                                     \
+	"appsrc name=\"src\" is-live=\"true\" do-timestamp=\"true\" "       \
+	"caps=\"video/x-vp8, width=(int)640, height=(int)360, "             \
+	"pixel-aspect-ratio=(fraction)1/1, framerate=(fraction)1000/1\" ! " \
+	"queue2 ! vp8dec ! queue2 ! "                                                \
+	"videoconvert ! autovideosink"
+#else
+#define PIPELINE_STRING                                               \
+	"appsrc name=\"src\" is-live=\"true\" do-timestamp=\"true\" " \
+	"caps=\"video/x-vp8, width=(int)640, height=(int)360, "       \
+	"framerate=1000/1\" ! queue2 ! "                              \
+	"vp8dec ! videoconvert ! autovideosink "
+
+    #define PIPELINE_STRING_ORG                                                     \
 	"appsrc name=\"src\" is-live=\"true\" do-timestamp=\"true\" "       \
 	"caps=\"video/x-vp8, width=(int)640, height=(int)360, "             \
 	"pixel-aspect-ratio=(fraction)1/1, framerate=(fraction)1000/1\" ! " \
 	"queue2 ! vp8dec ! queue2 ! "                                       \
 	"videorate ! video/x-raw-yuv,framerate=25/1 ! "                     \
 	"videoconvert ! directdrawsink name=\"sink\""
+
+#endif
 #endif
 
 #ifdef __APPLE__

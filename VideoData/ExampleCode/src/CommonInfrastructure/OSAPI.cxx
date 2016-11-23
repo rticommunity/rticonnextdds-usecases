@@ -20,7 +20,7 @@ OSThread::OSThread(
 void OSThread::Run()
 {
 
-#ifdef RTI_WIN32
+#ifdef _WIN32
     _thread = (HANDLE) _beginthread(
 		(void(__cdecl*)(void*))_function,
         0, (void*)_functionParam);
@@ -39,7 +39,7 @@ void OSThread::Run()
 
 OSMutex::OSMutex()
 {
-#ifdef RTI_WIN32
+#ifdef _WIN32
 	InitializeCriticalSection(&_handleCriticalSection);
 #else
 	pthread_mutex_init(&_mutex, NULL);
@@ -48,7 +48,7 @@ OSMutex::OSMutex()
 
 OSMutex::~OSMutex()
 {
-#ifdef RTI_WIN32
+#ifdef _WIN32
 	DeleteCriticalSection(&_handleCriticalSection);
 #else
 	pthread_mutex_destroy(&_mutex);
@@ -57,7 +57,7 @@ OSMutex::~OSMutex()
 
 void OSMutex::Lock()
 {
-#ifdef RTI_WIN32
+#ifdef _WIN32
         EnterCriticalSection(&_handleCriticalSection);
 #else
 	pthread_mutex_lock(&_mutex);
@@ -68,7 +68,7 @@ void OSMutex::Lock()
 
 void OSMutex::Unlock()
 {
-#ifdef RTI_WIN32
+#ifdef _WIN32
 	LeaveCriticalSection(&_handleCriticalSection);
 #else
 	pthread_mutex_unlock(&_mutex);

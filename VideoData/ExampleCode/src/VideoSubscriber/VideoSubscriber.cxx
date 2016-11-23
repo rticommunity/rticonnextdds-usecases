@@ -8,11 +8,31 @@ support the Software.  RTI shall not be liable for any incidental or consequenti
 damages arising out of the use or inability to use the software.
 **********************************************************************************************/
 
+using namespace std;
+
 #include <stdio.h>
 #include <glib.h>
 #include <gst/gst.h>
 #include <vector>
 #include <iostream>
+
+#if defined(_WIN32)
+    #if !defined(RTI_WIN32)
+        #define RTI_WIN32
+    #endif
+    #if !defined(NDDS_DLL_VARIABLE)
+        #define NDDS_DLL_VARIABLE
+    #endif
+	#ifdef _DEBUG
+		#pragma comment( lib, "nddscppd.lib")
+		#pragma comment( lib, "nddscd.lib")
+		#pragma comment( lib, "nddscored.lib")
+	#else
+		#pragma comment( lib, "nddscpp.lib")
+		#pragma comment( lib, "nddsc.lib")
+		#pragma comment( lib, "nddscore.lib")
+	#endif /* #ifdef _DEBUG */
+#endif /* defined(_WIN32) */
 
 #include "ndds/ndds_cpp.h"
 #include "ndds/ndds_namespace_cpp.h"
