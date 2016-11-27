@@ -2,13 +2,11 @@
 (c) 2005-2013 Copyright, Real-Time Innovations, Inc.  All rights reserved.    	                             
 RTI grants Licensee a license to use, modify, compile, and create derivative works 
 of the Software.  Licensee has the right to distribute object form only for use with RTI 
-products.  The Software is provided “as is”, with no warranty of any type, including 
+products.  The Software is provided ï¿½as isï¿½, with no warranty of any type, including 
 any warranty for fitness for any purpose. RTI is under no obligation to maintain or 
 support the Software.  RTI shall not be liable for any incidental or consequential 
 damages arising out of the use or inability to use the software.
 **********************************************************************************************/
-
-using namespace std;
 
 #include <stdio.h>
 #include <glib.h>
@@ -16,29 +14,8 @@ using namespace std;
 #include <vector>
 #include <iostream>
 
-#if defined(_WIN32)
-    #if !defined(RTI_WIN32)
-        #define RTI_WIN32
-    #endif
-    #if !defined(NDDS_DLL_VARIABLE)
-        #define NDDS_DLL_VARIABLE
-    #endif
-	#ifdef _DEBUG
-		#pragma comment( lib, "nddscppd.lib")
-		#pragma comment( lib, "nddscd.lib")
-		#pragma comment( lib, "nddscored.lib")
-	#else
-		#pragma comment( lib, "nddscpp.lib")
-		#pragma comment( lib, "nddsc.lib")
-		#pragma comment( lib, "nddscore.lib")
-	#endif /* #ifdef _DEBUG */
-#endif /* defined(_WIN32) */
-
-#include "ndds/ndds_cpp.h"
-#include "ndds/ndds_namespace_cpp.h"
+#include "connext_cpp_common.h"
 #include "CommonInfrastructure/DDSCommunicator.h"
-#include "Generated/VideoData.h"
-#include "Generated/VideoDataSupport.h"
 #include "CommonInfrastructure/VideoBuffer.h"
 #include "CommonInfrastructure/VideoOutput.h"
 #include "CommonInfrastructure/OSAPI.h"
@@ -168,17 +145,17 @@ int main (int argc, char *argv[])
 	{
 		// Adding the XML files that contain profiles used by this application
 		xmlFiles.push_back(
-			"file://../../../src/Config/base_profile_multicast.xml");
+			"file://../../../../src/Config/base_profile_multicast.xml");
 		xmlFiles.push_back(
-			"file://../../../src/Config/video_stream_multicast.xml");
+			"file://../../../../src/Config/video_stream_multicast.xml");
 	}
 	else
 	{
 		// Adding the XML files that contain profiles used by this application
 		xmlFiles.push_back(
-			"file://../../../src/Config/base_profile_no_multicast.xml");
+			"file://../../../../src/Config/base_profile_no_multicast.xml");
 		xmlFiles.push_back(
-			"file://../../../src/Config/video_stream_no_multicast.xml");
+			"file://../../../../src/Config/video_stream_no_multicast.xml");
 	}   
 
 	try 

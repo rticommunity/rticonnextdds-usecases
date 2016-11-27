@@ -2,7 +2,7 @@
 (c) 2005-2013 Copyright, Real-Time Innovations, Inc.  All rights reserved.    	                             
 RTI grants Licensee a license to use, modify, compile, and create derivative works 
 of the Software.  Licensee has the right to distribute object form only for use with RTI 
-products.  The Software is provided “as is”, with no warranty of any type, including 
+products.  The Software is provided ï¿½as isï¿½, with no warranty of any type, including 
 any warranty for fitness for any purpose. RTI is under no obligation to maintain or 
 support the Software.  RTI shall not be liable for any incidental or consequential 
 damages arising out of the use or inability to use the software.
@@ -11,8 +11,7 @@ damages arising out of the use or inability to use the software.
 #include <iostream>
 #include <vector>
 #include <sstream>
-#include "Generated/VideoData.h"
-#include "Generated/VideoDataSupport.h"
+#include "connext_cpp_common.h"
 #include "VideoSubscriberInterface.h"
 #include "CommonInfrastructure/VideoBuffer.h"
 
@@ -87,8 +86,7 @@ VideoSubscriberInterface::VideoSubscriberInterface(
 	// on what the DomainParticipant is responsible for, and how to configure
 	// it, see the DDSCommunicator class.
 	if (NULL == _communicator->CreateParticipant(0, qosFileNames, 
-					QOS_LIBRARY, 
-					profileName.c_str())) 
+					QOS_LIBRARY, profileName.c_str())) 
 	{
 		std::stringstream errss;
 		errss << "Failed to create DomainParticipant object";
@@ -169,7 +167,8 @@ void VideoStreamListener::on_data_available(DataReader *reader)
 	while (retCode != DDS_RETCODE_NO_DATA)
 	{
 
-		retCode = videoReader->take(dataSeq, infoSeq);
+		retCode = videoReader->take(dataSeq, infoSeq, DDS::LENGTH_UNLIMITED,
+         DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
 
 		if ((retCode != DDS_RETCODE_OK) &&
 			(retCode != DDS_RETCODE_NO_DATA))
@@ -263,20 +262,35 @@ VideoStreamReader::VideoStreamReader(
 	// it can provide video that supports the same video codecs that are 
 	// supported by the subscribing application.  If they share compatible
 	// codecs, it will start publishing video data.
-	DDS_DataReaderQos readerQoS;
-	DDS_ReturnCode_t retcode = 
-		TheParticipantFactory->get_datareader_qos_from_profile(readerQoS,
-									qosLibrary.c_str(), qosProfile.c_str());
+	DDS::DataReaderQos reader_qos;
+   if (!(qosLibrary.empty() && qosProfile.empty())) {
+      DDS_ReturnCode_t retcode = 
+         Connext::get_datareader_qos_from_profile(reader_qos,
+            qosLibrary, qosProfile);
+      if (retcode != DDS::RETCODE_OK) {
+         std::stringstream errss;
+         errss << "Failed to get DataReaderQos from profile";
+         throw errss.str();
+      }
+   } else {
+      reader_qos = DDS::DATAREADER_QOS_DEFAULT;
+   }
 
-	readerQoS.user_data.value.from_array(
+#if (CONNEXT_HAS_USERDATA == 1)
+	reader_qos.user_data.value.from_array(
 		reinterpret_cast<const DDS_Octet *>(videoMetadata.c_str()), 
 		videoMetadata.length());
+#elif (CONNEXT_HAS_USERDATA == -1)
+   /* Deliberately empty line */
+#else  /*CONNEXT_HAS_USERDATA */
+   #error Incorrect setup: macro CONNEXT_HAS_USERDATA should be defined and have value -1 or 1
+#endif  /*CONNEXT_HAS_USERDATA */
 
 	// Creating a DataReader
 	// This DataReader will receive the video data, and will store it in its
 	// queue, to be retrieved by listener in the on_data_available callback
-	 DataReader *reader = sub->create_datareader(topic, 
-		readerQoS, _listener, DDS_DATA_AVAILABLE_STATUS);
+	DataReader *reader = sub->create_datareader(topic, 
+		reader_qos, _listener, DDS_DATA_AVAILABLE_STATUS);
 	if (reader == NULL)
 	{
 		std::stringstream errss;
@@ -295,7 +309,7 @@ VideoStreamReader::VideoStreamReader(
 VideoStreamReader::~VideoStreamReader()
 {
 
-	_reader->delete_contained_entities();
+	/* _reader->delete_contained_entities(); */
 	Subscriber *sub = _reader->get_subscriber();
 	sub->delete_datareader(_reader);
 

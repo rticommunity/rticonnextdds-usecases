@@ -2,7 +2,7 @@
 (c) 2005-2013 Copyright, Real-Time Innovations, Inc.  All rights reserved.    	                             
 RTI grants Licensee a license to use, modify, compile, and create derivative works 
 of the Software.  Licensee has the right to distribute object form only for use with RTI 
-products.  The Software is provided “as is”, with no warranty of any type, including 
+products.  The Software is provided ï¿½as isï¿½, with no warranty of any type, including 
 any warranty for fitness for any purpose. RTI is under no obligation to maintain or 
 support the Software.  RTI shall not be liable for any incidental or consequential 
 damages arising out of the use or inability to use the software.
@@ -12,29 +12,9 @@ damages arising out of the use or inability to use the software.
 #include <vector>
 #include <iostream>
 
-#if defined(_WIN32)
-    #if !defined(RTI_WIN32)
-        #define RTI_WIN32
-    #endif
-    #if !defined(NDDS_DLL_VARIABLE)
-        #define NDDS_DLL_VARIABLE
-    #endif
-	#ifdef _DEBUG
-		#pragma comment( lib, "nddscppd.lib")
-		#pragma comment( lib, "nddscd.lib")
-		#pragma comment( lib, "nddscored.lib")
-	#else
-		#pragma comment( lib, "nddscpp.lib")
-		#pragma comment( lib, "nddsc.lib")
-		#pragma comment( lib, "nddscore.lib")
-	#endif /* #ifdef _DEBUG */
-#endif /* defined(_WIN32) */
+#include "connext_cpp_common.h"
 
-#include "ndds/ndds_cpp.h"
-#include "ndds/ndds_namespace_cpp.h"
 #include "CommonInfrastructure/VideoSource.h"
-#include "Generated/VideoData.h"
-#include "Generated/VideoDataSupport.h"
 #include "CommonInfrastructure/DDSCommunicator.h"
 #include "CommonInfrastructure/OSAPI.h"
 
@@ -46,6 +26,7 @@ damages arising out of the use or inability to use the software.
 #endif /* _WIN32 */
 
 using namespace std;
+using namespace com::rti::media::generated;
 
 void PrintHelp();
 
@@ -157,7 +138,18 @@ public:
         //       a side-effect of setting a private member -- this should be improved
 	virtual bool CodecsCompatible(std::string codecString)
 	{
-		if (_source->IsMetadataCompatible(codecString)) 
+      bool matches = false;
+#if (VIDEODATA_MATCH_EMPTY_USERDATA == 1)
+		matches = codecString.empty() || _source->IsMetadataCompatible(codecString);
+      std::cout << "Matching compatibility: code was compiled to match with Subscribers without user_data" << std::endl;
+#elif (VIDEODATA_MATCH_EMPTY_USERDATA == -1)
+		matches = _source->IsMetadataCompatible(codecString);
+      std::cout << "Matching compatibility: code was compiled to not match Subscribers without user_data" << std::endl;
+#else /* VIDEODATA_MATCH_EMPTY_USERDATA */
+#error Incorrect setup: VIDEODATA_MATCH_EMPTY_USERDATA should be defined and have the value -1 or 1
+#endif /* VIDEODATA_MATCH_EMPTY_USERDATA */
+
+		if (matches) 
 		{
 			_discoveredCompatibleReader = true;
 		}
@@ -219,23 +211,23 @@ int main (int argc, char *argv[])
 	{
 		// Adding the XML files that contain profiles used by this application
 		xmlFiles.push_back(
-			"file://../../../src/Config/base_profile_multicast.xml");
+			"file://../../../../src/Config/base_profile_multicast.xml");
 		xmlFiles.push_back(
-			"file://../../../src/Config/video_stream_multicast.xml");
+			"file://../../../../src/Config/video_stream_multicast.xml");
 	}
 	else
 	{
 		// Adding the XML files that contain profiles used by this application
 		xmlFiles.push_back(
-			"file://../../../src/Config/base_profile_no_multicast.xml");
+			"file://../../../../src/Config/base_profile_no_multicast.xml");
 		xmlFiles.push_back(
-			"file://../../../src/Config/video_stream_no_multicast.xml");
+			"file://../../../../src/Config/video_stream_no_multicast.xml");
 
 	}
 
-#ifdef WIN32
+#ifdef _WIN32
 	char fullPath[512];
-	std::string relativePath = "..\\..\\..\\resource\\bigbuck.webm";
+	std::string relativePath = "..\\..\\..\\..\\resource\\bigbuck.webm";
 
     if (NULL == _fullpath(fullPath, relativePath.c_str(), 512))
 	{
@@ -244,7 +236,7 @@ int main (int argc, char *argv[])
 	EMDSVideoSource *videoSource = new EMDSVideoSource(
 		fullPath);
 #else
-	std::string relativePath = "../../../resource/bigbuck.webm";
+	std::string relativePath = "../../../../resource/bigbuck.webm";
 	char fullPath[PATH_MAX];
 	if (NULL == realpath(relativePath.c_str(), fullPath))
 	{

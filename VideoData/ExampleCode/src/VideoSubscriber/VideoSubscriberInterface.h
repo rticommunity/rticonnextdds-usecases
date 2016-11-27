@@ -10,12 +10,8 @@ damages arising out of the use or inability to use the software.
 #ifndef VIDEO_SUBSCRIBER_INTERFACE_H
 #define VIDEO_SUBSCRIBER_INTERFACE_H
 
-
-#include "ndds/ndds_cpp.h"
-#include "ndds/ndds_namespace_cpp.h"
+#include "connext_cpp_common.h"
 #include "CommonInfrastructure/DDSCommunicator.h"
-#include "Generated/VideoData.h"
-#include "Generated/VideoDataSupport.h"
 #include "CommonInfrastructure/DDSTypeWrapper.h"
 #include "CommonInfrastructure/VideoBuffer.h"
 

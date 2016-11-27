@@ -14,28 +14,24 @@
 #
 # - To enable debugging information, set the Makefile variable 'DEBUG' to '1'.
 # Example:
-#   make -f make/Makefile.x64Darwin12clang4.1 DEBUG=1
+#   make -f make/Makefile.x64Darwin14clang6.0 DEBUG=1
 
 
 # Defines required Make variables. They will be used in the Makefile.common
 # to define the rules to define the build process for this application.
-ARCH := x64Darwin12clang4.1
+ARCH:=x64Darwin14clang6.0
 
-# The rules are in the 'Makefile.common'
+# The rest of the rules are in the 'Makefile.common'
 include make/Makefile.common
 
-# These are the architecture-specific defines
+$(CONNEXT_PRO): CXX = clang++
+$(CONNEXT_PRO): CXXFLAGS = -DRTI_UNIX -DRTI_DARWIN -DRTI_DARWIN10 -DRTI_64BIT -m64 -Wno-return-type-c-linkage
+$(CONNEXT_PRO): CXXLD = clang++
+$(CONNEXT_PRO): CXXLDFLAGS = -m64
+$(CONNEXT_PRO): SYSLIBS = -ldl -lm -lpthread
 
-$(CONNEXT_PRO): CXX := clang++
-$(CONNEXT_PRO): CXXFLAGS := -DRTI_UNIX -DRTI_DARWIN -DRTI_DARWIN10 -DRTI_64BIT -m64 -Wno-return-type-c-linkage
-$(CONNEXT_PRO): CXXLD := clang++
-$(CONNEXT_PRO): CXXLDFLAGS := -m64
-$(CONNEXT_PRO): SYSLIBS := -ldl -lm -lpthread
-
-$(CONNEXT_MICRO): CXX := g++
-$(CONNEXT_MICRO): CXXFLAGS := -DRTI_UNIX -DRTI_DARWIN -DRTI_POSIX_THREADS -m32 -g
-$(CONNEXT_MICRO): CXXLD := g++
-$(CONNEXT_MICRO): CXXLDFLAGS := -m32 -static-libgcc
-$(CONNEXT_MICRO): SYS_LIBS :=
-
-
+$(CONNEXT_MICRO): CXX = clang++
+$(CONNEXT_MICRO): CXXFLAGS = -DRTI_UNIX -DRTI_DARWIN -DRTI_DARWIN10 -DRTI_64BIT -m64 -Wno-return-type-c-linkage -Wno-c++11-compat-deprecated-writable-strings
+$(CONNEXT_MICRO): CXXLD = clang++
+$(CONNEXT_MICRO): CXXLDFLAGS = -m64
+$(CONNEXT_MICRO): SYSLIBS =

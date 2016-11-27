@@ -38,7 +38,7 @@ Real-Time Innovations, Inc. (RTI).  The above license is granted with
 #include "VideoSource.h"
 #include <gst/gst.h>
 #include <gst/app/gstappsink.h>
-#include "Generated/VideoData.h"
+#include "connext_cpp_common.h"
 
 static int seqn = 0;
 
