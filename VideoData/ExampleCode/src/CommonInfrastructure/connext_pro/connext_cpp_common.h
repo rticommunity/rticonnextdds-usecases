@@ -62,6 +62,15 @@ set_url_profile(
 	return TheParticipantFactory->set_qos(factoryQos);
 }
 
+
+/* Convenience function for setting profiles files in the ParticipantFactory */
+
+inline DDS::ReturnCode_t
+initialize_infrastructure(const std::string &interface_name)
+{
+   return DDS::RETCODE_OK;
+}
+
 /* Functions that are equivalent to the member functions on ParticipantFactory */
 
 inline DDS::ReturnCode_t

@@ -288,12 +288,14 @@ int main (int argc, char *argv[])
 				(void *)&videoInterface);
 
 		// Wait for compatible DataReaders to come online
+#if 0
 		while (!compatibilityCheck.DiscoveredCompatibleReader())
 		{
 			cout << "Waiting for a compatible video subscriber to come "
 				<< "online" << endl;
 			OSThread::Sleep(2,0);
 		}
+#endif
 
 		// If we have found a compatible Video Subscriber, we start publishing.
 		videoSource->Start();

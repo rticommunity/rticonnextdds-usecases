@@ -316,17 +316,17 @@ void VideoPublisherDiscoveryListener::on_data_available(DDSDataReader *reader)
 	// empty sequence to the take() call.  This is more efficient than 
 	// copying the data into a local buffer.
 	builtin_reader->return_loan(data_seq, info_seq);
-#elif (CONNEXT_HAS_BUILTINTOPICS == -1) */
+#elif (CONNEXT_HAS_BUILTINTOPICS == -1)
 #if (VIDEODATA_MATCH_EMPTY_USERDATA == 1)
     /* Need to invoke compatibility check to make sure internal state of _handler gets updated
 	    (this is due to a side-effect in the method CodecsCompatible()) */
     _handler->CodecsCompatible(std::string(""));
 #elif (VIDEODATA_MATCH_EMPTY_USERDATA == -1)
 #else /* VIDEODATA_MATCH_EMPTY_USERDATA */
-#error Incorrect setup: VIDEODATA_MATCH_EMPTY_USERDATA should be defined and have the value -1 or 1
+   #error Incorrect setup: VIDEODATA_MATCH_EMPTY_USERDATA should be defined and have the value -1 or 1
 #endif /* VIDEODATA_MATCH_EMPTY_USERDATA */
 #else /* CONNEXT_HAS_BUILTINTOPICS */
-#error Incorrect setup: CONNEXT_HAS_BUILTINTOPIC should be defined and have the value -1 or 1
+   #error Incorrect setup: CONNEXT_HAS_BUILTINTOPIC should be defined and have the value -1 or 1
 #endif /* CONNEXT_HAS_BUILTINTOPICS */
 
 

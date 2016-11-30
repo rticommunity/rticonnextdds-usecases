@@ -91,6 +91,8 @@ DDS::DomainParticipant* DDSCommunicator::CreateParticipant(
 	DDS::DataReaderListener *discoveryListener,
 	DiscoveryListenerKind listenerKind) 
 {
+   DDS::ReturnCode_t retcode;
+   
 	// If we have a discovery listener installed, create the DomainParticipant
 	// disabled, so that we can install the listener before the discovery
 	// process starts.
@@ -102,7 +104,7 @@ DDS::DomainParticipant* DDSCommunicator::CreateParticipant(
    DDS::DomainParticipantQos participant_qos;
    /* Only invoke profile action if not both strings are empty */
    if (!(participantQosLibrary.empty() && participantQosProfile.empty())) {
-      DDS::ReturnCode_t retcode = Connext::get_participant_qos_from_profile(participant_qos,
+      retcode = Connext::get_participant_qos_from_profile(participant_qos,
          participantQosLibrary.c_str(), participantQosProfile.c_str());
       if (retcode != DDS::RETCODE_OK) 
       {
@@ -112,6 +114,15 @@ DDS::DomainParticipant* DDSCommunicator::CreateParticipant(
       }
    } else {
       participant_qos = DDS::PARTICIPANT_QOS_DEFAULT;
+   }
+
+   /* Initialize infrastructure before creating Participant */
+   retcode = Connext::initialize_infrastructure("");
+   if (retcode != DDS::RETCODE_OK) 
+   {
+      std::stringstream errss;
+      errss << "Failed to initialize infrastructure";
+      throw errss.str();
    }
    
 	_participant = 

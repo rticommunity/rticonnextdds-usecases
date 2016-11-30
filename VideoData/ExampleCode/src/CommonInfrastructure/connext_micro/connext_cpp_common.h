@@ -27,6 +27,11 @@ DDS::ReturnCode_t
 set_url_profile(
    std::vector<std::string> fileNames);
 
+/* Function encapsulating initialization of libraries, different for Pro and Micro */
+
+DDS::ReturnCode_t
+initialize_infrastructure(const std::string &interface_name);
+
 /* Functions that are equivalent to the member functions on ParticipantFactory */
 
 DDS::ReturnCode_t
