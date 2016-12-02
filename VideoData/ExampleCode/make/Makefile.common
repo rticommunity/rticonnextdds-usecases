@@ -126,7 +126,7 @@ $(CONNEXT_PRO): CONNEXT_INCLUDES := -I$(NDDSHOME)/include -I$(NDDSHOME)/include/
 $(CONNEXT_PRO): CONNEXT_LIBS := $(addprefix -lndds, cpp c core)
 
 $(CONNEXT_MICRO): CONNEXT_INCLUDES := -I$(RTIMEHOME)/include -I$(RTIMEHOME)/include/rti_me
-$(CONNEXT_MICRO): CONNEXT_LIBS := $(addprefix -lrti_me_, cpp rhsm whsm discdpde) -lrti_me
+$(CONNEXT_MICRO): CONNEXT_LIBS := $(addprefix -lrti_me_, cpp rhsm whsm discdpde discdpse) -lrti_me
 
 SRCDIR := src
 COMMON_SRCDIR := $(SRCDIR)/CommonInfrastructure

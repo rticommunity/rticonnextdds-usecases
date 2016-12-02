@@ -21,13 +21,19 @@
 # to define the rules to define the build process for this application.
 ARCH=i86Linux3.xgcc4.6.3
 
-CXX = g++
-CXXFLAGS = -DRTI_UNIX -DRTI_LINUX -m32
-WX_FLAGS = -D_FILE_OFFSET_BITS=64 -DWXUSINGDLL -D__WXGTK__
-CXXLD = g++
-CXXLDFLAGS = -m32 -static-libgcc
-SYSLIBS = -ldl -lnsl -lm -lpthread -lrt
-
 # The rest of the rules are in the 'Makefile.common'
 include make/Makefile.common
+
+$(CONNEXT_PRO): CXX = g++
+$(CONNEXT_PRO): CXXFLAGS = -DRTI_UNIX -DRTI_LINUX -m32
+$(CONNEXT_PRO): CXXLD = g++
+$(CONNEXT_PRO): CXXLDFLAGS = -m32 -static-libgcc
+$(CONNEXT_PRO): SYSLIBS = -ldl -lnsl -lm -lpthread -lrt
+
+$(CONNEXT_MICRO): CXX = g++
+$(CONNEXT_MICRO): CXXFLAGS = -DRTI_UNIX -DRTI_LINUX -DRTI_POSIX_THREADS -m32 -Wno-write-strings
+$(CONNEXT_MICRO): CXXLD = g++
+$(CONNEXT_MICRO): CXXLDLFLAGS = -m32 -static-libgcc
+$(CONNEXT_MICRO): SYSLIBS=-ldl -lnsl -lm -lpthread -lrt
+
 

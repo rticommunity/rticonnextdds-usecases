@@ -18,6 +18,7 @@
    functions that abstract the functionality */
 
 #include <vector>
+#include <string>
 
 namespace Connext {
 

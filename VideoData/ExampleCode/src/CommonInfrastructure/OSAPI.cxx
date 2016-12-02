@@ -40,7 +40,8 @@ void OSThread::Run()
 
 void OSThread::Sleep(long seconds, long nano_seconds)
 {
-#ifdef __APPLE__
+//#ifdef __APPLE__
+#if 1
     struct timespec ts;
     ts.tv_sec = seconds;
     ts.tv_nsec = nano_seconds;
