@@ -149,6 +149,7 @@ public:
 
 		// The buffer becomes managed by the GStreamer framework as soon as
 		// we push it, so we do not have to free it.
+
 		gst_app_src_push_buffer(_appSrc, appbuffer);
 
 	}

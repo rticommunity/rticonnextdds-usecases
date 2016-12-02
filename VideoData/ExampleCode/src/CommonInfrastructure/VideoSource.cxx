@@ -62,52 +62,70 @@ void *video_source_worker(void *src)
 
 	while (1)
 	{
-	        GstSample * sample = 
+
+	   GstSample * sample = 
 			gst_app_sink_pull_sample(GST_APP_SINK(videoSource->GetAppSink()));
-                if (sample == NULL) 
-                {
-                    return NULL;
-                }
+      if (sample == NULL) 
+      {
+        if (gst_app_sink_is_eos(GST_APP_SINK(videoSource->GetAppSink())))
+        {
+           std::cout << "End of stream reached, jumping back to start of video" << std::endl;
+            GstElement *pipeline = GST_ELEMENT(videoSource->GetPipeline());
+            if (!gst_element_seek(pipeline, 
+                     1.0, GST_FORMAT_TIME, GST_SEEK_FLAG_FLUSH,
+                     GST_SEEK_TYPE_SET,  0,
+                     GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE)) {
+               std::cout << "  gst_element_seek failed" << std::endl;
+               return NULL;
+            }
+            if (GST_STATE_CHANGE_FAILURE == gst_element_set_state(pipeline, GST_STATE_PLAYING)) {
+               std::cout << "  gst_element_set_state(PLAYING) failed" << std::endl;
+               return NULL;
+            }
+        } else {
+           std::cout << "NULL-sample pulled but end of stream not reached" << std::endl;
+           return NULL;
+         }
+      } else { /* if (sample == NULL) */
+         GstBuffer * buffer = gst_sample_get_buffer(sample);
+         if (buffer == NULL)
+         {
+            return NULL;
+         }
 
-		GstBuffer * buffer = 
-                        gst_sample_get_buffer(sample);
-		if (buffer == NULL)
-		{
-			return NULL;
-		}
+         GstMemory * memory = gst_buffer_get_memory (buffer, 0);
+         if (memory == NULL)
+         {
+               return NULL;
+         }
 
-                GstMemory * memory = gst_buffer_get_memory (buffer, 0);
-                if (memory == NULL)
-                {
-                        return NULL;
-                }
+         GstMapInfo info;
+         if (gst_memory_map (memory, &info, GST_MAP_READ) == FALSE)
+         {
+               return NULL;
+         }
 
-                GstMapInfo info;
-                if (gst_memory_map (memory, &info, GST_MAP_READ) == FALSE)
-                {
-                        return NULL;
-                }
+         if (info.size > com::rti::media::generated::MAX_BUFFER_SIZE)
+         {
+            std::cout << "Buffer is larger than the max buffer size, not publishing" 
+               << std::endl;
+         } else {
+            EMDSBuffer *emdsBuffer	= new EMDSBuffer(info.size);
 
-		if (info.size > com::rti::media::generated::MAX_BUFFER_SIZE)
-		{
-			std::cout << "Buffer is larger than the max buffer size" 
-				<< std::endl;
-		}
-		EMDSBuffer *emdsBuffer
-			= new EMDSBuffer(info.size);
+            emdsBuffer->SetData(info.data, info.size);
+            emdsBuffer->SetSeqn(seqn);
 
-		emdsBuffer->SetData(info.data, info.size);
-		emdsBuffer->SetSeqn(seqn);
+            seqn++;
 
-		seqn++;
+            videoSource->GetFrameReadyHandler()->FrameReady(
+               videoSource->GetHandlerObj(), emdsBuffer);
 
-		videoSource->GetFrameReadyHandler()->FrameReady(
-			videoSource->GetHandlerObj(), emdsBuffer);
+            delete emdsBuffer;
 
-		delete emdsBuffer;
-
-                gst_buffer_unref (buffer);
-                gst_memory_unmap (memory, &info);
+            gst_buffer_unref (buffer);
+         }
+         gst_memory_unmap (memory, &info);
+      }
 	}
 
 	return NULL;
@@ -163,7 +181,9 @@ static void EMDSVideoSource_detect_new_pad(GstElement *element, GstPad *pad,
 				<< std::endl;
 		}
 
-		gst_element_set_state(linkElement, GST_STATE_PLAYING);
+		if (GST_STATE_CHANGE_FAILURE == gst_element_set_state(linkElement, GST_STATE_PLAYING)) {
+         std::cout << "Failed to start the sink" << std::endl;
+      }
 		gst_object_unref(sinkPad);
 
 	}

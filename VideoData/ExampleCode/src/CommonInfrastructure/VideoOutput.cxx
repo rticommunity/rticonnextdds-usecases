@@ -137,9 +137,13 @@ void EMDSVideoDisplayOutput::Initialize()
 #if defined(__linux__) || defined(__APPLE__)
 #define PIPELINE_STRING                                               \
 	"appsrc name=\"src\" is-live=\"true\" do-timestamp=\"true\" " \
-	"caps=\"video/x-vp8, width=(int)640, height=(int)360, "       \
-	"framerate=1000/1\" ! queue2 ! "                              \
+	"caps=\"video/x-vp8, width=(int)450, height=(int)360, "       \
+	"framerate=1000/1\" ! "                              \
 	"vp8dec ! videoconvert ! autovideosink "
+
+//	"framerate=1000/1\" ! queue2 ! "                              \
+//	"caps=\"video/x-vp8, width=(int)640, height=(int)360, "       \
+
 #endif
 
         const char *pipelineString = PIPELINE_STRING;
@@ -173,8 +177,11 @@ void EMDSVideoDisplayOutput::Initialize()
 	gst_object_unref(bus);
 
 	// Set the pipeline state to playing, so it actually displays video
-	gst_element_set_state(GST_ELEMENT(_displayPipeline),
-		GST_STATE_PLAYING);
+	if (GST_STATE_CHANGE_FAILURE == gst_element_set_state(GST_ELEMENT(_displayPipeline), GST_STATE_PLAYING)) {
+      std::cout << "Failed to set pipeline state to PLAYING" << std::endl;
+   //} else {
+   //   std::cout << "Successfully set pipeline state to PLAYING" << std::endl;
+   }
 }
 
 // ----------------------------------------------------------------------------
@@ -189,8 +196,12 @@ EMDSVideoDisplayOutput::EMDSVideoDisplayOutput()
 		return;
 	} else 
 	{
-		gst_element_set_state(GST_ELEMENT(_displayPipeline),
-			GST_STATE_PLAYING);
+		if (GST_STATE_CHANGE_FAILURE == gst_element_set_state(GST_ELEMENT(_displayPipeline),
+         GST_STATE_PLAYING)) {
+         std::cout << "Failed to set pipeline state to PLAYING" << std::endl;
+      //} else {
+      //   std::cout << "Successfully set pipeline state to PLAYING" << std::endl;
+      }
 	}
 }
 

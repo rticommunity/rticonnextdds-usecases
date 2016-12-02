@@ -21,6 +21,9 @@
 
 namespace Connext {
 
+/* Return type to hide the different return types */
+const RTI_BOOL TYPESUPPORT_OK = RTI_TRUE;
+
 /* Convenience function for setting profiles files in the ParticipantFactory */
 
 DDS::ReturnCode_t

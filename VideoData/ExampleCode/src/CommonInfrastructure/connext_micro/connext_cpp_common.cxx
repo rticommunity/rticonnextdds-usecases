@@ -108,6 +108,9 @@ initialize_infrastructure(const std::string &interface_name)
 #endif
    }
 
+   udp_property->max_receive_buffer_size = 2097152;
+   udp_property->max_message_size = 65507;
+
    bresult = registry->register_component(NETIO::DEFAULT_UDP_NAME,
                              UDP::InterfaceFactory::get_interface(),
                              &udp_property->_parent._parent,

@@ -41,6 +41,9 @@
 
 namespace Connext {
 
+/* Return type to hide the different return types */
+const DDS::ReturnCode_t TYPESUPPORT_OK = DDS::RETCODE_OK;
+
 /* Convenience function for setting profiles files in the ParticipantFactory */
 
 inline DDS::ReturnCode_t

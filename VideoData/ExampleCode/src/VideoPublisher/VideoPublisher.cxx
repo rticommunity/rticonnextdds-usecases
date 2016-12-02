@@ -227,7 +227,8 @@ int main (int argc, char *argv[])
 
 #ifdef _WIN32
 	char fullPath[512];
-	std::string relativePath = "..\\..\\..\\..\\resource\\bigbuck.webm";
+	//std::string relativePath = "..\\..\\..\\..\\resource\\bigbuck.webm";
+	std::string relativePath = "..\\..\\..\\..\\resource\\train.webm";
 
     if (NULL == _fullpath(fullPath, relativePath.c_str(), 512))
 	{
@@ -236,7 +237,8 @@ int main (int argc, char *argv[])
 	EMDSVideoSource *videoSource = new EMDSVideoSource(
 		fullPath);
 #else
-	std::string relativePath = "../../../../resource/bigbuck.webm";
+	//std::string relativePath = "../../../../resource/bigbuck.webm";
+	std::string relativePath = "../../../../resource/train.webm";
 	char fullPath[PATH_MAX];
 	if (NULL == realpath(relativePath.c_str(), fullPath))
 	{

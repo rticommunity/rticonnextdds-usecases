@@ -184,12 +184,20 @@ void VideoStreamListener::on_data_available(DataReader *reader)
 				if ((infoSeq[i].publication_sequence_number.low
 						% 50) == 1)
 				{
-					std::cout << ". ";
+					std::cout << ". " << std::flush;
 				}
+
+            if (0 != _last_seq_nr) {
+               if (infoSeq[i].publication_sequence_number.low != _last_seq_nr + 1) {
+                  std::cout << "Missed seqnr(s): previous was " << _last_seq_nr << ", current is " << infoSeq[i].publication_sequence_number.low  << std::endl;
+               }
+            }
+            //std::cout << dataSeq[i].sequence_number << ": " << dataSeq[i].frame.length() << " bytes in frame" << std::endl;
+
+            _last_seq_nr = infoSeq[i].publication_sequence_number.low;
 
 				double timestamp = infoSeq[i].source_timestamp.sec + 
 						(infoSeq[i].source_timestamp.nanosec / NANOSEC_TO_SEC);
-//std::cout << "  Timestamp: " << timestamp << std::endl;
 
 				_reader->NotifyHandlers(&dataSeq[i], dataSeq[i].stream_id, 
 					timestamp);
