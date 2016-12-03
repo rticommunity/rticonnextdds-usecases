@@ -46,7 +46,7 @@ const DDS::ReturnCode_t TYPESUPPORT_OK = DDS::RETCODE_OK;
 
 /* Encapsulating the sleep utility */
 inline void sleep(long seconds, unsigned long nano_seconds) {
-/* macOS (Sierra) behaves differently, NDDSUtilities::sleep does not work */
+/* macOS (Sierra) behaves differently, NDDSUtility::sleep does not work */
 #ifdef __APPLE__
     struct timespec ts;
     ts.tv_sec = seconds;
@@ -56,7 +56,7 @@ inline void sleep(long seconds, unsigned long nano_seconds) {
     DDS_Duration_t duration;
     duration.sec = seconds;
     duration.nanosec = nano_seconds;
-    NDDSUtilities::sleep(duration);
+    NDDSUtility::sleep(duration);
 #endif
 }
 

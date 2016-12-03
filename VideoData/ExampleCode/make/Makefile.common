@@ -100,33 +100,25 @@ else
 $(info Using Connext installation directory $(CONNEXT_HOME))
 endif
 
+###############################################################################
+# Define settings specific to Connext edition and GStreamer
+###############################################################################
 
 ifeq ($(CONNEXT_EDITION),$(CONNEXT_PRO))
 CONNEXT_VERSION := $(strip $(patsubst <base_version>%</base_version>, rti_connext_dds-%, $(shell grep base_version $(NDDSHOME)/rti_versions.xml)))
+CONNEXT_RTIDDSGEN := $(NDDSHOME)/bin/rtiddsgen
+CONNEXT_INCLUDES := -I$(NDDSHOME)/include -I$(NDDSHOME)/include/ndds
+CONNEXT_LIBS := $(addprefix -lndds, cpp c core)
 endif
 
 ifeq ($(CONNEXT_EDITION),$(CONNEXT_MICRO))
 CONNEXT_VERSION := $(strip $(patsubst rev_host_rti_me.%, rti_connext_micro.%, $(notdir $(wildcard $(RTIMEHOME)/rev_host_rti_me.*))))
+CONNEXT_RTIDDSGEN := $(RTIMEHOME)/rtiddsgen/scripts/rtiddsgen -micro
+CONNEXT_INCLUDES := -I$(RTIMEHOME)/include -I$(RTIMEHOME)/include/rti_me
+CONNEXT_LIBS := $(addprefix -lrti_me_, cpp rhsm whsm discdpde discdpse) -lrti_me
 endif
 
 $(info Using Connext version name $(CONNEXT_VERSION))
-
-#########################################
-# Set rtiddsgen command to use
-#########################################
-
-$(CONNEXT_PRO):   RTIDDSGEN := $(NDDSHOME)/bin/rtiddsgen
-$(CONNEXT_MICRO): RTIDDSGEN := $(RTIMEHOME)/rtiddsgen/scripts/rtiddsgen -micro
-
-###############################################################################
-# Define includes specific to Connext edition and GStreamer
-###############################################################################
-
-$(CONNEXT_PRO): CONNEXT_INCLUDES := -I$(NDDSHOME)/include -I$(NDDSHOME)/include/ndds
-$(CONNEXT_PRO): CONNEXT_LIBS := $(addprefix -lndds, cpp c core)
-
-$(CONNEXT_MICRO): CONNEXT_INCLUDES := -I$(RTIMEHOME)/include -I$(RTIMEHOME)/include/rti_me
-$(CONNEXT_MICRO): CONNEXT_LIBS := $(addprefix -lrti_me_, cpp rhsm whsm discdpde discdpse) -lrti_me
 
 SRCDIR := src
 COMMON_SRCDIR := $(SRCDIR)/CommonInfrastructure
@@ -144,19 +136,25 @@ INCLUDES = -I$(SRCDIR) -I$(COMMON_SRCDIR_EDITION) \
 
 ifneq ($(SHAREDLIB),1)
 # Static libraries have z added to their names
-CONNEXT_LIBS := $(addsuffix z, $(CONNEXT_LIBS))
+STATIC_SUFFIX := z
 endif
 
 ifeq ($(DEBUG),1)
-CXXFLAGS += -g -O0
 # Debug versions of libraries have d added to their names
-CONNEXT_LIBS := $(addsuffix d, $(CONNEXT_LIBS))
+DEBUG_SUFFIX := d
+CXXFLAGS_DEBOPT := -g -O0
 else
-CXXFLAGS += -O2
+CXXFLAGS_DEBOPT := -O2
 endif
 
 # Compiler flag to be added for all variants
 CXXFLAGS += -D__STDC_CONSTANT_MACROS
+
+OBJ_SUFFIX := $(DEBUG_SUFFIX).o
+LIB_SUFFIX := $(STATIC_SUFFIX)$(DEBUG_SUFFIX)
+EXE_SUFFIX := $(LIB_SUFFIX)
+
+CONNEXT_LIBS := $(addsuffix $(LIB_SUFFIX), $(CONNEXT_LIBS))
 
 ###############################################################################
 # Define libraries and their paths for Connext and GStreamer
@@ -187,7 +185,7 @@ IDL_HEADERS := $(subst %,VideoData,$(IDL_GENPAT_HEADERS))
 IDL_GENERATED := $(IDL_SOURCES) $(IDL_HEADERS)
 IDL_OBJDIR := $(ARCH_BLDDIR)/Common
 IDL_OBJPAT_ABS := $(addprefix $(IDL_OBJDIR)/,$(IDL_GENPAT))
-IDL_OBJPAT_OBJS := $(addsuffix .o,$(IDL_OBJPAT_ABS))
+IDL_OBJPAT_OBJS := $(addsuffix $(OBJ_SUFFIX),$(IDL_OBJPAT_ABS))
 IDL_OBJS := $(subst %,VideoData,$(IDL_OBJPAT_OBJS))
 IDL_DEPS := $(addsuffix .d,$(IDL_OBJS))
 
@@ -195,11 +193,11 @@ IDL_DEPS := $(addsuffix .d,$(IDL_OBJS))
 COMMON_NAME := Common
 COMMON_OBJDIR := $(ARCH_BLDDIR)/$(COMMON_NAME)
 COMMON_SRCS := $(wildcard $(COMMON_SRCDIR)/*.cxx)
-COMMON_OBJS := $(addprefix $(COMMON_OBJDIR)/,$(notdir $(COMMON_SRCS:.cxx=.o)))
+COMMON_OBJS := $(addprefix $(COMMON_OBJDIR)/,$(notdir $(COMMON_SRCS:.cxx=$(OBJ_SUFFIX))))
 COMMON_DEPS := $(addsuffix .d,$(COMMON_OBJS))
 COMMON_OBJDIR_EDITION := $(ARCH_BLDDIR)/$(COMMON_NAME)/connext_$(CONNEXT_EDITION)
 COMMON_SRCS_EDITION := $(wildcard $(COMMON_SRCDIR_EDITION)/*.cxx)
-COMMON_OBJS_EDITION := $(addprefix $(COMMON_OBJDIR_EDITION)/,$(notdir $(COMMON_SRCS_EDITION:.cxx=.o)))
+COMMON_OBJS_EDITION := $(addprefix $(COMMON_OBJDIR_EDITION)/,$(notdir $(COMMON_SRCS_EDITION:.cxx=$(OBJ_SUFFIX))))
 COMMON_DEPS_EDITION := $(addsuffix .d,$(COMMON_OBJS_EDITION))
 
 # Filenames associated with the VideoPublisher source code files and objects
@@ -207,20 +205,20 @@ PUB_NAME := VideoPublisher
 PUB_SRCDIR := $(SRCDIR)/$(PUB_NAME)
 PUB_OBJDIR := $(ARCH_BLDDIR)/$(PUB_NAME)
 PUB_SRCS := $(wildcard $(PUB_SRCDIR)/*.cxx)
-PUB_OBJS := $(addprefix $(PUB_OBJDIR)/,$(notdir $(PUB_SRCS:.cxx=.o)))
+PUB_OBJS := $(addprefix $(PUB_OBJDIR)/,$(notdir $(PUB_SRCS:.cxx=$(OBJ_SUFFIX))))
 PUB_DEPS := $(addsuffix .d,$(PUB_OBJS))
 PUB_EXECDIR := $(PUB_OBJDIR)
-PUB_EXEC := $(PUB_EXECDIR)/$(PUB_NAME)
+PUB_EXEC := $(PUB_EXECDIR)/$(PUB_NAME)$(EXE_SUFFIX)
 
 # Filenames associated with the VideoSubscriber source code files and objects
 SUB_NAME := VideoSubscriber
 SUB_SRCDIR := $(SRCDIR)/$(SUB_NAME)
 SUB_OBJDIR := $(ARCH_BLDDIR)/$(SUB_NAME)
 SUB_SRCS := $(wildcard $(SUB_SRCDIR)/*.cxx)
-SUB_OBJS := $(addprefix $(SUB_OBJDIR)/,$(notdir $(SUB_SRCS:.cxx=.o)))
+SUB_OBJS := $(addprefix $(SUB_OBJDIR)/,$(notdir $(SUB_SRCS:.cxx=$(OBJ_SUFFIX))))
 SUB_DEPS := $(addsuffix .d,$(SUB_OBJS))
 SUB_EXECDIR := $(SUB_OBJDIR)
-SUB_EXEC := $(SUB_EXECDIR)/$(SUB_NAME)
+SUB_EXEC := $(SUB_EXECDIR)/$(SUB_NAME)$(EXE_SUFFIX)
 
 # Accumulated variables
 ALL_DEPS := $(IDL_DEPS) $(COMMON_DEPS) $(COMMON_DEPS_EDITION) $(PUB_DEPS) $(SUB_DEPS)
@@ -281,27 +279,27 @@ $(SUB_OBJS):    | $(SUB_OBJDIR)
 
 define do-compile
 echo Compiling $@; \
-$(CXX) -MT $@ -MMD -MP -MF $@.Td $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<; \
+$(CXX) -MT $@ -MMD -MP -MF $@.Td $(CXXFLAGS) $(CXXFLAGS_DEBOPT) -o $@ $(DEFINES) $(INCLUDES) -c $<; \
 mv -f $@.Td $@.d
 endef
 
-$(IDL_OBJS): $(IDL_OBJDIR)/%.o: $(IDL_GENDIR)/%.cxx $(IDL_OBJDIR)/%.o.d
+$(IDL_OBJS): $(IDL_OBJDIR)/%$(OBJ_SUFFIX): $(IDL_GENDIR)/%.cxx $(IDL_OBJDIR)/%$(OBJ_SUFFIX).d
 	$(SILENT) $(do-compile)
 
-$(COMMON_OBJS): $(COMMON_OBJDIR)/%.o: $(COMMON_SRCDIR)/%.cxx $(COMMON_OBJDIR)/%.o.d
+$(COMMON_OBJS): $(COMMON_OBJDIR)/%$(OBJ_SUFFIX): $(COMMON_SRCDIR)/%.cxx $(COMMON_OBJDIR)/%$(OBJ_SUFFIX).d
 	$(SILENT) $(do-compile)
 
-$(COMMON_OBJS_EDITION): $(COMMON_OBJDIR_EDITION)/%.o: $(COMMON_SRCDIR_EDITION)/%.cxx $(COMMON_OBJDIR_EDITION)/%.o.d
+$(COMMON_OBJS_EDITION): $(COMMON_OBJDIR_EDITION)/%$(OBJ_SUFFIX): $(COMMON_SRCDIR_EDITION)/%.cxx $(COMMON_OBJDIR_EDITION)/%$(OBJ_SUFFIX).d
 	$(SILENT) $(do-compile)
 
-$(PUB_OBJS): $(PUB_OBJDIR)/%.o: $(PUB_SRCDIR)/%.cxx $(PUB_OBJDIR)/%.o.d
+$(PUB_OBJS): $(PUB_OBJDIR)/%$(OBJ_SUFFIX): $(PUB_SRCDIR)/%.cxx $(PUB_OBJDIR)/%$(OBJ_SUFFIX).d
 	$(SILENT) $(do-compile)
 
-$(SUB_OBJS): $(SUB_OBJDIR)/%.o: $(SUB_SRCDIR)/%.cxx $(SUB_OBJDIR)/%.o.d
+$(SUB_OBJS): $(SUB_OBJDIR)/%$(OBJ_SUFFIX): $(SUB_SRCDIR)/%.cxx $(SUB_OBJDIR)/%$(OBJ_SUFFIX).d
 	$(SILENT) $(do-compile)
 
-$(IDL_OBJDIR)/%.o.d $(COMMON_OBJDIR)/%.o.d $(COMMON_OBJDIR_EDITION)/%.o.d $(PUB_OBJDIR)/%.o.d $(SUB_OBJDIR)/%.o.d: ;
-.PRECIOUS: $(IDL_OBJDIR)/%.o.d $(COMMON_OBJDIR)/%.o.d $(COMMON_OBJDIR_EDITION)/%.o.d $(PUB_OBJDIR)/%.o.d $(SUB_OBJDIR)/%.o.d
+$(IDL_OBJDIR)/%$(OBJ_SUFFIX).d $(COMMON_OBJDIR)/%$(OBJ_SUFFIX).d $(COMMON_OBJDIR_EDITION)/%$(OBJ_SUFFIX).d $(PUB_OBJDIR)/%$(OBJ_SUFFIX).d $(SUB_OBJDIR)/%$(OBJ_SUFFIX).d: ;
+.PRECIOUS: $(IDL_OBJDIR)/%$(OBJ_SUFFIX).d $(COMMON_OBJDIR)/%$(OBJ_SUFFIX).d $(COMMON_OBJDIR_EDITION)/%$(OBJ_SUFFIX).d $(PUB_OBJDIR)/%$(OBJ_SUFFIX).d $(SUB_OBJDIR)/%$(OBJ_SUFFIX).d
 
 # Only include dependency files if relevant for the requested target.
 ifeq (,$(filter $(MAKECMDGOALS), clean veryclean generate))
@@ -333,7 +331,7 @@ ifeq ($(OS_ARCH), i86Win32)
 	call $(NDDSHOME)/bin/rtiddsgen.bat -namespace -d $(IDL_GENDIR) $< -replace -language C++
 else
 	$(SILENT) echo Generating code from IDL file $<; \
-	$(RTIDDSGEN) -namespace -d $(IDL_GENDIR) -replace -language C++ $<
+	$(CONNEXT_RTIDDSGEN) -namespace -d $(IDL_GENDIR) -replace -language C++ $<
 endif
 
 ###############################################################################
