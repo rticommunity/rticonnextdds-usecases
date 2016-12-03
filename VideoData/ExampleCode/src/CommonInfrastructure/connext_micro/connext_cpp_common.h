@@ -23,8 +23,14 @@
 namespace Connext {
 
 /* Return type to hide the different return types */
+
 const RTI_BOOL TYPESUPPORT_OK = RTI_TRUE;
 
+/* Encapsulating the sleep utility */
+/* Encapsulating the sleep utility */
+inline void sleep(long seconds, unsigned long nano_seconds) {
+   OSAPI_Thread_sleep(seconds*1000 + nano_seconds/1000);
+}
 /* Convenience function for setting profiles files in the ParticipantFactory */
 
 DDS::ReturnCode_t
