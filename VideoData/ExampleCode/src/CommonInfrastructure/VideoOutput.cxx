@@ -90,22 +90,22 @@ static GstBusSyncReply bus_sync_handler(
 	GstBus *bus, GstMessage *message, gpointer user_data) 
 {
 	GstElement *outwin = NULL;
-	GValue *val = (GValue *)g_value_array_new(1);
+	GValue val = G_VALUE_INIT;
 
-	outwin = gst_bin_get_by_name((GstBin*)user_data,"sink");
+	outwin = gst_bin_get_by_name(GST_BIN(user_data),"sink");
 
 	if (GST_MESSAGE_TYPE (message) != GST_MESSAGE_ELEMENT)
 		return GST_BUS_PASS;
 
-	if (!gst_structure_has_name (message->structure, "prepare-xwindow-id"))
+	if (!gst_structure_has_name (gst_message_get_structure(message), "prepare-xwindow-id"))
 		return GST_BUS_PASS;
 
-	g_value_init(val,G_TYPE_BOOLEAN);
-	g_value_set_boolean(val,FALSE);
+	g_value_init(&val,G_TYPE_BOOLEAN);
+	g_value_set_boolean(&val,FALSE);
 
 	if (outwin != NULL)
 	{	
-		gst_child_proxy_set_property((GstObject *)(outwin),"sync",val);
+		gst_child_proxy_set_property(GST_CHILD_PROXY(outwin),"sync",&val);
 	}
 
 	gst_message_unref(message);
@@ -123,32 +123,33 @@ void EMDSVideoDisplayOutput::Initialize()
 	_frameHandler = 
 		new DisplayFrameHandler(this);
 
-	// Create the video pipeline on Windows (sending to DirectDraw)
-#ifdef WIN32
+#ifdef _WIN32
+// Create the video pipeline on Windows (sending to DirectDraw)
+#define PIPELINE_STRING                                                \
+	"appsrc name=\"src\" is-live=\"true\" do-timestamp=\"true\" "       \
+	"caps=\"video/x-vp8, width=(int)640, height=(int)360, "             \
+	"pixel-aspect-ratio=(fraction)1/1, framerate=(fraction)1000/1\" ! " \
+	"queue2 ! vp8dec ! queue2 ! "                                       \
+	"videorate ! video/x-raw-yuv,framerate=25/1 ! "                     \
+	"videoconvert ! directdrawsink name=\"sink\""
+#endif
 
-	_displayPipeline =
-		(GstPipeline *)gst_parse_launch(
-		"appsrc name=\"src\" is-live=\"true\" do-timestamp=\"true\" "
-		"caps=\"video/x-vp8, width=(int)640, height=(int)360, "
-		"pixel-aspect-ratio=(fraction)1/1, framerate=(fraction)1000/1\" ! "
-		"queue2 ! vp8dec ! queue2 ! "
-		"videorate ! video/x-raw-yuv,framerate=25/1 ! "
-		"ffmpegcolorspace ! "
-		"directdrawsink name=\"sink\"",
-		NULL);
+#if defined(__linux__) || defined(__APPLE__)
+#define PIPELINE_STRING                                               \
+	"appsrc name=\"src\" is-live=\"true\" do-timestamp=\"true\" " \
+	"caps=\"video/x-vp8, width=(int)450, height=(int)360, "       \
+	"framerate=1000/1\" ! "                              \
+	"vp8dec ! videoconvert ! autovideosink "
 
-#else
-
-	// Create the video pipeline on Linux (sending to XImageSink)
-	_displayPipeline = 
-		(GstPipeline *)gst_parse_launch(
-		"appsrc name=\"src\" is-live=\"true\" do-timestamp=\"true\" "
-		"caps=\"video/x-vp8, width=(int)640, height=(int)360, "
-		"framerate=25/1\" ! queue2 ! "
-		" vp8dec ! ffmpegcolorspace ! ximagesink sync=\"false\" ",
-		NULL);
+//	"framerate=1000/1\" ! queue2 ! "                              \
+//	"caps=\"video/x-vp8, width=(int)640, height=(int)360, "       \
 
 #endif
+
+        const char *pipelineString = PIPELINE_STRING;
+        printf("Doing pipeline: %s\n", pipelineString);
+	_displayPipeline = 
+		GST_PIPELINE(gst_parse_launch( pipelineString, NULL));
 
 	// If the video pipeline was not created correctly, exit. 
 	// The common causes for this include:
@@ -168,7 +169,7 @@ void EMDSVideoDisplayOutput::Initialize()
 	bus = gst_pipeline_get_bus(
 		GST_PIPELINE (_displayPipeline));
 	gst_bus_set_sync_handler (bus, 
-		(GstBusSyncHandler) bus_sync_handler, _displayPipeline);
+		(GstBusSyncHandler) bus_sync_handler, _displayPipeline, NULL);
 
 	// Add a watch for EOS events
 	gst_bus_add_signal_watch(bus);
@@ -176,8 +177,11 @@ void EMDSVideoDisplayOutput::Initialize()
 	gst_object_unref(bus);
 
 	// Set the pipeline state to playing, so it actually displays video
-	gst_element_set_state((GstElement*)_displayPipeline,
-		GST_STATE_PLAYING);
+	if (GST_STATE_CHANGE_FAILURE == gst_element_set_state(GST_ELEMENT(_displayPipeline), GST_STATE_PLAYING)) {
+      std::cout << "Failed to set pipeline state to PLAYING" << std::endl;
+   //} else {
+   //   std::cout << "Successfully set pipeline state to PLAYING" << std::endl;
+   }
 }
 
 // ----------------------------------------------------------------------------
@@ -192,8 +196,12 @@ EMDSVideoDisplayOutput::EMDSVideoDisplayOutput()
 		return;
 	} else 
 	{
-		gst_element_set_state((GstElement*)_displayPipeline,
-			GST_STATE_PLAYING);
+		if (GST_STATE_CHANGE_FAILURE == gst_element_set_state(GST_ELEMENT(_displayPipeline),
+         GST_STATE_PLAYING)) {
+         std::cout << "Failed to set pipeline state to PLAYING" << std::endl;
+      //} else {
+      //   std::cout << "Successfully set pipeline state to PLAYING" << std::endl;
+      }
 	}
 }
 

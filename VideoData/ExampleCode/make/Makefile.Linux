@@ -1,0 +1,55 @@
+###############################################################################
+##         (c) Copyright, Real-Time Innovations, All rights reserved.        ##
+##                                                                           ##
+##         Permission to modify and use for internal purposes granted.       ##
+## This software is provided "as is", without warranty, express or implied.  ##
+##                                                                           ##
+###############################################################################
+
+# Note:
+# - This is a convenience makefile that you can use in the case that you build
+#   on Linux but there is no specific makefile for the architecture that you are
+#   building for. Normally, the architecture is hardcoded into the makefile,
+#   like you can see in Makefile.i86Linux2.6gcc4.4.5. In stead, this makefile
+#   tries to figure out what your installed architecture is by scanning your
+#   LD_LIBRARY_PATH.
+
+# - To use this Makefile, you must have the 'NDDSHOME' environment variable
+#   set to the location of RTI Connext and LD_LIBRARY_PATH must contain
+#   the RTI DDS libraries. An easy way to achieve this is by sourcing the
+#   RTI-provided environment script found in $NDDSHOME/resource/srcipts,
+#   for example
+#   . $NDDSHOME/resource/scripts/rtisetenv_i86Linux3.xgcc4.6.3.bash
+# 
+# - You need to invoke the make command from the root directory of this example.
+#
+# - To enable debugging information, set the Makefile variable 'DEBUG' to '1'.
+#
+# Example:
+#   make -f make/Makefile.Linux
+
+
+# Defines required Make variables. They will be used in the Makefile.common
+# to define the rules to define the build process for this application.
+NDDS_LIBNAME := libnddsc.so
+LDLP := $(subst :, ,$(LD_LIBRARY_PATH))
+NDDSC := $(wildcard $(addsuffix /$(NDDS_LIBNAME),$(LDLP)))
+ARCH := $(subst /,,$(subst $(abspath $(dir $(NDDSC))/..),,$(dir $(NDDSC))))
+
+CXX := g++
+CXXFLAGS := -DRTI_UNIX -DRTI_LINUX
+CXXLD := g++
+CXXLDFLAGS := -static-libgcc
+SYSLIBS := -ldl -lnsl -lm -lpthread -lrt
+
+ifeq ($(ARCH),$(filter i86%,$(ARCH)))
+  CXXFLAGS += -m32
+  CXXLDFLAGS += -m32
+endif
+ifeq ($(ARCH),$(filter x64%,$(ARCH)))
+  CXXFLAGS += -DRTI_64BIT -m64
+  CXXLDFLAGS += -m64
+endif
+
+# The rest of the rules are in the 'Makefile.common'
+include make/Makefile.common

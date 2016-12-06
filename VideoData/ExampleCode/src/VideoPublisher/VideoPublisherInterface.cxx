@@ -2,14 +2,14 @@
 (c) 2005-2013 Copyright, Real-Time Innovations, Inc.  All rights reserved.    	                             
 RTI grants Licensee a license to use, modify, compile, and create derivative works 
 of the Software.  Licensee has the right to distribute object form only for use with RTI 
-products.  The Software is provided “as is”, with no warranty of any type, including 
+products.  The Software is provided ï¿½as isï¿½, with no warranty of any type, including 
 any warranty for fitness for any purpose. RTI is under no obligation to maintain or 
 support the Software.  RTI shall not be liable for any incidental or consequential 
 damages arising out of the use or inability to use the software.
 **********************************************************************************************/
 #include <iostream>
+#include "connext_cpp_common.h"
 #include "VideoPublisherInterface.h"
-
 
 using namespace com::rti::media::generated;
 
@@ -129,9 +129,11 @@ VideoPublisherInterface::VideoPublisherInterface(
 	// decided by the DataReader, not the DataWriter)
 	// Note that the QoS profile and QoS library names are constants that are 
 	// defined in the .idl file. 
-	DDS::DataWriter *writer = pub->create_datawriter_with_profile(topic, 
-		QOS_LIBRARY, QOS_PROFILE_STREAMING_DATA, 
-		NULL, DDS_STATUS_MASK_NONE);
+   DDS::DataWriterQos writer_qos;
+   Connext::get_datawriter_qos_from_profile(writer_qos,
+      QOS_LIBRARY, QOS_PROFILE_STREAMING_DATA);
+	DDS::DataWriter *writer = pub->create_datawriter(topic, 
+      writer_qos,	NULL, DDS_STATUS_MASK_NONE);
 
 	// Downcast the generic datawriter to a video stream DataWriter 
 	_writer = VideoStreamDataWriter::narrow(writer);
@@ -175,8 +177,8 @@ bool VideoPublisherInterface::Write(DdsAutoType<VideoStream> data)
 		return false;
 	}
 
-/*	cout << "Writing sample #" << data.equence_number
-		<< ", length: " << data.frame.length() << endl;*/
+	/* std::cout << "Writing sample #" << data.sequence_number
+		<< ", length: " << data.frame.length() << std::endl; */
 
 	return true;
 
@@ -224,6 +226,7 @@ void VideoPublisherDiscoveryListener::on_data_available(DDSDataReader *reader)
 	// Cast the DataReader passed into this callback to a 
 	// "SubscriptionBuiltinTopicDataDataReader" that gets notifications about
 	// remote DataReaders.
+#if (CONNEXT_HAS_BUILTINTOPICS == 1)
 	DDS::SubscriptionBuiltinTopicDataDataReader *builtin_reader =
 		(DDS::SubscriptionBuiltinTopicDataDataReader*) reader;
 	DDS_SubscriptionBuiltinTopicDataSeq data_seq;
@@ -286,8 +289,10 @@ void VideoPublisherDiscoveryListener::on_data_available(DDSDataReader *reader)
 			// infrastructure) to find out if the remote codec is compatible
 			// with the codecs this application is publishing.
 			isCompatible = _handler->CodecsCompatible(readerData);
-
-		}
+		} else {
+         std::cout << "Found subscriber with no user_data" << std::endl;
+			isCompatible = _handler->CodecsCompatible("");
+      }
 		
 		if (!isCompatible) 
 		{
@@ -311,6 +316,19 @@ void VideoPublisherDiscoveryListener::on_data_available(DDSDataReader *reader)
 	// empty sequence to the take() call.  This is more efficient than 
 	// copying the data into a local buffer.
 	builtin_reader->return_loan(data_seq, info_seq);
+#elif (CONNEXT_HAS_BUILTINTOPICS == -1)
+#if (VIDEODATA_MATCH_EMPTY_USERDATA == 1)
+    /* Need to invoke compatibility check to make sure internal state of _handler gets updated
+	    (this is due to a side-effect in the method CodecsCompatible()) */
+    _handler->CodecsCompatible(std::string(""));
+#elif (VIDEODATA_MATCH_EMPTY_USERDATA == -1)
+#else /* VIDEODATA_MATCH_EMPTY_USERDATA */
+   #error Incorrect setup: VIDEODATA_MATCH_EMPTY_USERDATA should be defined and have the value -1 or 1
+#endif /* VIDEODATA_MATCH_EMPTY_USERDATA */
+#else /* CONNEXT_HAS_BUILTINTOPICS */
+   #error Incorrect setup: CONNEXT_HAS_BUILTINTOPIC should be defined and have the value -1 or 1
+#endif /* CONNEXT_HAS_BUILTINTOPICS */
+
 
 }
 

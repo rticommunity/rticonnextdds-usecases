@@ -38,7 +38,6 @@ Real-Time Innovations, Inc. (RTI).  The above license is granted with
 
 #include <gst/gst.h>
 #include <gst/app/gstappsrc.h>
-#include <gst/app/gstappbuffer.h>
 
 #include "VideoBuffer.h"
 #include "VideoEvent.h"
@@ -131,7 +130,7 @@ public:
 	//
 	virtual void FrameReady(void *obj, EMDSBuffer *buffer)
 	{
-		GstAppBuffer *appbuffer = NULL;
+		GstBuffer *appbuffer = NULL;
 
 		if(_appSrc == NULL)
 		{
@@ -145,12 +144,13 @@ public:
 		// Allocate a new buffer from the GStreamer framework that will be
 		// used to display this video frame.
 		appbuffer = 
-			(GstAppBuffer*)gst_app_buffer_new(buffer->GetData(), 
-				buffer->GetSize(), NULL, NULL);
+			gst_buffer_new_wrapped(buffer->GetData(), 
+				buffer->GetSize());
 
 		// The buffer becomes managed by the GStreamer framework as soon as
 		// we push it, so we do not have to free it.
-		gst_app_src_push_buffer(_appSrc, (GstBuffer*)appbuffer);
+
+		gst_app_src_push_buffer(_appSrc, appbuffer);
 
 	}
 

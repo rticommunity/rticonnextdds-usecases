@@ -2,14 +2,12 @@
 (c) 2005-2013 Copyright, Real-Time Innovations, Inc.  All rights reserved.    	                             
 RTI grants Licensee a license to use, modify, compile, and create derivative works 
 of the Software.  Licensee has the right to distribute object form only for use with RTI 
-products.  The Software is provided “as is”, with no warranty of any type, including 
+products.  The Software is provided ï¿½as isï¿½, with no warranty of any type, including 
 any warranty for fitness for any purpose. RTI is under no obligation to maintain or 
 support the Software.  RTI shall not be liable for any incidental or consequential 
 damages arising out of the use or inability to use the software.
 **********************************************************************************************/
 #include "DDSCommunicator.h"
-
-using namespace DDS;
 
 // ------------------------------------------------------------------------- //
 // Destruction of a DDS communication interface.  This first deletes all the
@@ -69,69 +67,32 @@ DDSCommunicator::~DDSCommunicator()
 
 // ------------------------------------------------------------------------- //
 // Creating a DomainParticipant with a specified domain ID  
-DomainParticipant* DDSCommunicator::CreateParticipant(long domain, 
+DDS::DomainParticipant* DDSCommunicator::CreateParticipant(long domain, 
 		DDS::DataReaderListener *discoveryListener,
 		DiscoveryListenerKind listenerKind) 
 {
-	// If we have a discovery listener installed, create the DomainParticipant
-	// disabled, so that we can install the listener before the discovery
-	// process starts.
-	if (discoveryListener != NULL)
-	{
-		PrepareFactoryForDiscoveryListener();
-	}
-
-	_participant = 
-		TheParticipantFactory->create_participant(domain, 
-		PARTICIPANT_QOS_DEFAULT, NULL, STATUS_MASK_NONE);
-
-	if (_participant == NULL) 
-	{
-		std::stringstream errss;
-		errss << "Failed to create DomainParticipant object";
-		throw errss.str();
-	} 
-
-
-	if (discoveryListener != NULL)
-	{
-		// Install the discovery listener and enable the DomainParticipant
-		InstallDiscoveryListener(discoveryListener, listenerKind);
-	}
-
-	return _participant;
+   return CreateParticipant(domain, "", "", discoveryListener, listenerKind);
 }
 
 // ------------------------------------------------------------------------- //
 // Creating a DomainParticipant with a domain ID of zero
-DomainParticipant* DDSCommunicator::CreateParticipant() 
+DDS::DomainParticipant* DDSCommunicator::CreateParticipant() 
 {
-	_participant = 
-		TheParticipantFactory->create_participant(
-									0, 
-									PARTICIPANT_QOS_DEFAULT, 
-									NULL, STATUS_MASK_NONE);
-
-	if (_participant == NULL) 
-	{
-		std::stringstream errss;
-		errss << "Failed to create DomainParticipant object";
-		throw errss.str();
-	} 
-
-	return _participant;
+	return CreateParticipant(0, "", "", NULL, NO_DISCOVERY_KIND);
 }
 
 
 // ------------------------------------------------------------------------- //
 // Creating a DomainParticipant with a specified domain ID and specified QoS 
-DomainParticipant* DDSCommunicator::CreateParticipant(
+DDS::DomainParticipant* DDSCommunicator::CreateParticipant(
 	long domain, 
 	const std::string &participantQosLibrary, 
 	const std::string &participantQosProfile,		
 	DDS::DataReaderListener *discoveryListener,
 	DiscoveryListenerKind listenerKind) 
 {
+   DDS::ReturnCode_t retcode;
+   
 	// If we have a discovery listener installed, create the DomainParticipant
 	// disabled, so that we can install the listener before the discovery
 	// process starts.
@@ -140,15 +101,37 @@ DomainParticipant* DDSCommunicator::CreateParticipant(
 		PrepareFactoryForDiscoveryListener();
 	}
 
-	_participant = 
-		TheParticipantFactory->create_participant_with_profile(
-									domain, 
-									participantQosLibrary.c_str(), 
-									participantQosProfile.c_str(), 
-									NULL, 
-									STATUS_MASK_NONE);
+   DDS::DomainParticipantQos participant_qos;
+   /* Only invoke profile action if not both strings are empty */
+   if (!(participantQosLibrary.empty() && participantQosProfile.empty())) {
+      retcode = Connext::get_participant_qos_from_profile(participant_qos,
+         participantQosLibrary.c_str(), participantQosProfile.c_str());
+      if (retcode != DDS::RETCODE_OK) 
+      {
+         std::stringstream errss;
+         errss << "Failed to get ParticipantQos from profile";
+         throw errss.str();
+      }
+   } else {
+      participant_qos = DDS::PARTICIPANT_QOS_DEFAULT;
+   }
 
-	if (_participant == NULL) 
+   /* Initialize infrastructure before creating Participant */
+   retcode = Connext::initialize_infrastructure("");
+   if (retcode != DDS::RETCODE_OK) 
+   {
+      std::stringstream errss;
+      errss << "Failed to initialize infrastructure";
+      throw errss.str();
+   }
+   
+	_participant = 
+		TheParticipantFactory->create_participant(
+									domain,
+                           participant_qos,
+									NULL,
+									DDS::STATUS_MASK_NONE);
+   if (_participant == NULL) 
 	{
 		std::stringstream errss;
 		errss << "Failed to create DomainParticipant object";
@@ -162,15 +145,14 @@ DomainParticipant* DDSCommunicator::CreateParticipant(
 	}
 
 	return _participant;
-
 }
 
 
 // ------------------------------------------------------------------------- //
 // Creating a DomainParticipant with a specified domain ID, specified QoS file
 // names, and specified QoS 
-DomainParticipant* DDSCommunicator::CreateParticipant(long domain, 
-	std::vector<std::string>fileNames, 
+DDS::DomainParticipant* DDSCommunicator::CreateParticipant(long domain, 
+	std::vector<std::string> fileNames, 
 	const std::string &participantQosLibrary, 
 	const std::string &participantQosProfile, 
 	DDS::DataReaderListener *discoveryListener, 
@@ -179,100 +161,30 @@ DomainParticipant* DDSCommunicator::CreateParticipant(long domain,
 
 	// Adding a list of explicit file names to the DomainParticipantFactory
 	// This gives the middleware a set of places to search for the files
-	DomainParticipantFactoryQos factoryQos;
-	TheParticipantFactory->get_qos(factoryQos);
-	factoryQos.profile.url_profile.ensure_length(fileNames.size(),
-												fileNames.size());
-
-	for (unsigned int i = 0; i < fileNames.size(); i++) 
-	{
-		// Note that we copy the file names here, so they cannot go out of 
-		// scope
-		factoryQos.profile.url_profile[i] = DDS_String_dup(
-			fileNames[i].c_str());
-	}
-
-	ReturnCode_t retcode = TheParticipantFactory->set_qos(factoryQos);
-		
-	if (retcode != RETCODE_OK) 
+   DDS::ReturnCode_t retcode = Connext::set_url_profile(fileNames);
+	if (retcode != DDS::RETCODE_OK) 
 	{
 		std::stringstream errss;
-		errss << "Failed to create DomainParticipant object";
+		errss << "Failed to set url profiles";
 		throw errss.str();
 	}
-
-	// If we have a discovery listener installed, create the DomainParticipant
-	// disabled, so that we can install the listener before the discovery
-	// process starts.
-	if (discoveryListener != NULL)
-	{
-		PrepareFactoryForDiscoveryListener();
-	}
-
-	// Actually creating the DomainParticipant
-	_participant = 
-		TheParticipantFactory->create_participant_with_profile(
-									domain, 
-									participantQosLibrary.c_str(), 
-									participantQosProfile.c_str(), 
-									NULL, 
-									STATUS_MASK_NONE);
-
-	if (_participant == NULL) 
-	{
-		std::stringstream errss;
-		errss << "Failed to create DomainParticipant object";
-		throw errss.str();
-	} 
-
-	if (discoveryListener != NULL)
-	{
-		// Install the discovery listener and enable the DomainParticipant
-		InstallDiscoveryListener(discoveryListener, listenerKind);
-	}
-
-
-	return _participant;
-
+   return CreateParticipant(domain, participantQosLibrary,
+      participantQosProfile, discoveryListener, listenerKind);
 }
 
 
 // ------------------------------------------------------------------------- //
 // Creating a Publisher object.  This is used to create type-specific 
 // DataWriter objects in the application
-Publisher* DDSCommunicator::CreatePublisher()
+DDS::Publisher* DDSCommunicator::CreatePublisher()
 {
-	if (GetParticipant() == NULL) 
-	{
-		std::stringstream errss;
-		errss << 
-			"DomainParticipant NULL - communicator not properly " << 
-				"initialized";
-		throw errss.str();
-	}
-
-	// Creating a Publisher.  
-	// This object is used to create type-specific DataWriter objects that 
-	// can actually send data.  
-	// 
-	_pub = GetParticipant()->create_publisher(
-									PUBLISHER_QOS_DEFAULT, 
-									NULL, STATUS_MASK_NONE);	
-
-	if (_pub == NULL) 
-	{
-		std::stringstream errss;
-		errss << "Failed to create Publisher";
-		throw errss.str();
-	}
-
-	return _pub;
+   return CreatePublisher("", "");
 }
 
 // ------------------------------------------------------------------------- //
 // Creating a Publisher object with specified QoS.  This is used to create 
 // type-specific DataWriter objects in the application
-Publisher* DDSCommunicator::CreatePublisher(
+DDS::Publisher* DDSCommunicator::CreatePublisher(
 	const std::string &qosLibrary, 
 	const std::string &qosProfile)
 {
@@ -289,11 +201,24 @@ Publisher* DDSCommunicator::CreatePublisher(
 	// This object is used to create type-specific DataWriter objects that 
 	// can actually send data.  
 	// 
-	_pub = GetParticipant()->create_publisher_with_profile(
-						qosLibrary.c_str(), 
-						qosProfile.c_str(),
-						NULL, STATUS_MASK_NONE);	
+   DDS::PublisherQos publisher_qos;
+   /* Only invoke profile action if not both strings are empty */
+   if (!(qosLibrary.empty() && qosProfile.empty())) {
+      DDS::ReturnCode_t retcode = Connext::get_publisher_qos_from_profile(publisher_qos,
+         qosLibrary.c_str(), qosProfile.c_str());
+      if (retcode != DDS::RETCODE_OK) 
+      {
+         std::stringstream errss;
+         errss << "Failed to get PublisherQoS from profile " <<
+            qosLibrary << "::" << qosProfile;
+         throw errss.str();
+      }
+   } else {
+      publisher_qos = DDS::PUBLISHER_QOS_DEFAULT;
+   }
 
+   _pub = GetParticipant()->create_publisher(
+      publisher_qos,	NULL, DDS::STATUS_MASK_NONE);
 	if (_pub == NULL) 
 	{
 		std::stringstream errss;
@@ -308,41 +233,15 @@ Publisher* DDSCommunicator::CreatePublisher(
 // ------------------------------------------------------------------------- //
 // Creating a Subscriber object.  This is used to create type-specific 
 // DataReader objects in the application
-Subscriber* DDSCommunicator::CreateSubscriber()
+DDS::Subscriber* DDSCommunicator::CreateSubscriber()
 {
-	if (GetParticipant() == NULL) 
-	{
-		std::stringstream errss;
-		errss << 
-			"DomainParticipant NULL - communicator not properly " << 
-				"initialized";
-		throw errss.str();
-	}
-
-	// Creating a Subscriber.  
-	// This object is used to create type-specific DataReader objects that 
-	// can actually receive data.  The Subscriber object is being created
-	//  in the DDSCommunicator class because one Subscriber can be used to
-	//  create multiple DDS DataReaders. 
-	// 
-	_sub = GetParticipant()->create_subscriber(
-								SUBSCRIBER_QOS_DEFAULT, 
-								NULL, STATUS_MASK_NONE);	
-
-	if (_sub == NULL) 
-	{
-		std::stringstream errss;
-		errss << "Failed to create Subscriber";
-		throw errss.str();
-	}
-
-	return _sub;
+   return CreateSubscriber("", "");
 }
 
 // ------------------------------------------------------------------------- //
 // Creating a Subscriber object with specified QoS.  This is used to create 
 // type-specific DataReader objects in the application
-Subscriber* DDSCommunicator::CreateSubscriber(
+DDS::Subscriber* DDSCommunicator::CreateSubscriber(
 	const std::string &qosLibrary,
 	const std::string &qosProfile)
 {
@@ -361,10 +260,24 @@ Subscriber* DDSCommunicator::CreateSubscriber(
 	//  in the DDSCommunicator class because one Subscriber can be used to
 	//  create multiple DDS DataReaders. 
 	// 
-	_sub = GetParticipant()->create_subscriber_with_profile(
-						qosLibrary.c_str(), 
-						qosProfile.c_str(), 
-						NULL, STATUS_MASK_NONE);	
+   DDS::SubscriberQos subscriber_qos;
+   /* Only invoke profile action if not both strings are empty */
+   if (!(qosLibrary.empty() && qosProfile.empty())) {
+      DDS::ReturnCode_t retcode = Connext::get_subscriber_qos_from_profile(subscriber_qos,
+         qosLibrary.c_str(), qosProfile.c_str());
+      if (retcode != DDS::RETCODE_OK) 
+      {
+         std::stringstream errss;
+         errss << "Failed to get SubscriberQoS from profile " <<
+            qosLibrary << "::" << qosProfile;
+         throw errss.str();
+      }
+   } else {
+      subscriber_qos = DDS::SUBSCRIBER_QOS_DEFAULT;
+   }
+
+	_sub = GetParticipant()->create_subscriber(subscriber_qos,
+      NULL, DDS::STATUS_MASK_NONE);
 	if (_sub == NULL) 
 	{
 		std::stringstream errss;
@@ -382,7 +295,7 @@ Subscriber* DDSCommunicator::CreateSubscriber(
 // the application to add a listener for discovery.
 void DDSCommunicator::PrepareFactoryForDiscoveryListener()
 {
-	DomainParticipantFactoryQos factoryQos;
+	DDS::DomainParticipantFactoryQos factoryQos;
 	TheParticipantFactory->get_qos(factoryQos);
 	factoryQos.entity_factory.autoenable_created_entities = false;
 	TheParticipantFactory->set_qos(factoryQos);
@@ -395,18 +308,19 @@ void DDSCommunicator::InstallDiscoveryListener(
 		DDS::DataReaderListener *discoveryListener,
 		DiscoveryListenerKind listenerKind)
 {
+#if (CONNEXT_HAS_BUILTINTOPICS == 1)
 	char *discoveryTopic = NULL;
 	if (listenerKind == PARTICIPANT_DISCOVERY_KIND)
 	{
-		discoveryTopic = (char *)PARTICIPANT_TOPIC_NAME;
+		discoveryTopic = (char *)DDS::PARTICIPANT_TOPIC_NAME;
 	}
 	if (listenerKind == DATAWRITER_DISCOVERY_KIND)
 	{
-		discoveryTopic = (char *)PUBLICATION_TOPIC_NAME;
+		discoveryTopic = (char *)DDS::PUBLICATION_TOPIC_NAME;
 	}
 	if (listenerKind == DATAREADER_DISCOVERY_KIND)
 	{
-		discoveryTopic = (char *)SUBSCRIPTION_TOPIC_NAME;
+		discoveryTopic = (char *)DDS::SUBSCRIPTION_TOPIC_NAME;
 	}
 
 	// Lookup the builtin DataReader to listen for either Participant discovery, 
@@ -425,8 +339,12 @@ void DDSCommunicator::InstallDiscoveryListener(
 
 	// Listen for discovery events
 	builtinReader->set_listener(discoveryListener, 
-		DATA_AVAILABLE_STATUS);
-
+		DDS::DATA_AVAILABLE_STATUS);
+#elif (CONNEXT_HAS_BUILTINTOPICS == -1)
+   /* Deliberately empty */
+#else /* CONNEXT_HAS_BUILTINTOPICS */
+#error Incorrect setup: CONNEXT_HAS_BUILTINTOPIC should be defined and have the value -1 or 1
+#endif
 	// Enable the DomainParticipant
 	_participant->enable();
 

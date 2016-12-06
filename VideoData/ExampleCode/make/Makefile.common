@@ -21,164 +21,344 @@
 # - SYSLIBS: additional system libraries to append to the CXXLD command-line
 
 ###############################################################################
-# Ensure this Makefile is invoked with the right variable set
+# Helpers for debugging and streamlining
 ###############################################################################
-ifeq ($(ARCH), )
-all:
-	@echo "***************************************************************"
-	@echo "You cannot use this Makefile directly, instead use the"
-	@echo "architecture-specific Makefile. For example:"
-	@echo "         gmake -f make/Makefile.i86Linux2.6gcc4.4.5"
-	@echo "***************************************************************"
-	@false
+
+# Use make SILENT= -f <makefile> to show verbose information
+SILENT := @
+
+###############################################################################
+# Information messages for cases of incorrect setups
+###############################################################################
+
+define CONNEXT_NOARCH_MSG
+
+***************************************************************
+You cannot use this Makefile directly, instead use the         
+architecture-specific Makefile. For example:                   
+        gmake -f make/Makefile.i86Linux2.6gcc4.4.5             
+***************************************************************
+
+endef
+
+define CONNEXT_NOHOME_MSG
+
+***************************************************************
+The environment variable 'NDDSHOME' or 'RTIMEHOME is not set!  
+To use this makefile you need to set NDDSHOME to the directory 
+where you have RTI Connext Pro installed or set RTIMEHOME to   
+the directory where you have RTI Connext Micro installed.      
+***************************************************************
+
+endef
+
+###############################################################################
+# Check whether architecture was set
+###############################################################################
+
+ifeq (,$(ARCH))
+$(error $(CONNEXT_NOARCH_MSG))
 else
-###############################################################################
-# Ensure $NDDSHOME is defined
-###############################################################################
-ifeq ($(NDDSHOME), )
-all:
-	@echo "***************************************************************"
-	@echo "The environment variable 'NDDSHOME' is not set!"
-	@echo "To use this makefile you need to set NDDSHOME to the directory"
-	@echo "where you have RTI Connext installed."
-	@echo "***************************************************************"
-	@false
-endif
+$(info Building for architecture $(ARCH))
 endif
 
+###############################################################################
+# Derive Connext edition from target
+###############################################################################
+#
+# Avoid secondary expansion complications, read from provided targets directly
 
-# Define the sources and NDDS search path
-INCLUDES = -Isrc/CommonInfrastructure -Isrc/Generated -I$(NDDSHOME)/include \
-           -I$(NDDSHOME)/include/ndds -I/usr/include/gstreamer-0.10 \
-           -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include \
-           -I/usr/include/libxml2
+CONNEXT_PRO := pro
+CONNEXT_MICRO := micro
+CONNEXT_EDITIONS := $(CONNEXT_PRO) $(CONNEXT_MICRO)
+
+# Default edition is pro (first in list)
+ifeq (,$(CONNEXT_EDITION))
+CONNEXT_EDITION := $(firstword $(filter $(CONNEXT_EDITIONS), $(CONNEXT_EDITION)))
+endif
+ifeq (,$(CONNEXT_EDITION))
+CONNEXT_EDITION := $(firstword $(CONNEXT_EDITIONS))
+endif
+
+$(info Building for Connext $(CONNEXT_EDITION) edition)
+
+###############################################################################
+# Figure out what Connext installdir and version name and number we are using
+###############################################################################
+
+ifeq ($(CONNEXT_EDITION),$(CONNEXT_PRO))
+CONNEXT_HOME := $(NDDSHOME)
+endif
+
+ifeq ($(CONNEXT_EDITION),$(CONNEXT_MICRO))
+CONNEXT_HOME := $(RTIMEHOME)
+endif
+
+ifeq (,$(CONNEXT_HOME))
+$(error $(CONNEXT_NOHOME_MSG))
+else
+$(info Using Connext installation directory $(CONNEXT_HOME))
+endif
+
+###############################################################################
+# Define settings specific to Connext edition and GStreamer
+###############################################################################
+
+ifeq ($(CONNEXT_EDITION),$(CONNEXT_PRO))
+CONNEXT_VERSION := $(strip $(patsubst <base_version>%</base_version>, rti_connext_dds-%, $(shell grep base_version $(NDDSHOME)/rti_versions.xml)))
+CONNEXT_RTIDDSGEN := $(NDDSHOME)/bin/rtiddsgen
+CONNEXT_INCLUDES := -I$(NDDSHOME)/include -I$(NDDSHOME)/include/ndds
+CONNEXT_LIBS := $(addprefix -lndds, cpp c core)
+endif
+
+ifeq ($(CONNEXT_EDITION),$(CONNEXT_MICRO))
+CONNEXT_VERSION := $(strip $(patsubst rev_host_rti_me.%, rti_connext_micro.%, $(notdir $(wildcard $(RTIMEHOME)/rev_host_rti_me.*))))
+CONNEXT_RTIDDSGEN := $(RTIMEHOME)/rtiddsgen/scripts/rtiddsgen -micro
+CONNEXT_INCLUDES := -I$(RTIMEHOME)/include -I$(RTIMEHOME)/include/rti_me
+CONNEXT_LIBS := $(addprefix -lrti_me_, cpp rhsm whsm discdpde discdpse) -lrti_me
+endif
+
+$(info Using Connext version name $(CONNEXT_VERSION))
+
+SRCDIR := src
+COMMON_SRCDIR := $(SRCDIR)/CommonInfrastructure
+COMMON_SRCDIR_EDITION := $(COMMON_SRCDIR)/connext_$(CONNEXT_EDITION)
+SRCDIR_IDLGEN := $(SRCDIR)/Generated/$(CONNEXT_VERSION)
+
+INCLUDES = -I$(SRCDIR) -I$(COMMON_SRCDIR_EDITION) \
+           -I$(SRCDIR_IDLGEN) $(CONNEXT_INCLUDES) \
+           -I/usr/include/libxml2 \
+           $(shell pkg-config --cflags gstreamer-app-1.0)
  
-
 ###############################################################################
 # Modify build flags for debug/release
 ###############################################################################
+
+ifneq ($(SHAREDLIB),1)
+# Static libraries have z added to their names
+STATIC_SUFFIX := z
+endif
+
 ifeq ($(DEBUG),1)
-CXXFLAGS += -g -O0 -D__STDC_CONSTANT_MACROS
-ifeq ($(SHAREDLIB),1)
-NDDSLIBS = -lnddscppd -lnddscd -lnddscored
+# Debug versions of libraries have d added to their names
+DEBUG_SUFFIX := d
+CXXFLAGS_DEBOPT := -g -O0
 else
-NDDSLIBS = -lnddscppzd -lnddsczd -lnddscorezd
-endif
-else
-CXXFLAGS += -O2 -D__STDC_CONSTANT_MACROS
-ifeq ($(SHAREDLIB),1)
-NDDSLIBS = -lnddscpp -lnddsc -lnddscore
-else
-NDDSLIBS = -lnddscppz -lnddscz -lnddscorez
-endif
+CXXFLAGS_DEBOPT := -O2
 endif
 
-LIBS = -L$(NDDSHOME)/lib/$(ARCH) -L/usr/lib $(NDDSLIBS) $(SYSLIBS) -lglib-2.0 -lgstreamer-0.10 -lgstapp-0.10
+# Compiler flag to be added for all variants
+CXXFLAGS += -D__STDC_CONSTANT_MACROS
 
-COMMONSRC = src/CommonInfrastructure/DDSCommunicator.cxx     \
-          src/CommonInfrastructure/OSAPI.cxx               \
-          src/CommonInfrastructure/VideoBuffer.cxx \
-          src/CommonInfrastructure/VideoSource.cxx \
-          src/CommonInfrastructure/VideoOutput.cxx \
-          src/CommonInfrastructure/SimCList.cxx
+OBJ_SUFFIX := $(DEBUG_SUFFIX).o
+LIB_SUFFIX := $(STATIC_SUFFIX)$(DEBUG_SUFFIX)
+EXE_SUFFIX := $(LIB_SUFFIX)
 
-COMMON_H  = src/CommonInfrastructure/DDSCommunicator.h \
-          src/CommonInfrastructure/OSAPI.h               \
-          src/CommonInfrastructure/DDSTypeWrapper.h       \
-          src/CommonInfrastructure/VideoBuffer.h \
-          src/CommonInfrastructure/VideoSource.h
+CONNEXT_LIBS := $(addsuffix $(LIB_SUFFIX), $(CONNEXT_LIBS))
 
-SOURCES_IDL = src/Generated/VideoData.cxx    \
-          src/Generated/VideoDataPlugin.cxx  \
-          src/Generated/VideoDataSupport.cxx
+###############################################################################
+# Define libraries and their paths for Connext and GStreamer
+###############################################################################
 
-VIDEOPUB_H = src/VideoPublisher/VideoPublisher.h
+LIBS = -L$(CONNEXT_HOME)/lib/$(ARCH) $(CONNEXT_LIBS) -L/usr/lib $(SYSLIBS) $(shell pkg-config --libs gstreamer-app-1.0)
 
-VIDEOPUBSRC = src/VideoPublisher/VideoPublisher.cxx \
-              src/VideoPublisher/VideoPublisherInterface.cxx 
+###############################################################################
+# Define output directories etc
+###############################################################################
 
-VIDEOSUB_H = src/VideoSubscriber/VideoSubscriber.h
+# Directory names to be used
+BLDDIR := objs
+VERSION_BLDDIR := $(BLDDIR)/$(CONNEXT_VERSION)
+ARCH_BLDDIR := $(VERSION_BLDDIR)/$(ARCH)
 
-VIDEOSUBSRC = src/VideoSubscriber/VideoSubscriber.cxx \
-              src/VideoSubscriber/VideoSubscriberInterface.cxx 
+# IDL-related filenames and patterns
+IDL_NAME := VideoData
+IDL_SRCDIR := $(SRCDIR)/Idl
+IDL_FILE := $(IDL_SRCDIR)/$(IDL_NAME).idl
+IDL_GENDIR := $(SRCDIR_IDLGEN)
+IDL_GENPAT := % %Support %Plugin 
+IDL_GENPAT_ABS := $(addprefix $(IDL_GENDIR)/,$(IDL_GENPAT))
+IDL_GENPAT_SOURCES := $(addsuffix .cxx,$(IDL_GENPAT_ABS))
+IDL_GENPAT_HEADERS := $(addsuffix .h,$(IDL_GENPAT_ABS))
+IDL_SOURCES := $(subst %,VideoData,$(IDL_GENPAT_SOURCES))
+IDL_HEADERS := $(subst %,VideoData,$(IDL_GENPAT_HEADERS))
+IDL_GENERATED := $(IDL_SOURCES) $(IDL_HEADERS)
+IDL_OBJDIR := $(ARCH_BLDDIR)/Common
+IDL_OBJPAT_ABS := $(addprefix $(IDL_OBJDIR)/,$(IDL_GENPAT))
+IDL_OBJPAT_OBJS := $(addsuffix $(OBJ_SUFFIX),$(IDL_OBJPAT_ABS))
+IDL_OBJS := $(subst %,VideoData,$(IDL_OBJPAT_OBJS))
+IDL_DEPS := $(addsuffix .d,$(IDL_OBJS))
 
-HEADERS_IDL = src/Generated/VideoData.h      \
-          src/Generated/VideoDataPlugin.h    \
-          src/Generated/VideoDataSupport.h
+# Filenames associated with the Common source code files and objects
+COMMON_NAME := Common
+COMMON_OBJDIR := $(ARCH_BLDDIR)/$(COMMON_NAME)
+COMMON_SRCS := $(wildcard $(COMMON_SRCDIR)/*.cxx)
+COMMON_OBJS := $(addprefix $(COMMON_OBJDIR)/,$(notdir $(COMMON_SRCS:.cxx=$(OBJ_SUFFIX))))
+COMMON_DEPS := $(addsuffix .d,$(COMMON_OBJS))
+COMMON_OBJDIR_EDITION := $(ARCH_BLDDIR)/$(COMMON_NAME)/connext_$(CONNEXT_EDITION)
+COMMON_SRCS_EDITION := $(wildcard $(COMMON_SRCDIR_EDITION)/*.cxx)
+COMMON_OBJS_EDITION := $(addprefix $(COMMON_OBJDIR_EDITION)/,$(notdir $(COMMON_SRCS_EDITION:.cxx=$(OBJ_SUFFIX))))
+COMMON_DEPS_EDITION := $(addsuffix .d,$(COMMON_OBJS_EDITION))
 
-DIRECTORIES   = objs.dir objs/$(ARCH).dir objs/$(ARCH)/VideoPublisher.dir \
-                objs/$(ARCH)/Common.dir objs/$(ARCH)/VideoSubscriber.dir
-SOURCES_NODIR = $(notdir $(COMMONSRC)) $(notdir $(SOURCES_IDL))
-VIDEOPUBSRC_NODIR = $(notdir $(VIDEOPUBSRC))
-VIDEOSUBSRC_NODIR = $(notdir $(VIDEOSUBSRC))
+# Filenames associated with the VideoPublisher source code files and objects
+PUB_NAME := VideoPublisher
+PUB_SRCDIR := $(SRCDIR)/$(PUB_NAME)
+PUB_OBJDIR := $(ARCH_BLDDIR)/$(PUB_NAME)
+PUB_SRCS := $(wildcard $(PUB_SRCDIR)/*.cxx)
+PUB_OBJS := $(addprefix $(PUB_OBJDIR)/,$(notdir $(PUB_SRCS:.cxx=$(OBJ_SUFFIX))))
+PUB_DEPS := $(addsuffix .d,$(PUB_OBJS))
+PUB_EXECDIR := $(PUB_OBJDIR)
+PUB_EXEC := $(PUB_EXECDIR)/$(PUB_NAME)$(EXE_SUFFIX)
 
-COMMONOBJS    = $(SOURCES_NODIR:%.cxx=objs/$(ARCH)/Common/%.o)
-VIDEOPUBOBJS  = $(VIDEOPUBSRC_NODIR:%.cxx=objs/$(ARCH)/VideoPublisher/%.o) $(COMMONOBJS)
-VIDEOSUBOBJS  = $(VIDEOSUBSRC_NODIR:%.cxx=objs/$(ARCH)/VideoSubscriber/%.o) $(COMMONOBJS)
-EXEC          = VideoPublisher 
-SUBEXEC       = VideoSubscriber
+# Filenames associated with the VideoSubscriber source code files and objects
+SUB_NAME := VideoSubscriber
+SUB_SRCDIR := $(SRCDIR)/$(SUB_NAME)
+SUB_OBJDIR := $(ARCH_BLDDIR)/$(SUB_NAME)
+SUB_SRCS := $(wildcard $(SUB_SRCDIR)/*.cxx)
+SUB_OBJS := $(addprefix $(SUB_OBJDIR)/,$(notdir $(SUB_SRCS:.cxx=$(OBJ_SUFFIX))))
+SUB_DEPS := $(addsuffix .d,$(SUB_OBJS))
+SUB_EXECDIR := $(SUB_OBJDIR)
+SUB_EXEC := $(SUB_EXECDIR)/$(SUB_NAME)$(EXE_SUFFIX)
+
+# Accumulated variables
+ALL_DEPS := $(IDL_DEPS) $(COMMON_DEPS) $(COMMON_DEPS_EDITION) $(PUB_DEPS) $(SUB_DEPS)
+ALL_OBJS := $(IDL_OBJS) $(COMMON_OBJS) $(COMMON_OBJS_EDITION) $(PUB_OBJS) $(SUB_OBJS)
+ALL_EXES := $(PUB_EXEC) $(SUB_EXEC)
+ALL_DIRS := $(IDL_GENDIR) $(COMMON_OBJDIR) $(COMMON_OBJDIR_EDITION) $(PUB_OBJDIR) $(SUB_OBJDIR)
 
 ###############################################################################
 # Build Rules
 ###############################################################################
-$(ARCH): VideoPublisher VideoSubscriber 
 
-VideoPublisher: $(DIRECTORIES) $(VIDEOPUBOBJS) $(EXEC:%=objs/$(ARCH)/VideoPublisher/%.o) \
-	$(EXEC:%=objs/$(ARCH)/VideoPublisher/%.out)
+# If one of these is used as a target on the command line, just execute
+#    the rules
+.PHONY: $(CONNEXT_PRO) $(CONNEXT_MICRO) link compile generate clean veryclean
 
-VideoSubscriber: $(DIRECTORIES) $(VIDEOSUBOBJS) $(@:%=objs/$(ARCH)/VideoSubscriber/%.o) \
-	$(SUBEXEC:%=objs/$(ARCH)/VideoSubscriber/%.out)
-
-
-# Building the video publisher application
-objs/$(ARCH)/VideoPublisher/%.out: objs/$(ARCH)/VideoPublisher/%.o
-	$(CXXLD) $(CXXLDFLAGS) -o $(@:%.out=%) $(VIDEOPUBOBJS) $(LIBS)
-
-# Building the video subscriber application
-objs/$(ARCH)/VideoSubscriber/%.out: objs/$(ARCH)/VideoSubscriber/%.o
-	$(CXXLD) $(CXXLDFLAGS) -o $(@:%.out=%) $(VIDEOSUBOBJS) $(LIBS)
-
-objs/$(ARCH)/Common/%.o: src/CommonInfrastructure/%.cxx $(COMMON_H)
-	$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
-	
-objs/$(ARCH)/Common/%.o: src/Generated/%.cxx $(COMMON_H)
-	$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
-
-objs/$(ARCH)/VideoPublisher/%.o: src/VideoPublisher/%.cxx $(COMMON_H) $(HEADERS_IDL)
-	$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
-
-objs/$(ARCH)/VideoSubscriber/%.o: src/VideoSubscriber/%.cxx $(COMMON_H) $(HEADERS_IDL)
-	$(CXX) $(CXXFLAGS) -o $@ $(DEFINES) $(INCLUDES) -c $<
-
-
-# Rule to rebuild the generated files when the .idl file change
-$(SOURCES_IDL) $(HEADERS_IDL): src/Idl/VideoData.idl
-	@mkdir -p src/Generated
-ifeq ($(OS_ARCH), i86Win32)
-	call $(NDDSHOME)/bin/rtiddsgen.bat -d src/idl src/VideoData.idl -replace -language C++
-else
-	$(NDDSHOME)/bin/rtiddsgen -namespace -d src/Generated src/Idl/VideoData.idl -replace -language C++
+ifeq ($(CONNEXT_EDITION),$(CONNEXT_PRO))
+$(CONNEXT_PRO): link
+endif
+ifeq ($(CONNEXT_EDITION),$(CONNEXT_MICRO))
+$(CONNEXT_MICRO): link
 endif
 
-generate: $(SOURCES_IDL) $(HEADERS_IDL)
+###############################################################################
+# Linking the executables from their objects
+###############################################################################
 
+# dependencies
+link: $(PUB_EXEC) $(SUB_EXEC)
+
+$(PUB_EXEC): $(PUB_OBJS) $(COMMON_OBJS) $(COMMON_OBJS_EDITION) $(IDL_OBJS) | $(PUB_EXECDIR)
+$(SUB_EXEC): $(SUB_OBJS) $(COMMON_OBJS) $(COMMON_OBJS_EDITION) $(IDL_OBJS) | $(SUB_EXECDIR)
+
+# recipes
+
+$(PUB_EXEC) $(SUB_EXEC):
+	$(SILENT) echo Linking $@; \
+	$(CXXLD) $(CXXLDFLAGS) $^ $(LIBS) -o $@
+
+###############################################################################
+# Compiling the objects from source
+###############################################################################
+
+# dependencies
+
+compile: $(ALL_OBJS)
+
+# Make sure that the required directories are generated first
+$(IDL_OBJS):    | $(IDL_OBJDIR)
+$(COMMON_OBJS): | $(COMMON_OBJDIR)
+$(COMMON_OBJS_EDITION): | $(COMMON_OBJDIR_EDITION)
+$(PUB_OBJS):    | $(PUB_OBJDIR)
+$(SUB_OBJS):    | $(SUB_OBJDIR)
+
+# recipes
+# The compilation rule includes the 'side-effect' of generating dependency files
+# See http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/
+#  for an explanation
+
+define do-compile
+echo Compiling $@; \
+$(CXX) -MT $@ -MMD -MP -MF $@.Td $(CXXFLAGS) $(CXXFLAGS_DEBOPT) -o $@ $(DEFINES) $(INCLUDES) -c $<; \
+mv -f $@.Td $@.d
+endef
+
+$(IDL_OBJS): $(IDL_OBJDIR)/%$(OBJ_SUFFIX): $(IDL_GENDIR)/%.cxx $(IDL_OBJDIR)/%$(OBJ_SUFFIX).d
+	$(SILENT) $(do-compile)
+
+$(COMMON_OBJS): $(COMMON_OBJDIR)/%$(OBJ_SUFFIX): $(COMMON_SRCDIR)/%.cxx $(COMMON_OBJDIR)/%$(OBJ_SUFFIX).d
+	$(SILENT) $(do-compile)
+
+$(COMMON_OBJS_EDITION): $(COMMON_OBJDIR_EDITION)/%$(OBJ_SUFFIX): $(COMMON_SRCDIR_EDITION)/%.cxx $(COMMON_OBJDIR_EDITION)/%$(OBJ_SUFFIX).d
+	$(SILENT) $(do-compile)
+
+$(PUB_OBJS): $(PUB_OBJDIR)/%$(OBJ_SUFFIX): $(PUB_SRCDIR)/%.cxx $(PUB_OBJDIR)/%$(OBJ_SUFFIX).d
+	$(SILENT) $(do-compile)
+
+$(SUB_OBJS): $(SUB_OBJDIR)/%$(OBJ_SUFFIX): $(SUB_SRCDIR)/%.cxx $(SUB_OBJDIR)/%$(OBJ_SUFFIX).d
+	$(SILENT) $(do-compile)
+
+$(IDL_OBJDIR)/%$(OBJ_SUFFIX).d $(COMMON_OBJDIR)/%$(OBJ_SUFFIX).d $(COMMON_OBJDIR_EDITION)/%$(OBJ_SUFFIX).d $(PUB_OBJDIR)/%$(OBJ_SUFFIX).d $(SUB_OBJDIR)/%$(OBJ_SUFFIX).d: ;
+.PRECIOUS: $(IDL_OBJDIR)/%$(OBJ_SUFFIX).d $(COMMON_OBJDIR)/%$(OBJ_SUFFIX).d $(COMMON_OBJDIR_EDITION)/%$(OBJ_SUFFIX).d $(PUB_OBJDIR)/%$(OBJ_SUFFIX).d $(SUB_OBJDIR)/%$(OBJ_SUFFIX).d
+
+# Only include dependency files if relevant for the requested target.
+ifeq (,$(filter $(MAKECMDGOALS), clean veryclean generate))
+$(info Including dependencies files)
+-include $(ALL_DEPS)
+endif
+
+###############################################################################
+# Generate source files from the .idl file
+###############################################################################
+
+# dependendies
+
+generate: $(IDL_GENERATED)
+$(COMMON_OBJS) $(COMMON_OBJS_EDITION) $(PUB_OBJS) $(SUB_OBJS): $(IDL_GENERATED)
+
+$(IDL_GENERATED): $(IDL_FILE) | $(IDL_GENDIR)
+
+# recipes
+
+# Need to use a pattern rule here to avoid the rule to be executed multiple times
+# See https://www.gnu.org/software/make/manual/make.html#Pattern-Intro for
+#   an explanation, starting at "Pattern rules may have more than one target."
+# To see the difference, trying running make with -j<n> for a parallel make and
+#   notice that the same rule gets executed only once.
+
+$(IDL_GENPAT_SOURCES) $(IDL_GENPAT_HEADERS): $(IDL_FILE)
+ifeq ($(OS_ARCH), i86Win32)
+	call $(NDDSHOME)/bin/rtiddsgen.bat -namespace -d $(IDL_GENDIR) $< -replace -language C++
+else
+	$(SILENT) echo Generating code from IDL file $<; \
+	$(CONNEXT_RTIDDSGEN) -namespace -d $(IDL_GENDIR) -replace -language C++ $<
+endif
+
+###############################################################################
 # Here is how we create those subdirectories automatically.
-%.dir : 
-	@echo "Checking directory $*"
-	@if [ ! -d $* ]; then \
-		echo "Making directory $*"; \
-		mkdir -p $* ; \
-	fi;
+###############################################################################
+
+# dependencies: none here
+
+# recipes
+
+# Rules to generate any of the directories
+$(ALL_DIRS): 
+	$(SILENT) echo "Creating directory $@"; \
+	mkdir -p $@
 
 ###############################################################################
 # Clean target: removes the objs dir
 ###############################################################################
-clean:
-	@rm -Rf objs/$(ARCH)
-	@echo "Successfully deleted object and executable files for architecture $(ARCH)"
-	@echo "To delete ALL the architectures and any generated file use target 'veryclean'"
 
-veryclean:
-	@rm -Rf objs
-	@rm -Rf src/idl
-	@echo "Deleted all executables, objects and generated files"
+clean:
+	$(SILENT) rm $(ALL_DEPS) $(ALL_OBJS) $(ALL_EXES) 2> /dev/null; \
+	rmdir -p $(COMMON_OBJDIR_EDITION) $(COMMON_OBJDIR) $(PUB_OBJDIR) $(SUB_OBJDIR) 2> /dev/null; \
+	echo "Deleted all dependency, object and executable files for architecture $(ARCH)"; \
+
+veryclean: clean
+	$(SILENT) rm $(IDL_GENERATED) 2> /dev/null; \
+	rmdir -p $(IDL_GENDIR) 2> /dev/null; \
+	echo "Deleted all IDL-generated files"
+
+#$(foreach DIR,$(ALL_DIRS), $(shell rmdir -p $(DIR)))

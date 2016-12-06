@@ -60,9 +60,9 @@ RTI Connext user manual.
                 <!-- This data may be larger than 64K (the maximum transport 
                      size for UDP) so this allows the middleware to fragment
                      data into chunks to send over the UDP transport -->
-                <publish_mode>
+                <!--publish_mode>
                     <kind>ASYNCHRONOUS_PUBLISH_MODE_QOS</kind>
-                </publish_mode>
+                </publish_mode-->
 
                 <!-- Tuning the reliability protocol for faster reliable 
                      data repairs (at the expense of bandwidth). -->

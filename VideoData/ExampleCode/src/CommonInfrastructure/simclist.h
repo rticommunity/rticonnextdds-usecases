@@ -34,7 +34,7 @@ extern "C" {
 #endif
 
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <stdint.h>
 #else
 #include <inttypes.h>
@@ -50,15 +50,15 @@ extern "C" {
 #   endif
 #endif
 
-
 /* Be friend of both C90 and C99 compilers */
-#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
-    /* "inline" and "restrict" are keywords */
-#else
-#   define inline           /* inline */
-#   define restrict         /* restrict */
+#if (!defined(__STDC_VERSION__) || __STDC_VERSION__ < 199901L) && !defined(restrict)
+#  if defined(__GNUC__) && __GNUC__ >= 4
+#    define restrict __restrict__
+#  else
+#    define restrict
+#    define inline
+#  endif
 #endif
-
 
 /**
  * Type representing list hashes.

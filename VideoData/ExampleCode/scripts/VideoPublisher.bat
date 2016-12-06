@@ -9,7 +9,7 @@ set args=%*
 set releaseBinDir=%scriptDir%..\win32\Release\i86Win32VS2010
 set debugBinDir=%scriptDir%..\win32\Debug\i86Win32VS2010
 
-set Path=%NDDSHOME%\lib\i86Win32VS2010;%scriptDir%..\thirdparty\gstreamer-sdk\win32\0.10\x86\bin;%Path%
+set Path=%NDDSHOME%\lib\i86Win32VS2010;%Path%
 
 if exist "%releaseBinDir%\%executableName%" (
     cd %releaseBinDir%

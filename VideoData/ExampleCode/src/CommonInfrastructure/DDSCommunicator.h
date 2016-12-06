@@ -14,8 +14,7 @@ damages arising out of the use or inability to use the software.
 #include <sstream>
 #include <vector>
 #include <map>
-#include "ndds/ndds_cpp.h"
-#include "ndds/ndds_namespace_cpp.h"
+#include "connext_cpp_common.h"
 
 
 // ------------------------------------------------------------------------- //

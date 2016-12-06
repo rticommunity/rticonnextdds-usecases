@@ -105,6 +105,11 @@ public:
 		return _handlerObj;
 	}
 
+   GstPipeline *GetPipeline()
+   {
+      return _videoEncodingPipeline;
+   }
+
 	GstElement *GetAppSink()
 	{
 		return _appSink;

@@ -1,21 +1,23 @@
 #!/bin/sh
 
-filename=$0
-script_dir=`dirname $filename`
-executable_name="VideoSubscriber"
-bin_dir=${script_dir}/../objs/i86Linux2.6gcc4.4.5/VideoSubscriber
+video_executable_name=VideoSubscriber
 
-if [ -f $bin_dir/$executable_name ]
+#Search platform using standard RTI scripts
+executable_name=rtiddsspy
+script_dir="$(dirname "$(which ${executable_name})")"
+source ${NDDSHOME}/resource/scripts/rticommon.sh
+
+video_bin_dir=objs/${platform_name}/VideoSubscriber
+
+if [ -f $video_bin_dir/$video_executable_name ]
 then
-    cd $bin_dir
-    export LD_LIBRARY_PATH=../thirdparty/proj-4.8.0/lib/i86Linux2.6gcc4.4.5:../thirdparty/wxWidgets-2.9.4/lib/i86Linux2.6gcc4.4.5:$LD_LIBRARY_PATH
-    ./$executable_name $*
+    (cd $video_bin_dir; ./$video_executable_name $*)
 else
     echo "***************************************************************"
     echo $executable_name executable does not exist in:
     echo $bin_dir
     echo ""
     echo Please, try to recompile the application using the command:
-    echo " $ make -f make/Makefile.i86Linux2.6gcc4.4.5"
+    echo " $ make -f make/Makefile.${ARCH}"
     echo "***************************************************************"
 fi
