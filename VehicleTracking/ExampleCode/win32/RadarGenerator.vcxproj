@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug DLL|Win32">
       <Configuration>Debug DLL</Configuration>
@@ -21,27 +21,32 @@
   <PropertyGroup Label="Globals">
     <ProjectName>RadarGenerator</ProjectName>
     <RootNamespace>RadarDataRaw_publisher</RootNamespace>
+    <ProjectGuid>{A1C363CB-AD62-63EE-4470-90E215CEB3DB}</ProjectGuid>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -61,22 +66,22 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.21006.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\i86Win32VS2010\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\i86Win32VS2010\$(ProjectName)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\i86Win32VS2015\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\i86Win32VS2015\$(ProjectName)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">$(SolutionDir)$(Configuration)\i86Win32VS2010\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">$(Configuration)\i86Win32VS2010\$(ProjectName)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">$(SolutionDir)$(Configuration)\i86Win32VS2015\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">$(Configuration)\i86Win32VS2015\$(ProjectName)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'" />
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\i86Win32VS2010\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\i86Win32VS2010\$(ProjectName)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\i86Win32VS2015\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\i86Win32VS2015\$(ProjectName)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">$(SolutionDir)$(Configuration)\i86Win32VS2010\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">$(Configuration)\i86Win32VS2010\$(ProjectName)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">$(SolutionDir)$(Configuration)\i86Win32VS2015\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">$(Configuration)\i86Win32VS2015\$(ProjectName)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'" />
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
-      <TypeLibraryName>.\objs\i86Win32VS2010\RadarDataRaw_publisher.tlb</TypeLibraryName>
+      <TypeLibraryName>.\objs\i86Win32VS2015\RadarDataRaw_publisher.tlb</TypeLibraryName>
       <HeaderFileName>
       </HeaderFileName>
     </Midl>
@@ -85,7 +90,6 @@
       <AdditionalIncludeDirectories>$(NDDSHOME)\include;$(NDDSHOME)\include\ndds;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;RTI_WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <PrecompiledHeaderOutputFile>
@@ -97,6 +101,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <CompileAs>Default</CompileAs>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -106,7 +111,7 @@
       <AdditionalDependencies>nddscppzd.lib;nddsczd.lib;nddscorezd.lib;netapi32.lib;advapi32.lib;user32.lib;WS2_32.lib;;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(NDDSHOME)\lib\i86Win32VS2010;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(NDDSHOME)\lib\i86Win32VS2015;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
@@ -115,7 +120,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">
     <Midl>
-      <TypeLibraryName>.\objs\i86Win32VS2010\RadarDataRaw_publisher.tlb</TypeLibraryName>
+      <TypeLibraryName>.\objs\i86Win32VS2015\RadarDataRaw_publisher.tlb</TypeLibraryName>
       <HeaderFileName>
       </HeaderFileName>
     </Midl>
@@ -124,18 +129,18 @@
       <AdditionalIncludeDirectories>$(NDDSHOME)\include;$(NDDSHOME)\include\ndds;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDDS_DLL_VARIABLE;WIN32_LEAN_AND_MEAN;WIN32;RTI_WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <PrecompiledHeaderOutputFile>
       </PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\objs\i86Win32VS2010\</AssemblerListingLocation>
-      <ObjectFileName>.\objs\i86Win32VS2010\</ObjectFileName>
-      <ProgramDataBaseFileName>.\objs\i86Win32VS2010\</ProgramDataBaseFileName>
+      <AssemblerListingLocation>.\objs\i86Win32VS2015\</AssemblerListingLocation>
+      <ObjectFileName>.\objs\i86Win32VS2015\</ObjectFileName>
+      <ProgramDataBaseFileName>.\objs\i86Win32VS2015\</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <CompileAs>Default</CompileAs>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -143,18 +148,18 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>nddscppd.lib;nddscd.lib;nddscored.lib;netapi32.lib;advapi32.lib;user32.lib;WS2_32.lib;;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>.\objs\i86Win32VS2010\RadarDataRaw_publisher.exe</OutputFile>
+      <OutputFile>.\objs\i86Win32VS2015\RadarDataRaw_publisher.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(NDDSHOME)\lib\i86Win32VS2010;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(NDDSHOME)\lib\i86Win32VS2015;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>.\objs\i86Win32VS2010\RadarDataRaw_publisher.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>.\objs\i86Win32VS2015\RadarDataRaw_publisher.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
-      <TypeLibraryName>.\objs\i86Win32VS2010\RadarDataRaw_publisher.tlb</TypeLibraryName>
+      <TypeLibraryName>.\objs\i86Win32VS2015\RadarDataRaw_publisher.tlb</TypeLibraryName>
       <HeaderFileName>
       </HeaderFileName>
     </Midl>
@@ -164,18 +169,18 @@
       <AdditionalIncludeDirectories>$(NDDSHOME)\include;$(NDDSHOME)\include\ndds;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;RTI_WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <PrecompiledHeaderOutputFile>
       </PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\objs\i86Win32VS2010\</AssemblerListingLocation>
-      <ObjectFileName>.\objs\i86Win32VS2010\</ObjectFileName>
-      <ProgramDataBaseFileName>.\objs\i86Win32VS2010\</ProgramDataBaseFileName>
+      <AssemblerListingLocation>.\objs\i86Win32VS2015\</AssemblerListingLocation>
+      <ObjectFileName>.\objs\i86Win32VS2015\</ObjectFileName>
+      <ProgramDataBaseFileName>.\objs\i86Win32VS2015\</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <CompileAs>Default</CompileAs>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -185,15 +190,15 @@
       <AdditionalDependencies>nddscppz.lib;nddscz.lib;nddscorez.lib;netapi32.lib;advapi32.lib;user32.lib;WS2_32.lib;;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(NDDSHOME)\lib\i86Win32VS2010;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <ProgramDatabaseFile>.\objs\i86Win32VS2010\RadarDataRaw_publisher.pdb</ProgramDatabaseFile>
+      <AdditionalLibraryDirectories>$(NDDSHOME)\lib\i86Win32VS2015;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ProgramDatabaseFile>.\objs\i86Win32VS2015\RadarDataRaw_publisher.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">
     <Midl>
-      <TypeLibraryName>.\objs\i86Win32VS2010\RadarDataRaw_publisher.tlb</TypeLibraryName>
+      <TypeLibraryName>.\objs\i86Win32VS2015\RadarDataRaw_publisher.tlb</TypeLibraryName>
       <HeaderFileName>
       </HeaderFileName>
     </Midl>
@@ -209,9 +214,9 @@
       </PrecompiledHeader>
       <PrecompiledHeaderOutputFile>
       </PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\objs\i86Win32VS2010\</AssemblerListingLocation>
-      <ObjectFileName>.\objs\i86Win32VS2010\</ObjectFileName>
-      <ProgramDataBaseFileName>.\objs\i86Win32VS2010\</ProgramDataBaseFileName>
+      <AssemblerListingLocation>.\objs\i86Win32VS2015\</AssemblerListingLocation>
+      <ObjectFileName>.\objs\i86Win32VS2015\</ObjectFileName>
+      <ProgramDataBaseFileName>.\objs\i86Win32VS2015\</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <CompileAs>Default</CompileAs>
@@ -222,10 +227,10 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>nddscpp.lib;nddsc.lib;nddscore.lib;netapi32.lib;advapi32.lib;user32.lib;WS2_32.lib;;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>.\objs\i86Win32VS2010\RadarDataRaw_publisher.exe</OutputFile>
+      <OutputFile>.\objs\i86Win32VS2015\RadarDataRaw_publisher.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(NDDSHOME)\lib\i86Win32VS2010;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <ProgramDatabaseFile>.\objs\i86Win32VS2010\RadarDataRaw_publisher.pdb</ProgramDatabaseFile>
+      <AdditionalLibraryDirectories>$(NDDSHOME)\lib\i86Win32VS2015;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ProgramDatabaseFile>.\objs\i86Win32VS2015\RadarDataRaw_publisher.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>

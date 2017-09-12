@@ -3,7 +3,7 @@
 filename=$0
 script_dir=`dirname $filename`
 executable_name="RecipeGenerator"
-bin_dir=${script_dir}/../objs/i86Linux2.6gcc4.4.5/RecipeGenerator
+bin_dir=${script_dir}/../objs/x64Linux3gcc5.4.0/RecipeGenerator
 
 if [ -f $bin_dir/$executable_name ]
 then
@@ -16,6 +16,6 @@ else
     echo $bin_dir
     echo ""
     echo Please, try to recompile the application using the command:
-    echo " $ make -f make/Makefile.i86Linux2.6gcc4.4.5"
+    echo " $ make -f make/Makefile.x64Linux3gcc5.4.0"
     echo "***************************************************************"
 fi

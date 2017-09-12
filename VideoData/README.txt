@@ -61,9 +61,9 @@ Linux Systems
 To build the applications on a Linux system, change directories to the 
 ExampleCode directory and use the command:
 
-gmake –f make/Makefile.<platform>
+gmake -f make/Makefile.<platform>
 The platform you choose will be the combination of your processor, OS, and 
-compiler version.  Right now this example only supports i86Linux2.6gcc4.5.5
+compiler version.  Right now this example only supports x64Linux3gcc4.8.2
 
 Run the Example
 ---------------

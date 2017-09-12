@@ -3,12 +3,12 @@
 filename=$0
 script_dir=`dirname $filename`
 executable_name="TrackGuiApp"
-bin_dir=${script_dir}/../objs/i86Linux2.6gcc4.4.5/TrackGui
+bin_dir=${script_dir}/../objs/x64Linux3gcc5.4.0/TrackGui
 
 if [ -f $bin_dir/$executable_name ]
 then
     cd $bin_dir
-    export LD_LIBRARY_PATH=$PWD/../../../thirdparty/proj-4.8.0/lib/i86Linux2.6gcc4.4.5:$PWD/../../../thirdparty/wxWidgets-2.9.4/lib/i86Linux2.6gcc4.4.5:$LD_LIBRARY_PATH
+    export LD_LIBRARY_PATH=$PWD/../../../thirdparty/proj-4.9.3/lib/x64Linux3gcc5.4.0:$PWD/../../../thirdparty/wxWidgets-3.0.3/lib/x64Linux3gcc5.4.0:$LD_LIBRARY_PATH
     echo $LD_LIBRARY_PATH
     ./$executable_name $*
 else
@@ -17,6 +17,6 @@ else
     echo $bin_dir
     echo ""
     echo Please, try to recompile the application using the command:
-    echo " $ make -f make/Makefile.i86Linux2.6gcc4.4.5"
+    echo " $ make -f make/Makefile.x64Linux3gcc5.4.0"
     echo "***************************************************************"
 fi
