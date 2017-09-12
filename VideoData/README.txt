@@ -4,7 +4,6 @@
 
 Concept
 -------
-
 This use case example includes two applications that send and receive 
 streaming video data.
 
@@ -12,26 +11,33 @@ The two applications are:
 
 1. Video Publisher (VideoPublisher)
         - Provides streaming video in VP8 format
+
 2. Video Subscriber (VideoSubscriber)
 	- Receives streaming video in VP8 format
 
+
 Additional Documentation
 ------------------------
+Detailed documentation and how-to videos for this example are available online at:
+  https://www.rti.com/resources/usecases/streaming-video
 
-Additional documentation is available in the Docs directory and online at: 
-www.rti.com/usecases/streaming-video.html
+More Case + Code examples are available at:
+  https://www.rti.com/resources/usecases
+
+
 
 Download RTI Connext DDS
 ------------------------
-
 If you do not already have RTI Connext DDS installed, download and install it 
 now. You can use a 30-day trial license to try out the product. Your download 
 will include the libraries that are required to run the example, and tools you 
 can use to visualize and debug your distributed system.
 
+You can download RTI Connext here: https://www.rti.com/downloads/
+
+
 How to Build this Code
 ----------------------
-
 On all platforms, the first thing you must do is set an environment variable 
 called NDDSHOME. This environment variable must point to the ndds.5.x.x 
 directory inside your RTI Connext DDS installation. For more information on how 
@@ -44,9 +50,9 @@ as EXAMPLE_HOME.
 All source and build files are located in EXAMPLE_HOME/ExampleCode/.  Before
 building or running, change directories into EXAMPLE_HOME/ExampleCode.
 
+
 Windows Systems
 ---------------
-
 On a Windows system, start by opening the file 
 win32\StreamingVideoExample-<compilerver>.sln.
 
@@ -55,9 +61,9 @@ represent the interface to the application. The Visual Studio solution files
 are set up to automatically generate the necessary code and link against the 
 required libraries.
 
+
 Linux Systems
 -------------
-
 To build the applications on a Linux system, change directories to the 
 ExampleCode directory and use the command:
 
@@ -65,25 +71,28 @@ gmake -f make/Makefile.<platform>
 The platform you choose will be the combination of your processor, OS, and 
 compiler version.  Right now this example only supports x64Linux3gcc4.8.2
 
+
 Run the Example
 ---------------
-
 On Windows systems, navigate to the EXAMPLE_HOME\ExampleCode\scripts directory.  
 In this directory are two batch files to start the applications:
 
-        - VideoPublisher.bat
-        - VideoSubscriber.bat
+    - VideoPublisher.bat
+    - VideoSubscriber.bat
+
 
 On Linux systems, navigate to the EXAMPLE_HOME/ExampleCode/scripts directory. 
 In this directory are two batch files to start the applications:
 
-        - VideoPublisher.sh
-        - VideoSubscriber.sh
+    - VideoPublisher.sh
+    - VideoSubscriber.sh
+
 
 You can run these script or batch files on the same machine, or you can copy 
 this example and run on multiple machines. If you run them on the same machine, 
 they will communicate over the shared memory transport. If you run them on 
 multiple machines, they will communicate over UDP.
+
 
 
 VideoPublisher Parameters:
