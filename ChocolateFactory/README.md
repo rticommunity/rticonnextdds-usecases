@@ -1,5 +1,6 @@
-=======================================================================
- RTI Connext DDS Use Case: Industrial Automation in a Chocolate Factory
+![Image](https://www.rti.com/hubfs/RTI_Oct2016/Images/rti-logounit.png)  
+ RTI Connext DDS Use Case:  
+ Industrial Automation in a Chocolate Factory
 =======================================================================
 
 Concept
@@ -9,13 +10,14 @@ data related to a chocolate manufacturing plant.  These applications
 represent an example of an application with a distributed workflow. The
 key concern with this design is that multiple applications are updating
 the state of an object as it passes through a workflow.  In this case we are
-showing a chocolate factory, but this could be any application that
+showing a chocolate factory, but this could be any application that performs
+sequential workflow operations in real time.
 
 The three applications are:
 
 1. Recipe Generator (RecipeGenerator)
     - Provides a set of recipes that describe the steps that a lot
-      takes to become cookies. Makes these recipes available to the
+      takes to become finished product. Makes these recipes available to the
       station controller at startup.
 
 2. Manufacturing Execution System (ManufacturingExecutionSystem)
@@ -57,11 +59,12 @@ Visit: https://www.rti.com/downloads
 
 How to Build this Code
 ----------------------
-On all platforms, the first thing you must do is set an environment variable
-called NDDSHOME. This environment variable must point to the ndds.5.x.x
-directory inside your RTI Connext DDS installation. For more information on how
-to set an environment variable, please see the RTI Core Libraries and Utilities
-Getting Started Guide.
+o run this example on all platforms, an environment variable called `NDDSHOME`
+must be set to point to the RTI Connext DDS installation directory, such as
+rti_connext_dds-5.3.x.
+For more information on how to set an environment variable, please see the RTI
+Core Libraries and Utilities Getting Started Guide.
+
 
 We will refer to the location where you unzipped the example in this document
 as EXAMPLE_HOME.
@@ -73,7 +76,7 @@ building or running, change directories into EXAMPLE_HOME/ExampleCode.
 Windows Systems
 ---------------
 On a Windows system, start by opening the file
-win32\ChocolateFactory-<compilerver>.sln.
+`win32\ChocolateFactory-<compilerver>.sln`.
 
 This code is made up of a combination of libraries, source, and IDL files that
 represent the interface to the application. The Visual Studio solution files
@@ -85,22 +88,23 @@ Linux Systems
 -------------
 To build the applications on a Linux system, change directories to the
 ExampleCode directory and use the command:
-
+```
 (g)make -f make/Makefile.<platform>
+```
 The platform you choose will be the combination of your processor, OS, and
 compiler version.  Right now this example only supports x64Linux3gcc5.4.0
 
 
 Run the Example
 ---------------
-On Windows systems, navigate to the EXAMPLE_HOME\ExampleCode\scripts directory.
+On Windows systems, navigate to the EXAMPLE_HOME\ExampleCode\scripts directory.  
 In this directory are four batch files to start the applications:
   - RecipeGenerator.bat
   - MES.bat
   - StationController.bat (to start a single station controller)
   - AllStationControllers.bat (to start all station controllers)
 
-On Linux systems, navigate to the EXAMPLE_HOME/ExampleCode/scripts directory.
+On Linux systems, navigate to the EXAMPLE_HOME/ExampleCode/scripts directory.  
 In this directory are four batch files to start the applications:
   - RecipeGenerator.sh
   - MES.sh
@@ -117,48 +121,48 @@ RecipeGenerator Parameters:
 --------------------------
 The recipe generator includes the option to disable multicast if your network
 does not support it.
-
+```
 Valid options are:
     --no-multicast       Do not use any multicast, including for discovery
                          (note you must edit XML config to include IP
                          addresses)
-
+```
 
 MES Parameters:
 ---------------
 The manufacturing execution system can be configured with a number of lots to
 process.  It can also be configured to send those lots with a specified amount
 of time between them.  It can also be configured to not use multicast.
-
+```
 Valid options are:
-    --num-lots [num]              Number of lots to start before shutting down
+    --num-lots [num]               Number of lots to start before shutting down
     --time-between [time in ms]    Time between starting lot batches
     --no-multicast                 Do not use multicast (note you must edit XML
                                    config to include IP addresses)
-
+```
 
 StationController Parameters:
 -----------------------------
 The station controller can be configured with which type of controller it is,
 numbered between 1 and 5:
-  1 = sugar controller
-  2 = cocoa butter controller
-  3 = cocoa liquor controller
-  4 = vanilla controller
-  5 = milk controller
+  * 1 = sugar controller
+  * 2 = cocoa butter controller
+  * 3 = cocoa liquor controller
+  * 4 = vanilla controller
+  * 5 = milk controller
 
 It also includes the option to disable multicast if
 your network does not support it.
-
+```
 Valid options are:
     --controller-type [number] Valid values 1-5. Type of controller this app
                                represents
     --no-multicast             Do not use multicast (note you must edit XML
                                config to include IP addresses)
-
+```
 
 AllStationController Parameters:
 --------------------------------
 The AllStationController script starts five station controllers.  This takes
 the same parameters as the StationController script (other than the
---controller-type parameter).
+`--controller-type` parameter).
