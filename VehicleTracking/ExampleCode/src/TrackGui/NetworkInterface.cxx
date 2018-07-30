@@ -11,6 +11,7 @@ damages arising out of the use or inability to use the software.
 #include "../CommonInfrastructure/DDSTypeWrapper.h"
 #include "../CommonInfrastructure/OSAPI.h"
 
+#define VTE_USE_WAITSET		// comment-out to use polling for received track data
 
 using namespace DDS;
 using namespace com::rti::atc::generated;
@@ -420,8 +421,8 @@ TrackReader::~TrackReader()
 }
 
 // ----------------------------------------------------------------------------
-// This example is using an application thread to be notified when tracks
-// arrive.  
+// This example is using an application thread to either poll or be notified 
+// when tracks arrive, depending on VTE_USE_WAITSET defined or not.
 // 
 // In this example, we leave the data from the middleware's queue by calling
 // read().  We do this to illustrate a case where an object that represents
@@ -431,7 +432,7 @@ TrackReader::~TrackReader()
 // queue does not grow forever.
 //
 // There are three options for getting data from RTI Connext DDS:
-// 1. Being notified in the application's thread of data arriving (as here).
+// 1. Being notified in the application's thread of data arriving (WaitSet).
 //    This mechanism has slightly higher latency than option #2, but low
 //    latency is not important for this use case.  In addition, this is safer
 //    than using option #2, because you do not have to worry about the effect
@@ -442,110 +443,15 @@ TrackReader::~TrackReader()
 // 2. Being notified in a listener callback of data arriving.
 //    This has lower latency than using a WaitSet, but is more dangerous
 //    because you have to worry about not blocking the middleware's thread.
-// 3. Polling for data.
+//    (Not shown in this example).
+// 3. Polling for data. 
 //    You can call read() or take() at any time to view or remove the data that
 //    is currently in the queue. 
 //    A simple example of this can be found at:
 //    http://community.rti.com/examples/polling-read
-
-void TrackReader::WaitForTracks(
-	std::vector< DdsAutoType<Track> > *tracksUpdated,
-	std::vector< DdsAutoType<Track> > *tracksDeleted) 
-{
-
-	ConditionSeq activeConditions;
-	DDS_Duration_t timeout = {0,300000000};
-
-	_mutex->Lock();
-
-	// Block this thread until track data becomes available.
-	DDS_ReturnCode_t retcode = _waitSet->wait(activeConditions, timeout);
-
-	// May be normal to time out
-	if (retcode == DDS_RETCODE_TIMEOUT) 
-	{
-		_mutex->Unlock();
-		return;
-	}
-	if (retcode != DDS_RETCODE_OK) 
-	{
-		std::stringstream errss;
-		errss << "WaitForTracks(): error when receiving flight plans.";
-		_mutex->Unlock();
-		throw errss.str();
-	}
-
-	// Note: These two sequences are being created with a length = 0.
-	// this means that the middleware is loaning memory to them, which
-	// the application must return to the middleware.  This avoids 
-	// having two separate copies of the data.
-	TrackSeq trackSeq;
-	SampleInfoSeq sampleInfos;
-
-	// Call read in a loop until there is no data left to read.  Note that
-	// retcode must be okay, or an exception would have been thrown above
-	while (retcode != DDS_RETCODE_NO_DATA)
-	{
-		// This leaves the data in the DataReader's queue.  Alternately, can 
-		// call take() which will remove it from the queue.  Leaving data in  
-		// the makes sense in this application for two reasons:  
-		// 1) the QoS allows the overwriting of data in the queue
-		// 2) the application wants to always see the latest update of each 
-		//    instance
-		retcode = _reader->read(trackSeq, sampleInfos);
-
-		if (retcode != DDS_RETCODE_NO_DATA &&
-			retcode != DDS_RETCODE_OK) 
-		{
-			std::stringstream errss;
-			errss << "WaitForTracks(): error when retrieving flight plans.";
-			_mutex->Unlock();
-			throw errss.str();
-		}
-
-		// Note, based on the QoS profile (history = keep last, depth = 1) and  
-		// the fact that we modeled flights as separate instances, we can 
-		// assume there is only one entry per flight.  So if a flight plan for 
-		// a particular flight has been changed 10 times, we will  only be 
-		// maintaining the most recent update to that flight plan in the 
-		// middleware queue.
-		for (int i = 0; i < trackSeq.length(); i++) 
-		{
-			if (sampleInfos[i].valid_data) 
-			{
-				SampleInfo info = sampleInfos[i];
-
-				// Making copies of this type for clean API because we do not  
-				// need lowest latency for flight plan data
-				DdsAutoType<Track> trackType = trackSeq[i];
-				tracksUpdated->push_back(trackType);
-			}
-			else if (!sampleInfos[i].valid_data)
-			{
-				if (sampleInfos[i].instance_state != ALIVE_INSTANCE_STATE)
-				{
-					DdsAutoType<Track> trackType = trackSeq[i];
-					trackType.trackId = 
-						_reader->get_key_value(trackType, 
-									sampleInfos[i].instance_handle);
-					tracksDeleted->push_back(trackType);
-				}
-			}
-
-		}
-
-		// The original track sequence was loaned from the middleware to the
-		// application.  We have copied the data out of it, so we can now 
-		// return the loan to the middleware.
-		_reader->return_loan(trackSeq, sampleInfos);
-	}
-
-	_mutex->Unlock();
-
-}
-
 // ----------------------------------------------------------------------------
-// This example is using an application thread to poll for all the existing 
+// When used in the polling configuration (VTE_USE_WAITSET not defined), this 
+// example uses an application thread to poll for all the existing 
 // track data inside the middleware's queue.
 //
 // This goes through two steps:
@@ -562,16 +468,38 @@ void TrackReader::GetCurrentTracks(
 	std::vector< DdsAutoType<Track> > *tracksDeleted)
 {
 	_mutex->Lock();
+    DDS_ReturnCode_t retcode;
+#ifdef VTE_USE_WAITSET	// define to use a WaitSet instead of polling to receive track data
+	ConditionSeq activeConditions;
+	DDS_Duration_t timeout = {0,300000000};
+	// Block this thread until track data becomes available.
+	retcode = _waitSet->wait(activeConditions, timeout);
+	// May be normal to time out
+	if (retcode == DDS_RETCODE_TIMEOUT) 
+	{
+		_mutex->Unlock();
+		return;
+	}
+	if (retcode != DDS_RETCODE_OK) 
+	{
+		std::stringstream errss;
+		errss << "WaitForTracks(): error when receiving flight plans.";
+		_mutex->Unlock();
+		throw errss.str();
+	}
+#endif	// VTE_USE_WAITSET
 
-	// The sequences that will be filled in with the data.  These are empty,
-	// so the middleware will loan the data to the sequences.  
+	// Note: These two sequences are being created with a length = 0.
+	// this means that the middleware is loaning memory to them, which
+	// the application must return to the middleware.  This avoids 
+	// having two separate copies of the data.
 	TrackSeq trackSeq;
 	SampleInfoSeq sampleInfos;
 
 	// This reads all ALIVE track data from the queue, and loans it to the 
 	// application in the trackSeq sequence.  See below where you must return
 	// the loan.
-	DDS_ReturnCode_t retcode = _reader->read(
+	retcode = _reader->read(
 		trackSeq, sampleInfos, 
 		DDS_LENGTH_UNLIMITED, DDS_ANY_SAMPLE_STATE, 
 		DDS_ANY_VIEW_STATE, DDS_ALIVE_INSTANCE_STATE);

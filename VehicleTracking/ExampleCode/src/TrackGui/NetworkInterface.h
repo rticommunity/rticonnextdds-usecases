@@ -157,15 +157,6 @@ public:
 	// --- Destructor --- 
 	~TrackReader();
 
-	// --- Waiting for tracks --- 
-	// This waits for new tracks to become available, and notifies the 
-	// application that there are new tracks or deleted tracks.
-	void WaitForTracks(
-		std::vector< DdsAutoType<com::rti::atc::generated::Track> > 
-										*tracksUpdated,
-		std::vector< DdsAutoType<com::rti::atc::generated::Track> > 
-										*tracksDeleted);
-
 	// --- Retreiving current track updates --- 
 	// This retrieves track updates from the middleware queue.  This is used
 	// to poll for all the current track updates from the middleware.  This

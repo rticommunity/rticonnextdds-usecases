@@ -51,6 +51,7 @@ bool TrackApp::OnInit()
 
 	wxPoint point(300, 300);
 	_frame->SetPosition(point);
+	_frame->SetIcon(wxIcon(wxT("../../../resource/gui/rti.ico"), wxBITMAP_TYPE_ICO));
 	_frame->Show(true);
 	SetTopWindow(_frame);
 
