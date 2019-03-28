@@ -10,7 +10,7 @@ damages arising out of the use or inability to use the software.
 #include "RecipePublisherInterface.h"
 
 
-using namespace com::rti::chocolatefactory::generated;
+using namespace com::chocolatefactory::generated;
 
 // ----------------------------------------------------------------------------
 // The RecipePublisherInterface is the network interface to the whole 

@@ -20,7 +20,7 @@ class StationController
 public:
 	// --- Constructor --- 
 	StationController(
-		com::rti::chocolatefactory::generated::StationControllerKind kind,
+		com::chocolatefactory::generated::StationControllerKind kind,
 		StationControllerInterface *scInterface);
 	
 	// --- Process lots --- 
@@ -28,12 +28,12 @@ public:
 
 	// --- Update lot state --- 
 	void UpdateState(
-		DdsAutoType<com::rti::chocolatefactory::generated::ChocolateLotState> 
+		DdsAutoType<com::chocolatefactory::generated::ChocolateLotState> 
 			*updatedState);
 	
 	// --- Process lot --- 
 	void ProcessLot(
-		DdsAutoType<com::rti::chocolatefactory::generated::ChocolateLotState> 
+		DdsAutoType<com::chocolatefactory::generated::ChocolateLotState> 
 			*lotState);
 
 private:
@@ -41,7 +41,7 @@ private:
 	// --- Private members --- 
 	StationControllerInterface *_networkInterface;
 	bool _shuttingDown;
-	com::rti::chocolatefactory::generated::StationControllerKind 
+	com::chocolatefactory::generated::StationControllerKind 
 			_stationControllerKind;
 };
 
