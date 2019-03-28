@@ -17,7 +17,7 @@ damages arising out of the use or inability to use the software.
 #include "../CommonInfrastructure/VideoBuffer.h"
 
 using namespace DDS;
-using namespace com::rti::media::generated;
+using namespace com::media::generated;
 
 
 // ------------------------------------------------------------------------- //
@@ -182,13 +182,6 @@ void VideoStreamListener::on_data_available(DataReader *reader)
 		{
 			if (infoSeq[i].valid_data == DDS_BOOLEAN_TRUE)
 			{
-
-				if ((infoSeq[i].publication_sequence_number.low
-						% 50) == 1)
-				{
-					std::cout << ". ";
-				}
-
 				double timestamp = infoSeq[i].source_timestamp.sec + 
 						(infoSeq[i].source_timestamp.nanosec / NANOSEC_TO_SEC);
 
@@ -337,7 +330,7 @@ void VideoStreamReader::NotifyHandlers(VideoStream *frame,
 		EMDSBuffer *buffer = new EMDSBuffer(frame->frame.length()); 
 
 		// Copy the data and metadata into the new buffer
-		buffer->SetData(frameBinaryData, frame->frame.length());		
+		buffer->SetData(frameBinaryData, frame->frame.length());
 		buffer->SetSeqn(frame->sequence_number);
 		buffer->SetTimestamp(timestamp);
 

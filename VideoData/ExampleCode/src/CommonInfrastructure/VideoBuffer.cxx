@@ -35,7 +35,9 @@ Real-Time Innovations, Inc. (RTI).  The above license is granted with
 -------------------------------------------- */
 
 #include <sstream>
+#include <gst/gst.h>
 #include "VideoBuffer.h"
+
 
 #ifdef WIN32
 #include <string>
@@ -123,6 +125,7 @@ void EMDSBuffer::SetData(unsigned char *copyFrom, unsigned int sizeIn)
 		errss << "Trying to copy too-large data into buffer";
 		throw errss.str();
 	}
+	//int s = gst_buffer_extract(buffer, 0, data, gst_buffer_get_size(buffer));
 	memcpy(data, copyFrom, sizeIn);
 }
 

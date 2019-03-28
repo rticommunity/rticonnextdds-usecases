@@ -17,7 +17,7 @@ damages arising out of the use or inability to use the software.
 #include "../Generated/VideoData.h"
 #include "../Generated/VideoDataSupport.h"
 
-using namespace com::rti::media::generated;
+using namespace com::media::generated;
 
 class VideoPublisherDiscoveryListener;
 class CodecCompatibleHandler;

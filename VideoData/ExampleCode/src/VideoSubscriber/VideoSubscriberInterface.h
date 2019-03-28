@@ -189,7 +189,7 @@ public:
 	// --- Register video handler --- 
 	void RegisterVideoHandler(VideoEventHandler *handler);
 	void UnregisterVideoHandler(VideoEventHandler *handler);
-	void NotifyHandlers(com::rti::media::generated::VideoStream *frame,
+	void NotifyHandlers(com::media::generated::VideoStream *frame,
 				long streamId, double timestamp);
 
 
@@ -203,7 +203,7 @@ private:
 	VideoSubscriberInterface *_communicator;
 
 	// Application-specific DDS DataReader for receiving video stream data
-	com::rti::media::generated::VideoStreamDataReader *_reader;
+	com::media::generated::VideoStreamDataReader *_reader;
 
 	// Objects to block a thread until video data arrives
 	VideoStreamListener *_listener;

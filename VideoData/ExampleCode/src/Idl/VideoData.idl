@@ -9,7 +9,6 @@ damages arising out of the use or inability to use the software.
 **********************************************************************************************/
 
 module com {
-module rti {
 module media {
 module generated {
 
@@ -43,5 +42,4 @@ struct VideoStream {
 
 }; // generated
 }; // video
-}; // rti
 }; // com 

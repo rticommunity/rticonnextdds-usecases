@@ -39,7 +39,7 @@ Real-Time Innovations, Inc. (RTI).  The above license is granted with
 
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <gst/gst.h>
 #include "simclist.h"
 
 
