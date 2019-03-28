@@ -14,7 +14,7 @@ set scriptDir=%~dp0
 for /f "tokens=1,* delims= " %%a in ("%*") do set args=%%b
 
 set releaseBinDir=%scriptDir%..\win32\Release\%arch%
-set debugBinDir=%scriptDir%..\win32\Debug\%arch&
+set debugBinDir=%scriptDir%..\win32\Debug\%arch%
 
 set Path=%NDDSHOME%\lib\%arch%;%scriptDir%..\thirdparty\gstreamer-sdk\win32\0.10\x86\bin;%Path%
 
