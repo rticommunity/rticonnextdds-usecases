@@ -97,11 +97,11 @@
 
             <!-- This routes from a local area network on domain 6 to a TCP -->
             <!-- network on domain 0 -->
-            <participant_1>
+            <participant name="1">
                 <domain_id>6</domain_id>
-            </participant_1>
+            </participant>
 
-            <participant_2>
+            <participant name="2">
                 <domain_id>0</domain_id>
                 <participant_qos>
                     <!-- Turning off the shared memory and UDPv4/UDPv6 -->
@@ -158,7 +158,7 @@
                         </value>
                     </property>
                 </participant_qos>
-            </participant_2>
+            </participant>
 
             <session name="SessionForward">
                 <topic_route name="AlarmForward">
@@ -342,11 +342,11 @@
         <domain_route name="DataDomain">
             <!-- This routes from a local area network on domain 5 to a -->
             <!-- TCP network on domain 0 -->
-            <participant_1>
+            <participant name="1">
                 <domain_id>5</domain_id>
-            </participant_1>
+            </participant>
 
-            <participant_2>
+            <participant name="2">
                 <domain_id>0</domain_id>
                 <participant_qos>
 
@@ -402,7 +402,7 @@
                         </value>
                     </property>
                 </participant_qos>
-            </participant_2>
+            </participant>
 
             <session name="SessionForward">
                 <topic_route name="AlarmForward">

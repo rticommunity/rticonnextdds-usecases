@@ -52,7 +52,7 @@ How to Run this Example
 -----------------------
 To run this example on all platforms, an environment variable called `NDDSHOME`
 must be set to point to the RTI Connext DDS installation directory, such as
-rti_connext_dds-5.3.x.
+rti_connext_dds-6.0.x.
 For more information on how to set an environment variable, please see the RTI
 Core Libraries and Utilities Getting Started Guide.
 
