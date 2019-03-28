@@ -115,7 +115,7 @@ public:
 	// when it is interested in it.  It queries the middleware queue by
 	// flight ID.
 	void GetFlightPlan(char *flightId, 
-		DdsAutoType<com::rti::atc::generated::FlightPlan> *plan);
+		DdsAutoType<com::atc::generated::FlightPlan> *plan);
 
 private:
 	// --- Private members ---
@@ -124,7 +124,7 @@ private:
 	NetworkInterface *_app;
 
 	// The DDS DataReader of flight plans 
-	com::rti::atc::generated::FlightPlanDataReader *_fpReader;
+	com::atc::generated::FlightPlanDataReader *_fpReader;
 
 	// The mechanisms that cause a thread to wait until flight plan data
 	// becomes available, and to be woken up when the data arrives
@@ -161,9 +161,9 @@ public:
 	// This waits for new tracks to become available, and notifies the 
 	// application that there are new tracks or deleted tracks.
 	void WaitForTracks(
-		std::vector< DdsAutoType<com::rti::atc::generated::Track> > 
+		std::vector< DdsAutoType<com::atc::generated::Track> > 
 										*tracksUpdated,
-		std::vector< DdsAutoType<com::rti::atc::generated::Track> > 
+		std::vector< DdsAutoType<com::atc::generated::Track> > 
 										*tracksDeleted);
 
 	// --- Retreiving current track updates --- 
@@ -171,9 +171,9 @@ public:
 	// to poll for all the current track updates from the middleware.  This
 	// keeps a second vector that includes all tracks that have been deleted.
 	void GetCurrentTracks(
-		std::vector< DdsAutoType<com::rti::atc::generated::Track> > 
+		std::vector< DdsAutoType<com::atc::generated::Track> > 
 										*tracksUpdated,
-		std::vector< DdsAutoType<com::rti::atc::generated::Track> > 
+		std::vector< DdsAutoType<com::atc::generated::Track> > 
 										*tracksDeleted);
 
 	// --- Wake up the reader thread if it is waiting on data ---
@@ -186,7 +186,7 @@ private:
 	NetworkInterface *_app;
 
 	// The DDS DataReader of tracks 
-	com::rti::atc::generated::TrackDataReader *_reader;
+	com::atc::generated::TrackDataReader *_reader;
 
 	// The mechanisms that cause a thread to wait until flight plan data
 	// becomes available, and to be woken up when the data arrives

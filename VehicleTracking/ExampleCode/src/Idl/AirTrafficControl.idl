@@ -9,7 +9,6 @@ damages arising out of the use or inability to use the software.
 **********************************************************************************************/
 
 module com {
-module rti {
 module atc {
 module generated {
 
@@ -79,7 +78,7 @@ const string AIRCRAFT_FLIGHT_PLAN_TOPIC = "FlightPlan";
 
 
 // Note: In C and C++, these enumeration values are declared in the top-level
-// scope of the module.  So if this were not nested in com::rti::atc::generated
+// scope of the module.  So if this were not nested in com::atc::generated
 // there would be a concern that they would be global.  This is usually only
 // a problem if you define enumerations like OFF and ON or TRUE and FALSE.
 enum FlightRulesKind {
@@ -144,7 +143,6 @@ struct FlightPlan {
 
 };
 
-};
 };
 };
 };	

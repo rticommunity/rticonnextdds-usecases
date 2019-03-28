@@ -22,7 +22,7 @@ damages arising out of the use or inability to use the software.
 
 using namespace DDS;
 using namespace std;
-using namespace com::rti::atc::generated;
+using namespace com::atc::generated;
 
 void PrintHelp();
 

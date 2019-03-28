@@ -19,8 +19,8 @@
 // ------------------------------------------------------------------------- //
 struct FlightInfo
 {
-	DdsAutoType<com::rti::atc::generated::Track> _track;
-	DdsAutoType<com::rti::atc::generated::FlightPlan> _plan;
+	DdsAutoType<com::atc::generated::Track> _track;
+	DdsAutoType<com::atc::generated::FlightPlan> _plan;
 
 };
 

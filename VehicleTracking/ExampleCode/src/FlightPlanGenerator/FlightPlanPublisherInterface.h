@@ -17,7 +17,7 @@ damages arising out of the use or inability to use the software.
 #include "../Generated/AirTrafficControl.h"
 #include "../Generated/AirTrafficControlSupport.h"
 
-using namespace com::rti::atc::generated;
+using namespace com::atc::generated;
 
 // ----------------------------------------------------------------------------
 //

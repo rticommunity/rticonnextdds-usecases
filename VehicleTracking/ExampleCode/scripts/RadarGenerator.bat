@@ -2,10 +2,34 @@
 setlocal
 
 set dir=%~dp0
-set executable_name=RadarGenerator
+set executable_name=RadarGenerator.exe
+set arch=%1
 
-set Path=%NDDSHOME%\lib\i86Win32VS2015;%dir%\..\thirdparty\wxWidgets-3.0.3\lib\vc_dll;%dir%\..\thirdparty\proj-4.9.3\lib\i86Win32VS2015;%PATH%
+if "%arch%" == "" (
+    echo "Architecture not set. Please specify arcitecture e.g. i86Win32VS2015, x64Win64VS2017
+    exit /b
+)
 
-cd %dir%\..\win32\Release\i86Win32VS2015\
+echo.%arch% | find /I "Win64">nul && (
+   set toolVersion=Win64
+) || (
+   set toolVersion=Win32
+)
 
-call %executable_name% %*
+if not exist  %dir%\..\win\Release\%arch%\%executable_name% ( 
+   echo %dir%\..\win\Release\%arch%\%executable_name% does not exists
+   echo Please try to compile the application using the Visual Studio project
+   exit /b
+)
+
+if %toolVersion% == Win32 (
+    set Path=%NDDSHOME%\lib\;%dir%\..\thirdparty\wxWidgets-3.1.2\Win32\lib\vc_dll;%dir%\..\thirdparty\proj-5.2\Win32\lib;"%PATH%"
+) else (
+    set Path=%NDDSHOME%\lib\;%dir%\..\thirdparty\wxWidgets-3.1.2\Win64\lib\vc_x64_dll;%dir%\..\thirdparty\proj-5.2\Win64\lib;"%PATH%"
+) 
+
+cd %dir%\..\win\Release\%arch%\
+
+for /f "tokens=1,* delims= " %%a in ("%*") do set ALL_BUT_FIRST=%%b
+
+call %executable_name% %ALL_BUT_FIRST%

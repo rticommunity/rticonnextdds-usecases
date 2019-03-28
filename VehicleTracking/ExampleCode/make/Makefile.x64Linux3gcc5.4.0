@@ -24,8 +24,8 @@ ARCH=x64Linux3gcc5.4.0
 CXX = g++
 CXXFLAGS = -DRTI_UNIX -DRTI_LINUX -m64
 WX_FLAGS = -D_FILE_OFFSET_BITS=64 -DWXUSINGDLL -D__WXGTK__
-WX_INCLUDES = -Ithirdparty/wxWidgets-3.0.3/include/gtk2-unicode-3.0 
-WX_LIBS   = -Lthirdparty/wxWidgets-3.0.3/lib/$(ARCH) -pthread   -Wl,-rpath,thirdparty/wxWidgets-3.0.3/lib/$(ARCH) -lwx_gtk2u_xrc-3.0 -lwx_gtk2u_html-3.0 -lwx_gtk2u_qa-3.0 -lwx_gtk2u_adv-3.0 -lwx_gtk2u_core-3.0 -lwx_baseu_xml-3.0 -lwx_baseu_net-3.0 -lwx_baseu-3.0  
+WX_INCLUDES = -Ithirdparty/wxWidgets-3.1.2/Linux/include/gtk2-unicode-3.1 
+WX_LIBS   = -Lthirdparty/wxWidgets-3.1.2/Linux/lib/${ARCH} -pthread   -Wl,-rpath,thirdparty/wxWidgets-3.1.2/Linux/lib/${ARCH} -lwx_gtk2u_xrc-3.1 -lwx_gtk2u_html-3.1 -lwx_gtk2u_qa-3.1 -lwx_gtk2u_adv-3.1 -lwx_gtk2u_core-3.1 -lwx_baseu_xml-3.1 -lwx_baseu_net-3.1 -lwx_baseu-3.1  
 CXXLD = g++
 CXXLDFLAGS = -m64 -static-libgcc
 SYSLIBS = -ldl -lnsl -lm -lpthread -lrt

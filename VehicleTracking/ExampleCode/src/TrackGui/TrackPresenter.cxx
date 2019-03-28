@@ -16,7 +16,7 @@ damages arising out of the use or inability to use the software.
 #include <sstream>
 using namespace std;
 using namespace DDS;
-using namespace com::rti::atc::generated;
+using namespace com::atc::generated;
 
 // ------------------------------------------------------------------------- //
 // Class FlightInfoNetworkReceiver

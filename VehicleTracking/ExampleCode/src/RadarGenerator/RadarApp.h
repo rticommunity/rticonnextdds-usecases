@@ -39,7 +39,7 @@ public:
 	DDSRadarListener(RadarWriter *writer, long radarId) 
 		: _writer(writer), _radarId(radarId)
 	{
-		com::rti::atc::generated::TrackTypeSupport::initialize_data(&_track);
+		com::atc::generated::TrackTypeSupport::initialize_data(&_track);
 
 	}
 
@@ -108,7 +108,7 @@ private:
 	RadarWriter *_writer;
 
 	// Network data type of a track
-	DdsAutoType<com::rti::atc::generated::Track> _track;
+	DdsAutoType<com::atc::generated::Track> _track;
 
 	// The ID of this radar
 	long _radarId;
