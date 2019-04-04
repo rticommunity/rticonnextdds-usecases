@@ -17,7 +17,7 @@ damages arising out of the use or inability to use the software.
 #include "../CommonInfrastructure/DDSTypeWrapper.h"
 #include "../CommonInfrastructure/ChocolateLotStateEntities.h"
 
-using namespace com::rti::chocolatefactory::generated;
+using namespace com::chocolatefactory::generated;
 
 // ----------------------------------------------------------------------------
 //

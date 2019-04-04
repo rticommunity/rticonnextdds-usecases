@@ -1,10 +1,10 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C++ Express 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VideoPublisher", "VideoPublisher.vcxproj", "{FA2857A7-83A2-426C-82A5-87F5A54EECFF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VideoPublisher", "VideoPublisher_vs2015.vcxproj", "{FA2857A7-83A2-426C-82A5-87F5A54EECFF}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SharedDataTypes", "SharedDataTypes.vcxproj", "{E287142F-0D1E-49BF-B3BC-A218C1D1629F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SharedDataTypes", "SharedDataTypes_vs2015.vcxproj", "{E287142F-0D1E-49BF-B3BC-A218C1D1629F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VideoSubscriber", "VideoSubscriber.vcxproj", "{7FA8D028-BFFD-445F-B3F3-1442B50D03A0}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VideoSubscriber", "VideoSubscriber_vs2015.vcxproj", "{7FA8D028-BFFD-445F-B3F3-1442B50D03A0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

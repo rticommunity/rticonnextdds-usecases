@@ -14,4 +14,4 @@
 // Icon resources
 //
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
-IDI_ICON1          ICON           ".\\rti.ico"
+IDI_ICON1          ICON           ".\\rti1.ico"

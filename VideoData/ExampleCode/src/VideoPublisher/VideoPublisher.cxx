@@ -134,6 +134,7 @@ public:
 	// is compatible with what we are sending.  If not, we return false.
 	virtual bool CodecsCompatible(std::string codecString)
 	{
+		cout << "CODEC " << codecString << endl;
 		if (_source->IsMetadataCompatible(codecString)) 
 		{
 			_discoveredCompatibleReader = true;
@@ -228,7 +229,7 @@ int main (int argc, char *argv[])
 		cout << "Error getting the file path" << endl;
 	}
 	EMDSVideoSource *videoSource = new EMDSVideoSource(
-		fullPath);
+		fullPath );
 #endif
 
 	// If the video source was not created correctly, return an error.

@@ -38,7 +38,9 @@ Real-Time Innovations, Inc. (RTI).  The above license is granted with
 
 #include <gst/gst.h>
 #include <gst/app/gstappsrc.h>
+#ifdef WIN32
 #include <gst/app/gstappbuffer.h>
+#endif
 
 #include "VideoBuffer.h"
 #include "VideoEvent.h"
@@ -131,8 +133,11 @@ public:
 	//
 	virtual void FrameReady(void *obj, EMDSBuffer *buffer)
 	{
+#ifdef WIN32
 		GstAppBuffer *appbuffer = NULL;
-
+#else
+		GstBuffer *appbuffer = NULL;
+#endif
 		if(_appSrc == NULL)
 		{
 			// Initialize the app source.
@@ -144,14 +149,23 @@ public:
 
 		// Allocate a new buffer from the GStreamer framework that will be
 		// used to display this video frame.
-		appbuffer = 
-			(GstAppBuffer*)gst_app_buffer_new(buffer->GetData(), 
+#ifdef WIN32
+		appbuffer =
+			(GstAppBuffer*)gst_app_buffer_new(buffer->GetData(),
 				buffer->GetSize(), NULL, NULL);
 
 		// The buffer becomes managed by the GStreamer framework as soon as
 		// we push it, so we do not have to free it.
 		gst_app_src_push_buffer(_appSrc, (GstBuffer*)appbuffer);
+#else
+		appbuffer = gst_buffer_new_and_alloc(buffer->GetSize());
 
+		gst_buffer_fill(appbuffer, 0, buffer->GetData(), buffer->GetSize());
+
+		// The buffer becomes managed by the GStreamer framework as soon as
+		// we push it, so we do not have to free it.
+		gst_app_src_push_buffer(_appSrc, appbuffer);
+#endif
 	}
 
 	virtual void EOSHandler(void *obj, EMDSBuffer *buffer)

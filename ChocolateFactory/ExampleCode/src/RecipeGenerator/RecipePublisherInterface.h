@@ -66,7 +66,7 @@ public:
 	// Uses DDS interface to send a recipe efficiently over the network
 	// or shared memory to interested applications subscribing to recipe
 	// information.
-	bool Write(DdsAutoType<com::rti::chocolatefactory::generated::ChocolateRecipe> data);
+	bool Write(DdsAutoType<com::chocolatefactory::generated::ChocolateRecipe> data);
 
 
 private:
@@ -76,7 +76,7 @@ private:
 	DDSCommunicator *_communicator;
 
 	// Recipe publisher specific to this application
-	com::rti::chocolatefactory::generated::ChocolateRecipeDataWriter *_writer;
+	com::chocolatefactory::generated::ChocolateRecipeDataWriter *_writer;
 };
 
 #endif

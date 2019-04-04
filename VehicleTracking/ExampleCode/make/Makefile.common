@@ -49,10 +49,9 @@ endif
 
 # Define the sources and NDDS search path
 INCLUDES = -Isrc/CommonInfrastructure -Isrc/Generated -I$(NDDSHOME)/include \
-           -I$(NDDSHOME)/include/ndds -Ithirdparty/wxWidgets-3.0.3/include/ \
-           -Ithirdparty/shapelib-1.4.0/include -Ithirdparty/proj-4.9.3/include
+           -I$(NDDSHOME)/include/ndds -I./thirdparty/wxWidgets-3.1.2/Linux/include/ \
+           -I./thirdparty/shapelib-1.5.0/Linux/include -Ithirdparty/proj-5.2/Linux/include
 
-#           -Ithirdparty/wxWidgets-3.0.3/include/wx \
 ###############################################################################
 # Modify build flags for debug/release
 ###############################################################################
@@ -73,8 +72,8 @@ endif
 endif
 
 LIBS = -L$(NDDSHOME)/lib/$(ARCH) $(NDDSLIBS) $(SYSLIBS)
-GUILIBS = $(LIBS) -Lthirdparty/shapelib-1.4.0/lib/$(ARCH) \
-          -Lthirdparty/proj-4.9.3/lib/$(ARCH) \
+GUILIBS = $(LIBS) -Lthirdparty/shapelib-1.5.0/Linux/lib/ \
+          -Lthirdparty/proj-5.2/Linux/lib/$(ARCH) \
           -lshp -lproj
 
 COMMONSRC = src/CommonInfrastructure/DDSCommunicator.cxx     \

@@ -29,19 +29,19 @@ public:
 	// Converts from a StationControllerKind to a nice readable name for
 	// printing messages
 	static void GetControllerPrettyName(
-		com::rti::chocolatefactory::generated::StationControllerKind kind,
+		com::chocolatefactory::generated::StationControllerKind kind,
 		std::string &kindOut);
 
 	// Converts from a StationControllerKind to a string that represents
 	// the enumeration
 	static void GetControllerEnumName(
-		com::rti::chocolatefactory::generated::StationControllerKind kind,
+		com::chocolatefactory::generated::StationControllerKind kind,
 		std::string &kindOut);
 
 	// Takes a StationControllerKind and fills in a string that represents
 	// the type of ingredient that controller adds	
 	static void GetControllerIngredientName(
-		com::rti::chocolatefactory::generated::StationControllerKind kind,
+		com::chocolatefactory::generated::StationControllerKind kind,
 		std::string &ingredientOut);
 
 
@@ -56,7 +56,7 @@ public:
 	// Converts from a LotStatusKind to a nice readable name for
 	// printing messages
 	static void GetLotStatusPrettyName(
-		com::rti::chocolatefactory::generated::LotStatusKind kind,
+		com::chocolatefactory::generated::LotStatusKind kind,
 		std::string &kindOut);
 
 };

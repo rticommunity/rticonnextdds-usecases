@@ -97,7 +97,7 @@ private:
 	// GUI that uses the data.
 	static void PrepareUpdate(
 		TrackApp *app,
-		std::vector< DdsAutoType<com::rti::atc::generated::Track> > 
+		std::vector< DdsAutoType<com::atc::generated::Track> > 
 				*updateData,
 		std::vector<FlightInfo *> *flightData);
 

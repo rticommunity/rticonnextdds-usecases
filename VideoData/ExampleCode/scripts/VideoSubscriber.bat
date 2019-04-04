@@ -3,13 +3,20 @@ setlocal
 
 set executableName=VideoSubscriber.exe
 set appName=VideoSubscriber
+set arch=%1
+
+if "%arch%" == "" (
+    echo "Architecture not set. Please specify arcitecture e.g. i86Win32VS2015, i86Win86VS2017
+    exit /b
+)
 
 set scriptDir=%~dp0
-set args=%*
-set releaseBinDir=%scriptDir%..\win32\Release\i86Win32VS2015
-set debugBinDir=%scriptDir%..\win32\Debug\i86Win32VS2015
+for /f "tokens=1,* delims= " %%a in ("%*") do set args=%%b
 
-set Path=%NDDSHOME%\lib\i86Win32VS2015;%scriptDir%..\thirdparty\gstreamer-sdk\win32\0.10\x86\bin;%Path%
+set releaseBinDir=%scriptDir%..\win32\Release\%arch%
+set debugBinDir=%scriptDir%..\win32\Debug\%arch%
+
+set Path=%NDDSHOME%\lib\%arch%;%scriptDir%..\thirdparty\gstreamer-sdk\win32\0.10\x86\bin;%Path%
 
 if exist "%releaseBinDir%\%executableName%" (
     cd %releaseBinDir%

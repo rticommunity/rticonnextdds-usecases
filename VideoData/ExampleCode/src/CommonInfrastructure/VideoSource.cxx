@@ -38,7 +38,9 @@ Real-Time Innovations, Inc. (RTI).  The above license is granted with
 #include "VideoSource.h"
 #include <gst/gst.h>
 #include <gst/app/gstappsink.h>
+#ifdef WIN32
 #include <gst/app/gstappbuffer.h>
+#endif
 #include "../Generated/VideoData.h"
 
 static int seqn = 0;
@@ -53,6 +55,7 @@ void *video_source_worker(void *src)
 {
 
 	EMDSVideoSource *videoSource = (EMDSVideoSource *)src;
+	static unsigned char data[com::media::generated::MAX_BUFFER_SIZE];
 
 	if (videoSource->GetFrameReadyHandler() == NULL)
 	{
@@ -62,26 +65,41 @@ void *video_source_worker(void *src)
 
 	while (1)
 	{
-	
-		GstBuffer * buffer = 
+#ifdef WIN32
+		GstBuffer * buffer =
 			gst_app_sink_pull_buffer((GstAppSink *)videoSource->GetAppSink());
-
+#else
+		GstBuffer * buffer = gst_sample_get_buffer(gst_app_sink_pull_sample((GstAppSink*)videoSource->GetAppSink()));
+#endif		
 		if (buffer == NULL)
 		{
 			return NULL;
 		}
 
-		if (GST_BUFFER_SIZE(buffer) > 
-			com::rti::media::generated::MAX_BUFFER_SIZE)
+#ifdef WIN32
+		if (GST_BUFFER_SIZE(buffer) >
+			com::media::generated::MAX_BUFFER_SIZE)
 		{
-			std::cout << "Buffer is larger than the max buffer size" 
+			std::cout << "Buffer is larger than the max buffer size"
 				<< std::endl;
-		}
+	}
 		EMDSBuffer *emdsBuffer
 			= new EMDSBuffer(GST_BUFFER_SIZE(buffer));
 
 		emdsBuffer->SetData(GST_BUFFER_DATA(buffer),
 			GST_BUFFER_SIZE(buffer));
+
+#else
+
+		EMDSBuffer *emdsBuffer
+			= new EMDSBuffer(gst_buffer_get_size(buffer));
+
+		
+		int s = gst_buffer_extract(buffer, 0, data, gst_buffer_get_size(buffer));
+
+		emdsBuffer->SetData(&data[0], gst_buffer_get_size(buffer));
+#endif
+
 		emdsBuffer->SetSeqn(seqn);
 
 		seqn++;

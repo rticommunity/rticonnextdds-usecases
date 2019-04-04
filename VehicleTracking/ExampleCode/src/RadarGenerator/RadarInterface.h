@@ -206,7 +206,7 @@ public:
 	// See the other example application for alternatives - being notified
 	// that data is available.
 	void WaitForFlightPlans(
-		std::vector< DdsAutoType<com::rti::atc::generated::FlightPlan> > *plans);
+		std::vector< DdsAutoType<com::atc::generated::FlightPlan> > *plans);
 
 
 private:
@@ -214,7 +214,7 @@ private:
 
 	// --- Process flight plans in queue ---
 	bool ProcessFlightPlans(
-		std::vector< DdsAutoType<com::rti::atc::generated::FlightPlan> > *plans);
+		std::vector< DdsAutoType<com::atc::generated::FlightPlan> > *plans);
 
 	// --- Private members ---
 
@@ -222,7 +222,7 @@ private:
 	RadarInterface *_communicator;
 
 	// Application-specific DDS DataReader for receiving flight plan data
-	com::rti::atc::generated::FlightPlanDataReader *_reader;
+	com::atc::generated::FlightPlanDataReader *_reader;
 
 	// Objects to block a thread until flight plan data arrives
 	DDS::WaitSet *_waitSet;
@@ -262,13 +262,13 @@ public:
 	// or shared memory to interested applications subscribing to flight plan
 	// information.
 	void PublishTrack(
-		DdsAutoType<com::rti::atc::generated::Track> &track);
+		DdsAutoType<com::atc::generated::Track> &track);
 
 	// --- Deletes the Track Data --- 
 	// "Deletes" the flight plan from the system - removing the DDS instance 
 	// from all applications.
 	void DeleteTrack(
-		DdsAutoType<com::rti::atc::generated::Track> &track);
+		DdsAutoType<com::atc::generated::Track> &track);
 
 private:
 	// --- Private members ---
@@ -278,7 +278,7 @@ private:
 
 	// The application-specific DDS DataWriter that sends track data updates
 	// over the network or shared memory
-	com::rti::atc::generated::TrackDataWriter *_trackWriter;
+	com::atc::generated::TrackDataWriter *_trackWriter;
 
 
 };

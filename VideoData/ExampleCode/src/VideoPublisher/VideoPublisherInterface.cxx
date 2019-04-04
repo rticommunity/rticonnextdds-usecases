@@ -11,7 +11,7 @@ damages arising out of the use or inability to use the software.
 #include "VideoPublisherInterface.h"
 
 
-using namespace com::rti::media::generated;
+using namespace com::media::generated;
 
 // ----------------------------------------------------------------------------
 // The VideoPublisherInterface is the network interface to the whole 

@@ -49,9 +49,11 @@ endif
 
 # Define the sources and NDDS search path
 INCLUDES = -Isrc/CommonInfrastructure -Isrc/Generated -I$(NDDSHOME)/include \
-           -I$(NDDSHOME)/include/ndds -I/usr/include/gstreamer-0.10 \
+           -I$(NDDSHOME)/include/ndds \
+           -I/usr/include/gstreamer-1.0 \
+           -I/usr/lib/x86_64-linux-gnu/gstreamer-1.0/include  \
+           -I/usr/include/glib-2.0 \
            -I/usr/lib/x86_64-linux-gnu/glib-2.0/include \
-           -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include \
            -I/usr/include/libxml2
  
 
@@ -74,7 +76,7 @@ NDDSLIBS = -lnddscppz -lnddscz -lnddscorez
 endif
 endif
 
-LIBS = -L$(NDDSHOME)/lib/$(ARCH) -L/usr/lib $(NDDSLIBS) $(SYSLIBS) -lglib-2.0 -lgstreamer-0.10 -lgstapp-0.10 -lgobject-2.0
+LIBS = -L$(NDDSHOME)/lib/$(ARCH) -L/usr/lib $(NDDSLIBS) $(SYSLIBS) -lglib-2.0 -lgstreamer-1.0  -lgstapp-1.0  -lgobject-2.0
 
 COMMONSRC = src/CommonInfrastructure/DDSCommunicator.cxx     \
           src/CommonInfrastructure/OSAPI.cxx               \
