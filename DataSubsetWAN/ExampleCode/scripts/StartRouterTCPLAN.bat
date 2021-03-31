@@ -9,7 +9,7 @@ set executable_name=rtiroutingservice
 
 cd %dir%\..\routing
 
-call "%NDDSHOME%\bin\%executable_name%" -cfgFile Routing-TCP-LAN.xml -cfgName %1
+call "%NDDSHOME%\bin\%executable_name%" -cfgFile Routing-TCP-LAN.xml -cfgName %1 %2
 EXIT /B 0
 
 :NeedNDDSHome

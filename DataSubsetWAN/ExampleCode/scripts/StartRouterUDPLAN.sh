@@ -17,12 +17,14 @@ then
         echo " $0: Wrong parameters"
         echo "" 
         echo " Usage:"
-        echo " $0 [Router1|Router2]"
+        echo " $0 [SOCI|COSI]"
+        echo " Where:"
+        echo "    SOCI = SquareOutCircleIn, COSI = CircleOutSquareIn"
         echo "*************************************************************"
     fi
 else
     echo "*****************************************************************"
     echo "The NDDSHOME environment variable must be set to"
-    echo "rti_connext_dds-5.x.x to run this example"
+    echo "the Connext installation directory to run this example"
     echo "*****************************************************************"
 fi

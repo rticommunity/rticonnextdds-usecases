@@ -6,8 +6,8 @@ Connecting High-Speed LAN Data over a WAN
 Concept
 -------
 This use case example shows two (or more) logical applications sharing real-
-time data within a LAN, and also sending a subset of that data over TCP
-across a WAN.
+time data within a LAN, and also sending a subset of that data across a WAN 
+using TCP or the RTI UDPv4-WAN transport.
 
 The applications are:
 
