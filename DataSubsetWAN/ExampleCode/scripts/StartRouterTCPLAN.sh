@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 filename=$0
 script_dir=`dirname $filename`
@@ -6,12 +6,12 @@ executable_name="rtiroutingservice"
 
 if [ -f $NDDSHOME/bin/$executable_name ]
 then
-    if [ "$1" = "SOCI" ] || [ "$1" = "COSI" ] || [ -n "$2" ]
-    then 
-	    cd $script_dir/../routing
-	    $NDDSHOME/bin/$executable_name \
-	        -cfgFile Routing-TCP-LAN.xml \
-	        -cfgName $1 $2
+    if [[ ( "$1" = "SOCI"  ||  "$1" = "COSI" ) ]] && [ -n "$2" ]
+    then
+        cd $script_dir/../routing
+        $NDDSHOME/bin/$executable_name \
+   	        -cfgFile Routing-TCP-LAN.xml \
+   	        -cfgName $1 $2
     else
         echo "*************************************************************"
         echo " $0: Wrong parameters"

@@ -27,7 +27,7 @@
     <!-- Configuration file for RTI Routing Service bridging data in a LAN  -->
     <!-- ****************************************************************** -->
 
-    <routing_service name="Router1">
+    <routing_service name="SOCI">
 
         <annotation>
             <documentation>
@@ -134,7 +134,7 @@
 
     </routing_service>
 
-    <routing_service name="Router2">
+    <routing_service name="COSI">
 
         <annotation>
             <documentation>

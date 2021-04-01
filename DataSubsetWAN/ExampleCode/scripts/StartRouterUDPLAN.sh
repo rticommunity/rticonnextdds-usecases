@@ -6,7 +6,7 @@ executable_name="rtiroutingservice"
 
 if [ -f $NDDSHOME/bin/$executable_name ]
 then
-    if [ "$1" = "Router1" ] || [ "$1" = "Router2" ]
+    if [ "$1" = "SOCI" ] || [ "$1" = "COSI" ]
     then 
         cd $script_dir/../routing
         $NDDSHOME/bin/$executable_name \
