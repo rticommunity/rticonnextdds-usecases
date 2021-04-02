@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!-- 
+ (c) Copyright, Real-Time Innovations, 2012-2016.
+ All rights reserved.
+ No duplications, whole or partial, manual or electronic, may be made
+ without express written permission.  Any such copies, or
+ revisions thereof, must display this notice unaltered.
+ This code contains trade secrets of Real-Time Innovations, Inc.
+
+Description:
+This file defines the default QoS profiles that the rtishapesdemo will use.
+
+For more information about XML QoS Profiles see Chapter 15 in the 
+RTI Data Distribution Service user manual.
+-->
+<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="../schema/rti_dds_qos_profiles.xsd">
+    <qos_library name="User_RTI_Shapes_Lib">
+        <qos_profile name="UDPv4_WAN_Profile" is_default_qos="true">
+            <!-- Add your initial peers and multicast receive address here, e.g: -->
+            <participant_qos>
+                <transport_builtin>
+                    <mask>UDPv4_WAN</mask>
+                </transport_builtin>            
+                <discovery>
+                    <initial_peers>
+                        <element>rtps@3.101.43.126:7400</element>
+                    </initial_peers>
+                </discovery> 
+            </participant_qos>
+            <datawriter_qos>
+                <writer_data_lifecycle>
+                    <autodispose_unregistered_instances>false</autodispose_unregistered_instances>
+                </writer_data_lifecycle>
+            </datawriter_qos>
+            <datareader_qos>
+                <history>
+                    <kind>KEEP_LAST_HISTORY_QOS</kind>
+                    <depth>1</depth>
+                </history>
+            </datareader_qos>
+        </qos_profile>
+    </qos_library>
+</dds>
