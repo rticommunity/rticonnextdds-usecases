@@ -24,7 +24,7 @@ RTI Data Distribution Service user manual.
                 </transport_builtin>            
                 <discovery>
                     <initial_peers>
-                        <element>rtps@3.101.43.126:7400</element>
+                        <element>rtps@3.101.43.126:8600</element>
                     </initial_peers>
                 </discovery> 
             </participant_qos>

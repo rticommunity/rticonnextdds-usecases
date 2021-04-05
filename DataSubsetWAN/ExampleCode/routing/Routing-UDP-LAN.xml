@@ -10,8 +10,8 @@
             <durability>
                 <kind>VOLATILE_DURABILITY_QOS</kind>
             </durability>
-
         </datareader_qos>
+        
         <datawriter_qos name="ShapeDataWriter">
             <reliability>
                 <kind>RELIABLE_RELIABILITY_QOS</kind>
@@ -20,7 +20,6 @@
                 <kind>VOLATILE_DURABILITY_QOS</kind>
             </durability>
         </datawriter_qos>
-
     </qos_library>
 
     <!-- ****************************************************************** -->
@@ -77,19 +76,17 @@
                         <topic_name>Square</topic_name>
                         <registered_type_name>ShapeType</registered_type_name>
                         <creation_mode>IMMEDIATE</creation_mode>
-
                         <!-- Only pass the Square data through if y is in the bottom half of the viewer -->
                         <content_filter>
                             <expression>y &gt; %0 AND y &lt; %1 </expression>
                             <parameter>140</parameter>
                             <parameter>265</parameter>
                         </content_filter>
-
                         <datareader_qos base_name="RoutingLibrary::ShapeDataReader"></datareader_qos>
                     </input>
 
                     <!-- The DomainParticipant that uses UDP in domain 0 -->
-                    <output>
+                    <output participant="BridgeDomain">
                         <topic_name>Square</topic_name>
                         <registered_type_name>ShapeType</registered_type_name>
                         <creation_mode>IMMEDIATE</creation_mode>
@@ -109,33 +106,24 @@
                         <topic_name>Circle</topic_name>
                         <registered_type_name>ShapeType</registered_type_name>
                         <creation_mode>IMMEDIATE</creation_mode>
-
-                        <!-- The Shape topic is:  -->
-                        <!--   1) Reliable        -->
-                        <!--   2) Durable         -->
-                        <!--   3) History of 10    -->
                         <datareader_qos base_name="RoutingLibrary::ShapeDataReader">
                         </datareader_qos>
-
                     </input>
+                    
                     <!-- The DomainParticipant in domain 6 that uses UDP -->
-                    <output>
+                    <output participant="LocalDomain">
                         <topic_name>Circle</topic_name>
                         <registered_type_name>ShapeType</registered_type_name>
                         <creation_mode>IMMEDIATE</creation_mode>
-
                         <datawriter_qos base_name="RoutingLibrary::ShapeDataWriter">
                         </datawriter_qos>
-
                     </output>
                 </topic_route>
             </session>
         </domain_route>
-
     </routing_service>
 
     <routing_service name="COSI">
-
         <annotation>
             <documentation>
                 Routes Alarm and Temperature topics from one domain to second domain
@@ -185,13 +173,12 @@
                         <datareader_qos base_name="RoutingLibrary::ShapeDataReader">
                         </datareader_qos>
                     </input>
-                    <output>
+                    <output participant="BridgeDomain">
                         <topic_name>Circle</topic_name>
                         <registered_type_name>ShapeType</registered_type_name>
                         <creation_mode>IMMEDIATE</creation_mode>
                         <datawriter_qos base_name="RoutingLibrary::ShapeDataWriter">
                         </datawriter_qos>
-
                     </output>
                 </topic_route>
             </session>
@@ -209,7 +196,7 @@
                         </datareader_qos>
                     </input>
 
-                    <output>
+                    <output participant="LocalDomain">
                         <topic_name>Square</topic_name>
                         <registered_type_name>ShapeType</registered_type_name>
                         <creation_mode>IMMEDIATE</creation_mode>

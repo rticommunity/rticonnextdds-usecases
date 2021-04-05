@@ -11,16 +11,16 @@ then
         cd $script_dir/../routing
         $NDDSHOME/bin/$executable_name \
    	        -cfgFile Routing-TCP-LAN.xml \
-   	        -cfgName $1 $2
+   	        -cfgName $1 -DREMOTE_IPADDR=$2
     else
         echo "*************************************************************"
         echo " $0: Wrong parameters"
         echo "" 
         echo " Usage:"
-        echo " $0 [SOCI|COSI] [-DREMOTE_IPADDR=xx.xx.xx.xx]"
+        echo " $0 [SOCI|COSI] [xx.xx.xx.xx]"
         echo " Where:"
         echo "    SOCI = SquareOutCircleIn, COSI = CircleOutSquareIn"
-        echo "    -DREMOTE_IPADDR = IP address of the remote machine"
+        echo "    xx.xx.xx.xx = IP address of the remote machine"
         echo "*************************************************************"
     fi
 else
