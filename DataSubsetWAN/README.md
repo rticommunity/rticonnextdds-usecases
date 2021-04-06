@@ -42,13 +42,14 @@ How to Run the Example use cases
 To run this example on all platforms, an environment variable called `NDDSHOME`
 must be set to point to the RTI Connext DDS installation directory, such as
 rti_connext_dds-6.1.x.  Helper scripts to set the environment are included in the 
-Connext installation directory, typically found at `"C:\Program Files\rti_connext_dds-6.1.0\resource\script\rtisetenv*"`
-for Windows, or `source ~/rti_connext_dds-6.1.0/resource/scripts/rtisetenv*` for Linux.  
-For more information on how to set an environment variable, please see the RTI
+Connext installation directory, typically found at:  
+`"C:\Program Files\rti_connext_dds-6.1.0\resource\script\rtisetenv*"` for Windows, or  
+`source ~/rti_connext_dds-6.1.0/resource/scripts/rtisetenv*` for Linux.  
+
+More information on how to set up your Connext environment can be found in the RTI Connext 
 Core Libraries and Utilities Getting Started Guide.
 
-We will refer to the location where you unzipped the example in this document
-as `EXAMPLE_HOME`.  
+We will refer to the location where you unzipped the example in this document as `EXAMPLE_HOME`.  
 
 All configuration and script files for this example are located in `EXAMPLE_HOME/ExampleCode/`.  
 Before running, change directories into `EXAMPLE_HOME/ExampleCode`.
@@ -92,15 +93,15 @@ Using the **Publish** and **Subscribe** menus in each Shapes Demo, set up the fo
  - Publish: Circle, any color or size, default settings for everything else.
  - Subscribe: Square, default settings.
 
-**Shapes Demo 5**
+**Shapes Demo 6**
  - Publish: Square, any color or size, default settings for everything else.
  - Subscribe: Circle, default settings.
 
-*These applications cannot 'see' each other* because they are on different DDS domains (5 and 6), 
+**_These applications cannot 'see' each other_** - because they are on different DDS domains (5 and 6), 
 so the subscribed-to topics will receive no data samples.   
 The following use-cases solve this in different ways.
 
-###1. UDP LAN Bridge
+### 1. UDP LAN Bridge
 
 This case uses a pair of Routing Service instances to bridge domains 5 and 6 via an intermediate UDP domain 0.
 Note that the domains could also have been bridged directly (5 <--> 6) using a single Routing Service
@@ -125,7 +126,7 @@ as participants with read/write access.   Launching a 3rd Shapes Demo on domain 
 all ShapeType data topics (Square, Circle, Triangle).
 
 
-###2. TCP LAN Bridge
+### 2. TCP LAN Bridge
 
 This case also uses a pair of Routing Service instances to bridge domains 5 and 6 via an intermediate TCP domain.
 This is useful for bridging topics between isolated network segments that allow TCP data to pass, but not UDP.
@@ -148,7 +149,7 @@ You should see results similar to:
   [image file showing 2 Shapes Demo instances, with circles and squares]
 
 
-###3. TCP WAN Bridge
+### 3. TCP WAN Bridge
 
 This case is similar to case 2, but will use the TCPv4-WAN transport option to enable traversing
 a WAN such as the internet.  This case requires publicly-accessible IP addresses and open ports on
@@ -164,7 +165,7 @@ These scripts will launch 2 instances of Routing Service, with topic routing con
 between these two Routing Service instances, bridging their respective domains on the selected topics.
 
 
-###4. TCP WAN Bridge with Relay
+### 4. TCP WAN Bridge with Relay
 
 This case uses a www-accessible "TCP Relay" machine to bridge and route topic data between separate networks.
 
@@ -190,7 +191,7 @@ Note: in this case, DDS traffic is routed any-to-any on either side of the bridg
 instances or Routing Service instances launched at other locations will also see the shapes demo samples 
 at their location.
 
-###5. UDP WAN Bridge with Cloud Discovery Service
+### 5. UDP WAN Bridge with Cloud Discovery Service
 
 This case uses RTI Routing Service with the RTI UDPv4_WAN transport option.  
 The UDPv4_WAN transport is an optional component that enables direct connectivity between applications on 
@@ -214,7 +215,7 @@ but once the connection is established it should have relatively short latency (
 specifics of your internet connection performance).
 
 
-###6. UDP-WAN Transport with Cloud Discovery Service
+### 6. UDP-WAN Transport with Cloud Discovery Service
 
 This case has the user application (Shapes Demo) directly using the UDPv4_WAN transport option to 
 connect with a remote application -- **no Routing Service needed**.  It also relies on Cloud Discovery
@@ -237,5 +238,5 @@ You should be able to publish shapes from either Shapes Demo, and to subscribe t
 Note that discovery may take several seconds depending on internet conditions.
 
 
-Please visit the online version of the documentation for this example at:
+Please visit the online documentation for this example at:
 https://www.rti.com/resources/usecases/real-time-lan-over-wan
