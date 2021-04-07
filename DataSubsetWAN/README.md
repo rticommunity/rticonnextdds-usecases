@@ -78,11 +78,11 @@ Open a command terminal for each (A and B).
 
 
 **RTI Shapes Demo**  
-Two instances of RTI Shapes Demo are needed for this example, on DDS domains 5 and 6.  
+Two instances of RTI Shapes Demo are needed for the use cases in this example, on DDS domains 5 and 6.  
 For convenience, a shell script / batch file has been provided:
 
- - **Terminal A1:** `scripts/StartShapesDemo 5'
- - **Terminal B1:** `scripts/StartShapesDemo 6'
+ - **Terminal A1:** `scripts/StartShapesDemo 5`
+ - **Terminal B1:** `scripts/StartShapesDemo 6`
  
 **NOTE**: scripts have been provided for Linux and Windows; use the appropriate suffix (.bat or .sh) for your environment.
 
@@ -98,7 +98,7 @@ Using the **Publish** and **Subscribe** menus in each Shapes Demo, set up the fo
  - Subscribe: Circle, default settings.
 
 **_These applications cannot 'see' each other_** - because they are on different DDS domains (5 and 6), 
-so the subscribed-to topics will receive no data samples.   
+so the subscribed-to topics will receive no data samples.
 The following use-cases solve this in different ways.
 
 ### 1. UDP LAN Bridge
@@ -119,7 +119,7 @@ These scripts will launch 2 instances of Routing Service, with topic routing con
 
 You should see results similar to:
 
-  [image file showing 2 Shapes Demo instances, with circles and squares]
+![shapes demo with filter](img/LanBridgeWithFilter_1240x477.png "LAN bridge with filter on Square")
 
 Note that because this uses an intermediate domain, other Connext DDS applications can also join this domain
 as participants with read/write access.   Launching a 3rd Shapes Demo on domain 0 should have full access to
