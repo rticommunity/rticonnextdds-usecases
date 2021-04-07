@@ -146,7 +146,7 @@ instances of Routing Service can join this intermediate connection.
 
 You should see results similar to:
 
-  [image file showing 2 Shapes Demo instances, with circles and squares]
+![shapes demo across TCP LAN](img/LanBridgeTCP_1234x479.png "LAN bridge using TCP")
 
 
 ### 3. TCP WAN Bridge

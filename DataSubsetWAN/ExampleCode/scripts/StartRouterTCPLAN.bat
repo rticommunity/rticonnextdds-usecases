@@ -4,6 +4,7 @@ setlocal
 IF []==[%NDDSHOME%] GOTO NeedNDDSHome
 
 IF "%1"=="" GOTO NeedArgs
+IF "%2"=="" GOTO NeedArgs
 
 set dir=%~dp0
 set executable_name=rtiroutingservice
