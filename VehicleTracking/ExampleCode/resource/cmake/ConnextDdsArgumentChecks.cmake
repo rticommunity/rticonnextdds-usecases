@@ -1,4 +1,3 @@
-#!/bin/sh
 #
 # (c) 2021 Copyright, Real-Time Innovations, Inc. (RTI)
 # All rights reserved.
@@ -15,26 +14,29 @@
 # that Licensee may not combine or link such alternate versions of DDS with
 # the Software.
 #
+#[[.rst:
+.. _connextdds_argument_checks:
 
-filename=$0
-script_dir=`dirname $filename`
-executable_name="RadarGenerator"
-bin_dir=${script_dir}/../build
+ConnextDdsArgumentChecks
+------------------------
 
+Function helpers to check function arguments
 
-if [ -f $bin_dir/$executable_name ]
-then
-    cd $bin_dir
-    export LD_LIBRARY_PATH=../thirdparty/proj-5.2/Linux/lib:../thirdparty/wxWidgets-3.1.2/Linux/lib/${arch}:$LD_LIBRARY_PATH
-    ./$executable_name $*
-else
-    echo "***************************************************************"
-    echo $executable_name executable does not exist in:
-    echo $bin_dir
-    echo ""
-    echo Please, try to recompile the application using the command:
-    echo " $ cd ../build"
-    echo " $ cmake .. "
-    echo " $ cmake --build ."
-    echo "***************************************************************"
-fi
+``connextdds_check_required_arguments``
+    Checks that all of the arguments are present and defined
+
+#]]
+
+function(connextdds_check_required_arguments)
+    foreach(arg ${ARGN})
+        if(NOT ${arg})
+            message(FATAL_ERROR "Argument ${arg} is missing")
+        endif()
+    endforeach()
+endfunction()
+
+macro(connextdds_check_no_extra_arguments)
+    if(ARGN)
+        message(FATAL_ERROR "Function has more arguments than expected")
+    endif()
+endmacro()
