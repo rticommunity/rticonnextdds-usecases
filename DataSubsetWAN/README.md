@@ -10,13 +10,15 @@ different kinds of logical network separations: different DDS domains in the sam
 and separated local networks sharing data using TCP WAN or the RTI UDPv4-WAN transport.
 
 This example set uses the RTI Shapes Demo as the test application(s), which uses the "ShapeType" 
-data type.   This was selected for ease-of-use and to make it easier to understand and port to
+data type to indicate the on-screen position and color of Squares, Circles, and Triangles in the
+application.  This was selected for ease-of-use and to make it easier to understand and port to
 your own applications.
 
 It also uses RTI Routing Service to act as a gateway between domains and transports, with the
 exception of the final example case which uses the RTI UDPv4-WAN transport natively with RTI
 Shapes Demo, to provide a global connection using UDP.  Discovery assistance is (optionally)
-provided by RTI Cloud Discovery Service, residing on a www-accessible server.
+provided by RTI Cloud Discovery Service, residing on a www-accessible server to facilitate
+discovery of participants through common types of NAT routers.
 
 
 Additional Documentation
@@ -32,8 +34,8 @@ Download RTI Connext DDS
 ------------------------
 If you do not already have RTI Connext DDS installed, download and install it
 now. You can use a 30-day trial license to try out the product. Your download
-will include the libraries that are required to run the example, and tools you
-can use to visualize and debug your distributed system.
+will include the primary applications that are required to run the example, plus tools
+and libraries you can use to create, visualize and debug your distributed system.
 You can download RTI Connext here: https://www.rti.com/downloads/
 
 
@@ -43,13 +45,14 @@ To run this example on all platforms, an environment variable called `NDDSHOME`
 must be set to point to the RTI Connext DDS installation directory, such as
 rti_connext_dds-6.1.x.  Helper scripts to set the environment are included in the 
 Connext installation directory, typically found at:  
-`"C:\Program Files\rti_connext_dds-6.1.0\resource\script\rtisetenv*"` for Windows, or  
-`source ~/rti_connext_dds-6.1.0/resource/scripts/rtisetenv*` for Linux.  
+`"C:\Program Files\rti_connext_dds-6.1.0\resource\script\rtisetenv_{ARCH}.bat"` for Windows, or  
+`source ~/rti_connext_dds-6.1.0/resource/scripts/rtisetenv_{ARCH}.sh` for Linux.  
 
 More information on how to set up your Connext environment can be found in the RTI Connext 
 Core Libraries and Utilities Getting Started Guide.
 
-We will refer to the location where you unzipped the example in this document as `EXAMPLE_HOME`.  
+We will refer to the location where you installed the example for`DataSubsetWAN` in this document
+as `EXAMPLE_HOME`.  
 
 All configuration and script files for this example are located in `EXAMPLE_HOME/ExampleCode/`.  
 Before running, change directories into `EXAMPLE_HOME/ExampleCode`.
@@ -78,7 +81,10 @@ Open a command terminal for each (A and B).
 
 
 **RTI Shapes Demo**  
-Two instances of RTI Shapes Demo are needed for the use cases in this example, on DDS domains 5 and 6.  
+Two instances of RTI Shapes Demo are needed for the use cases in this example, to be run
+on different machines to provide physical separation.  Further, these are intentionally run
+on different DDS domains (5 and 6), to provide for network separation. The applications cannot
+communicate with each other, even if they're on the same local network.  
 For convenience, a shell script / batch file has been provided:
 
  - **Terminal A1:** `scripts/StartShapesDemo 5`
@@ -99,7 +105,7 @@ Using the **Publish** and **Subscribe** menus in each Shapes Demo, set up the fo
 
 **_These applications cannot 'see' each other_** - because they are on different DDS domains (5 and 6), 
 so the subscribed-to topics will receive no data samples.
-The following use-cases solve this in different ways.
+The following use-case examples solve this in different ways.
 
 ### 1. UDP LAN Bridge
 
