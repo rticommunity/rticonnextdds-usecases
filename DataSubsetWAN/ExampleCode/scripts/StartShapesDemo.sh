@@ -6,7 +6,7 @@ script_dir=`dirname $filename`
 
 if [ -f $NDDSHOME/bin/$executable_name ]
 then
-    cd $script_dir/../apps
+    cd $script_dir/../apps/ShapesDemo
     $NDDSHOME/bin/$executable_name -domainId $1 &
 else
     echo "**************************************************************************"
