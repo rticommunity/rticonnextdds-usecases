@@ -58,17 +58,17 @@ All configuration and script files for this example are located in `EXAMPLE_HOME
 Before running, change directories into `EXAMPLE_HOME/ExampleCode`.
 
 There are 6 use-cases in this example, all are using RTI Shapes Demo as test applications:
-| Use Case               | Using               | Description                               |
-|------------------------|---------------------|-------------------------------------------|
-| 1. `UDP LAN`           | RTI Routing Service | Bridge DDS domain 5 and 6 on UDP LAN      |
-| 2. `TCP LAN`           | RTI Routing Service | as above, on TCP LAN                      |
-| 3. `TCP WAN`           | RTI Routing Service | as above, on TCP WAN                      |
-| 4. `TCP WAN via Relay` | RTI Routing Service | as above, through cloud-based relay       |
-| 5. `UDP WAN`           | RTI Routing Service | as above, using UDP-WAN transport and CDS |
-| 6. `UDP WAN`           | UDPv4-WAN transport | Direct connection, discovery aided w/CDS  |
+| Use Case               | Using                  | Description                                    |
+|------------------------|------------------------|------------------------------------------------|
+| 1. `UDP LAN`           | RTI Routing Service    | Bridge DDS domain 5 and 6 on UDP LAN           |
+| 2. `TCP LAN`           | RTI Routing Service    | as above, on TCP LAN                           |
+| 3. `TCP WAN`           | RTI Routing Service    | as above, on TCP WAN                           |
+| 4. `TCP WAN via Relay` | RTI Routing Service    | as above, through cloud-based relay            |
+| 5. `Realtime WAN`      | RTI Routing Service    | as above, using Realtime WAN Transport and CDS |
+| 6. `Realtime WAN`      | Realtime WAN transport | Direct connection, discovery aided w/CDS       |
 
 Where:  
- - `UDP-WAN` is the new RTI UDPv4-WAN transport, which enables direct WAN connections between Connext applications on separate LANs.
+ - `Realtime WAN` is the new RTI Realtime WAN Transport (RWT), which enables direct UDP WAN connections between Connext applications on separate LANs.
  - `CDS` is the RTI Cloud Discovery Service, which facilitates discovery between applications that are otherwise blocked from automated discovery (such as: no multicast, or residing on unconnected LANs).
 
 
@@ -197,10 +197,10 @@ Note: in this case, DDS traffic is routed any-to-any on either side of the bridg
 instances or Routing Service instances launched at other locations will also see the shapes demo samples 
 at their location.
 
-### 5. UDP WAN Bridge with Cloud Discovery Service
+### 5. Realtime WAN Transport Bridge using Cloud Discovery Service
 
 This case uses RTI Routing Service with the RTI UDPv4_WAN transport option.  
-The UDPv4_WAN transport is an optional component that enables direct connectivity between applications on 
+The Realtime WAN Transport is an optional component that enables direct connectivity between applications on 
 separate UDP LANs, provided the LANs have connectivity to an external WAN such as the internet, typically
 through a NAT router.  This case uses the assistance of RTI Cloud Discovery Service (CDS) on a web-accessible 
 server to help determine the external address of the DDS participant, which enables discovery by other 
@@ -221,9 +221,9 @@ but once the connection is established it should have relatively short latency (
 specifics of your internet connection performance).
 
 
-### 6. UDP-WAN Transport with Cloud Discovery Service
+### 6. Direct use of Realtime WAN Transport using Cloud Discovery Service
 
-This case has the user application (Shapes Demo) directly using the UDPv4_WAN transport option to 
+This case has the user application (Shapes Demo) directly using the Realtime WAN transport option to 
 connect with a remote application -- **no Routing Service needed**.  It also relies on Cloud Discovery
 Service (CDS) to facilitate the automated discovery of participants on a global scale.
 
