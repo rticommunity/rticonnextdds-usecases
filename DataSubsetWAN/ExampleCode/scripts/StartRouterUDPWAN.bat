@@ -11,14 +11,14 @@ set executable_name=rtiroutingservice
 
 cd %dir%\..\routing
 
-call "%NDDSHOME%\bin\%executable_name%" -cfgFile Routing-TCP-LAN.xml -cfgName %1 -DREMOTE_IPADDR=%2 
+call "%NDDSHOME%\bin\%executable_name%" -cfgFile Routing-UDP-WAN.xml -cfgName %1 -DCDS_IPADDR=%2
 EXIT /B 0
 
 :NeedNDDSHome
-@echo NDDSHOME must be set to the RTI Connext install dir to run this example
+@echo environment variable NDDSHOME must be set to the RTI Connext install dir to run this example
 EXIT /B 1
 
 :NeedArgs
 @echo Needs args for RS config (SOCI or COSI) for 'SquareOutCircleIn' or 'CircleOutSquareIn',
-@echo  and the IP address of the remote machine (xx.xx.xx.xx)
+@echo  and for IP address of RTI Cloud Discovery Service instance (xx.xx.xx.xx)
 EXIT /B 1

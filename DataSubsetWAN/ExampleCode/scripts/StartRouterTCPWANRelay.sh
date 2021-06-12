@@ -6,22 +6,21 @@ executable_name="rtiroutingservice"
 
 if [ -f $NDDSHOME/bin/$executable_name ]
 then
-    if [[ ( "$1" = "SOCI"  ||  "$1" = "COSI" ) ]] && [ -n "$2" ] && [ n "$3" ]
+    if [[ ( "$1" = "Local5"  ||  "$1" = "Local6" ) ]] && [ -n "$2" ]
     then 
 	    cd $script_dir/../routing
 	    $NDDSHOME/bin/$executable_name \
-    	    -cfgFile Routing-TCP-WAN.xml \
-	        -cfgName $1 -DREMOTE_IPADDR=$2 -DLOCAL_IPADDR=$3
+    	    -cfgFile Routing-TCP-WAN-RELAY.xml \
+	        -cfgName $1 -DRELAY_IPADDR=$2
     else
         echo "*************************************************************"
         echo " $0: Wrong parameters"
         echo "" 
         echo " Usage:"
-        echo " $0 [SOCI|COSI] [xx.xx.xx.xx] [yy.yy.yy.yy]"
+        echo " $0 [Local5|Local6] [xx.xx.xx.xx]"
         echo " Where:"
-        echo "    SOCI = SquareOutCircleIn, COSI = CircleOutSquareIn"
-        echo "    xx.xx.xx.xx = IP address of the remote machine"
-        echo "    yy.yy.yy.yy = IP address of the local machine"
+        echo "    Local5 = My local UDP is on DDS domain 5, Local6 = Local domain 6"
+        echo "    xx.xx.xx.xx = IP address of the DDS TCP relay machine"
         echo "*************************************************************"
     fi
 else

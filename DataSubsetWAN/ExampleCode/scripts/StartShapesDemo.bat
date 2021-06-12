@@ -6,11 +6,11 @@ IF []==[%NDDSHOME%] GOTO NeedNDDSHome
 IF "%1"=="" GOTO NeedArgs
 
 set dir=%~dp0
-set executable_name=rtiroutingservice
+set executable_name=rtishapesdemo
 
-cd %dir%\..\routing
+cd %dir%\..\apps\ShapesDemo
 
-call "%NDDSHOME%\bin\%executable_name%" -cfgFile Routing-UDP-LAN.xml -cfgName %1
+call "%NDDSHOME%\bin\%executable_name%" -domainId %1
 EXIT /B 0
 
 :NeedNDDSHome
@@ -18,5 +18,5 @@ EXIT /B 0
 EXIT /B 1
 
 :NeedArgs
-@echo Needs an arg for RS config (SOCI or COSI) for 'SquareOutCircleIn' or 'CircleOutSquareIn'
+@echo Needs an arg for DDS Domain (5 or 6 for this example)
 EXIT /B 1

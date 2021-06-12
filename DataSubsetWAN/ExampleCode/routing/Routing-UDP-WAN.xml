@@ -11,7 +11,7 @@
                 <kind>VOLATILE_DURABILITY_QOS</kind>
             </durability>
         </datareader_qos>
-        
+
         <datawriter_qos name="ShapeDataWriter">
             <reliability>
                 <kind>RELIABLE_RELIABILITY_QOS</kind>
@@ -25,23 +25,23 @@
     <!-- ****************************************************************** -->
     <!-- Configuration file for RTI Routing Service bridging data in a LAN  -->
     <!-- ****************************************************************** -->
-
+    <!-- Square Out, Circle In -->
     <routing_service name="SOCI">
 
         <annotation>
             <documentation>
-                Routes ShapeType topics from one domain to second domain
-    and the other way around over UDP.
+                Routes Square and Temperature topics from one domain to second domain
+                and the other way around over UDP.
 
-    Configurations in this file, with this Routing Service configuration marked
-    as *RS1*:
+                Configurations in this file, with this Routing Service configuration marked
+                as *RS1*:
 
-    LAN apps ==[domain 6]== *RS1* ==[domain 0]== RS2 ==[domain 5]== LAN apps
+                LAN apps ==[domain 6]== *RS1* ==[domain 0]== RS2 ==[domain 5]== LAN apps
 
-    UDP LAN side:  Sending to/receiving from app in domain 6
-    UDP "WAN" side:  Sending to/receiving from the other Routing Service 
-    in domain 0
-    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                UDP LAN side:  Sending to/receiving from app in domain 6
+                UDP "WAN" side:  Sending to/receiving from the other Routing Service 
+                in domain 0
+                - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             </documentation>
         </annotation>
 
@@ -61,12 +61,27 @@
                 <domain_id>6</domain_id>
             </participant>
 
+            <!-- The 'bridge domain' uses RTI UDPv4_WAN transport, -->
+            <!-- with some assistance in discovery using RTI Cloud Discovery Service -->
             <participant name="BridgeDomain">
                 <domain_id>0</domain_id>
+                <participant_qos>
+                    <!-- transports -->
+                    <transport_builtin>
+                        <mask>UDPv4_WAN</mask>
+                    </transport_builtin>
+                    <discovery>
+                        <initial_peers>
+                            <!-- This example uses RTI Cloud Discovery Service -->
+                            <!-- on a web-accessible address -->
+                            <element>rtps@$(CDS_IPADDR):8600</element>
+                        </initial_peers>
+                    </discovery>
+                </participant_qos>
             </participant>
 
             <session name="SessionForward">
-                <topic_route name="ShapeForward">
+                <topic_route name="SquareForward">
                     <route_types>true</route_types> 
                     <publish_with_original_info>true</publish_with_original_info>
                     <publish_with_original_timestamp>true</publish_with_original_timestamp>
@@ -76,16 +91,11 @@
                         <topic_name>Square</topic_name>
                         <registered_type_name>ShapeType</registered_type_name>
                         <creation_mode>IMMEDIATE</creation_mode>
-                        <!-- Only pass the Square data through if y is in the bottom half of the viewer -->
-                        <content_filter>
-                            <expression>y &gt; %0 AND y &lt; %1 </expression>
-                            <parameter>140</parameter>
-                            <parameter>265</parameter>
-                        </content_filter>
-                        <datareader_qos base_name="RoutingLibrary::ShapeDataReader"></datareader_qos>
+                        <datareader_qos base_name="RoutingLibrary::ShapeDataReader">
+                        </datareader_qos>
                     </input>
 
-                    <!-- The DomainParticipant that uses UDP in domain 0 -->
+                    <!-- The DomainParticipant that uses TCP in domain 0 -->
                     <output participant="BridgeDomain">
                         <topic_name>Square</topic_name>
                         <registered_type_name>ShapeType</registered_type_name>
@@ -93,15 +103,16 @@
                         <datawriter_qos base_name="RoutingLibrary::ShapeDataWriter">    
                         </datawriter_qos>
                     </output>
-                </topic_route>
+                </topic_route>                
             </session>
+
             <session name="SessionBackward">
-                <topic_route name="ShapeBackward">
+                <topic_route name="CircleBackward">
                     <route_types>true</route_types>
                     <publish_with_original_info>true</publish_with_original_info>
                     <publish_with_original_timestamp>true</publish_with_original_timestamp>
 
-                    <!-- The DomainParticipant that bridges using domain 0 on UDP -->
+                    <!-- The DomainParticipant that uses TCP in domain 0 -->
                     <input participant="BridgeDomain">
                         <topic_name>Circle</topic_name>
                         <registered_type_name>ShapeType</registered_type_name>
@@ -109,7 +120,6 @@
                         <datareader_qos base_name="RoutingLibrary::ShapeDataReader">
                         </datareader_qos>
                     </input>
-                    
                     <!-- The DomainParticipant in domain 6 that uses UDP -->
                     <output participant="LocalDomain">
                         <topic_name>Circle</topic_name>
@@ -123,21 +133,22 @@
         </domain_route>
     </routing_service>
 
+    <!-- Circle Out, Square In -->
     <routing_service name="COSI">
         <annotation>
             <documentation>
-                Routes Alarm and Temperature topics from one domain to second domain
-    and the other way around over UDP.
+                Routes Circle(out) and Square(in) topics from local UDP domain 
+                to a 'bridge' domain using UDP_WAN transport, to a remote machine.
 
-    Configurations in this file, with this Routing Service configuration marked
-    as *RS2*:
+                Configurations in this file, with this Routing Service configuration marked
+                as *RS2*:
 
-    LAN apps ==[domain 6]== RS1 ==[domain 0]== *RS2* ==[domain 5]== LAN apps
+                LAN apps ==[domain 6]== RS1 ==[domain 0]== *RS2* ==[domain 5]== LAN apps
 
-    UDP LAN side:  Sending to/receiving from app in domain 5
-    UDP "WAN" side:  Sending to/receiving from the other Routing Service
-    in domain 0
-    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                UDP LAN side:  Sending to/receiving from app in domain 5
+                UDP "WAN" side:  Sending to/receiving from the other Routing Service
+                in domain 0
+                - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             </documentation>
         </annotation>
         
@@ -150,22 +161,36 @@
         </administration>
 
         <domain_route name="DataDomain">
-            <!-- This routes from a local area UDP network on domain 5 to a -->
-            <!-- bridge networks using domain 0 on UDP -->
+            <!-- This routes from a local area network on domain 5 to a -->
+            <!-- UDP network on domain 0 -->
             <participant name="LocalDomain">
                 <domain_id>5</domain_id>
             </participant>
 
+            <!-- The 'bridge domain' uses RTI UDPv4_WAN transport, -->
+            <!-- with some assistance in discovery using RTI Cloud Discovery Service -->
             <participant name="BridgeDomain">
                 <domain_id>0</domain_id>
+                <participant_qos>
+                    <!-- transports -->
+                    <transport_builtin>
+                        <mask>UDPv4_WAN</mask>
+                    </transport_builtin>
+                    <discovery>
+                        <initial_peers>
+                            <!-- This example uses RTI Cloud Discovery Service -->
+                            <!-- on a web-accessible address -->
+                            <element>rtps@$(CDS_IPADDR):8600</element>
+                        </initial_peers>
+                    </discovery>
+                </participant_qos>
             </participant>
 
             <session name="SessionForward">
-                <topic_route name="ShapeForward">
+                <topic_route name="CircleForward">
                     <route_types>true</route_types>
                     <publish_with_original_info>true</publish_with_original_info>
                     <publish_with_original_timestamp>true</publish_with_original_timestamp>
-                    <!-- The DomainParticipant for UDP local network -->
                     <input participant="LocalDomain">
                         <topic_name>Circle</topic_name>
                         <registered_type_name>ShapeType</registered_type_name>
@@ -183,11 +208,10 @@
                 </topic_route>
             </session>
             <session name="SessionBackward">
-                <topic_route name="ShapeBackward">
+                <topic_route name="SquareBackward">
                     <route_types>true</route_types>
                     <publish_with_original_info>true</publish_with_original_info>
                     <publish_with_original_timestamp>true</publish_with_original_timestamp>
-                    <!-- The DomainParticipant that bridges using domain 0 on UDP -->
                     <input participant="BridgeDomain">
                         <topic_name>Square</topic_name>
                         <registered_type_name>ShapeType</registered_type_name>
@@ -195,7 +219,6 @@
                         <datareader_qos base_name="RoutingLibrary::ShapeDataReader">
                         </datareader_qos>
                     </input>
-
                     <output participant="LocalDomain">
                         <topic_name>Square</topic_name>
                         <registered_type_name>ShapeType</registered_type_name>

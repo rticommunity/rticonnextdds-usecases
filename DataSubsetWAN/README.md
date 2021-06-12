@@ -5,29 +5,20 @@ Connecting High-Speed LAN Data over a WAN
 
 Concept
 -------
-This use case example shows two (or more) logical applications sharing real-
-time data within a LAN, and also sending a subset of that data over TCP
-across a WAN.
+This use case example shows two (or more) applications sharing real-time data across 
+different kinds of logical network separations: different DDS domains in the same local network,
+and separated local networks sharing data using TCP WAN or the RTI UDPv4-WAN transport.
 
-The applications are:
+This example set uses the RTI Shapes Demo as the test application(s), which uses the "ShapeType" 
+data type to indicate the on-screen position and color of Squares, Circles, and Triangles in the
+application.  This was selected for ease-of-use and to make it easier to understand and port to
+your own applications.
 
-1. Temperature sensor and alarm provider
-    - Writes temperature updates between 0 and 150 at a rate specified
-      by the user
-    - Writes Alarm updates if the temperature has moved above 100
-      degrees or below 32 degrees.
-
-2. Temperature sensor and alarm receiver
-    - Prints out temperature and alarm data
-
-3. Routing Services
-    - Act as a gateway between the LAN and WAN:  The WAN TCP addresses
-      are only specified in the Routing Service configuration, not in
-      the local application
-    - Filter temperature data between 32 and 100 so it never crosses the WAN
-    - Decide which RTI Connext DDS data streams ("Topics" in DDS terms)
-      are allowed to be sent across the WAN
-
+It also uses RTI Routing Service to act as a gateway between domains and transports, with the
+exception of the final example case which uses the RTI UDPv4-WAN transport natively with RTI
+Shapes Demo, to provide a global connection using UDP.  Discovery assistance is (optionally)
+provided by RTI Cloud Discovery Service, residing on a www-accessible server to facilitate
+discovery of participants through common types of NAT routers.
 
 
 Additional Documentation
@@ -43,82 +34,215 @@ Download RTI Connext DDS
 ------------------------
 If you do not already have RTI Connext DDS installed, download and install it
 now. You can use a 30-day trial license to try out the product. Your download
-will include the libraries that are required to run the example, and tools you
-can use to visualize and debug your distributed system.
+will include the primary applications that are required to run the example, plus tools
+and libraries you can use to create, visualize and debug your distributed system.
 You can download RTI Connext here: https://www.rti.com/downloads/
 
 
-How to Run this Example
+How to Run the Example use cases
 -----------------------
 To run this example on all platforms, an environment variable called `NDDSHOME`
 must be set to point to the RTI Connext DDS installation directory, such as
-rti_connext_dds-6.0.x.
-For more information on how to set an environment variable, please see the RTI
+rti_connext_dds-6.1.x.  Helper scripts to set the environment are included in the 
+Connext installation directory, typically found at:  
+`"C:\Program Files\rti_connext_dds-6.1.0\resource\script\rtisetenv_{ARCH}.bat"` for Windows, or  
+`source ~/rti_connext_dds-6.1.0/resource/scripts/rtisetenv_{ARCH}.sh` for Linux.  
+
+More information on how to set up your Connext environment can be found in the RTI Connext 
 Core Libraries and Utilities Getting Started Guide.
 
-We will refer to the location where you unzipped the example in this document
-as EXAMPLE_HOME.  
+We will refer to the location where you installed the example for`DataSubsetWAN` in this document
+as `EXAMPLE_HOME`.  
 
-All configuration and script files are located in EXAMPLE_HOME/ExampleCode/.  
-Before running, change directories into EXAMPLE_HOME/ExampleCode.
+All configuration and script files for this example are located in `EXAMPLE_HOME/ExampleCode/`.  
+Before running, change directories into `EXAMPLE_HOME/ExampleCode`.
+
+There are 6 use-cases in this example, all are using RTI Shapes Demo as test applications:
+| Use Case               | Using                  | Description                                    |
+|------------------------|------------------------|------------------------------------------------|
+| 1. `UDP LAN`           | RTI Routing Service    | Bridge DDS domain 5 and 6 on UDP LAN           |
+| 2. `TCP LAN`           | RTI Routing Service    | as above, on TCP LAN                           |
+| 3. `TCP WAN`           | RTI Routing Service    | as above, on TCP WAN                           |
+| 4. `TCP WAN via Relay` | RTI Routing Service    | as above, through cloud-based relay            |
+| 5. `Realtime WAN`      | RTI Routing Service    | as above, using Realtime WAN Transport and CDS |
+| 6. `Realtime WAN`      | Realtime WAN transport | Direct connection, discovery aided w/CDS       |
+
+Where:  
+ - `Realtime WAN` is the new RTI Realtime WAN Transport (RWT), which enables direct UDP WAN connections between Connext applications on separate LANs.
+ - `CDS` is the RTI Cloud Discovery Service, which facilitates discovery between applications that are otherwise blocked from automated discovery (such as: no multicast, or residing on unconnected LANs).
 
 
-To Start the Sender
+To Launch the Test Applications
 -------------------
-Run the (Windows) batch file: `scripts\StartSend.bat` or the (Linux) shell
-script: `scripts/StartSend.sh`
-
-This will send data in domain 6.
-
-
-To Start the Receiver
----------------------
-Run the (Windows) batch file: `scripts\StartReceive.bat` or the (Linux) shell
-script: `scripts/StartReceive.sh`
-
-This will receive data in domain 5.  
-These two domains are logically isolated, so this application will not receive
-any data until you run the RTI Routing Service.
+These use cases are typically used to connect applications on separate computer instances, 
+but because DDS provides a logical separation of DDS domains, most can be run on a single test machine.
+This explanation will refer to the machine and terminal instances as `A` and `B`.  
+Open a command terminal for each (A and B).
 
 
-To Start the Routing Services with UDP LAN Configuration
----------------------------------------------------------
-To start the Routing Services in UDP LAN configuration,
-enter the following commands:  
-Windows:  
-  `scripts\StartRouterUDPLAN.bat Router1`  
-  `scripts\StartRouterUDPLAN.bat Router2`
+**RTI Shapes Demo**  
+Two instances of RTI Shapes Demo are needed for the use cases in this example, to be run
+on different machines to provide physical separation.  Further, these are intentionally run
+on different DDS domains (5 and 6), to provide for network separation. The applications cannot
+communicate with each other, even if they're on the same local network.  
+For convenience, a shell script / batch file has been provided:
 
-Linux:  
-  `scripts/StartRouterUDPLAN.sh Router1`  
-  `scripts/StartRouterUDPLAN.sh Router2`
+ - **Terminal A1:** `scripts/StartShapesDemo 5`
+ - **Terminal B1:** `scripts/StartShapesDemo 6`
+ 
+**NOTE**: scripts have been provided for Linux and Windows; use the appropriate suffix (.bat or .sh) for your environment.
 
-Example Output
---------------
-The example output includes both Alarm and Temperature data.  Note that due to
-temperature data between 32 and 100 degrees being filtered out, you may not see
-data immediately.
-```
-  DataReader "AlarmReader" received sample 3 on Topic "Alarm" sent at 1373936124.699991 s
-  appID: 234
-  alarmType: TOO_COLD
-  alarmLevel: WARNING
+This should result in 2 instances of Shapes Demo: one on domain 5, one on domain 6.  
+Using the **Publish** and **Subscribe** menus in each Shapes Demo, set up the following:
 
-  DataReader "TemperatureReader" received sample 16 on Topic "Temperature" sent at 1373936125.699991 s
-  appID: 234
-  value: 30.000000
+**Shapes Demo 5**
+ - Publish: Circle, any color or size, default settings for everything else.
+ - Subscribe: Square, default settings.
 
-  DataReader "TemperatureReader" received sample 17 on Topic "Temperature" sent at 1373936126.699991 s
-  appID: 234
-  value: 29.000000
+**Shapes Demo 6**
+ - Publish: Square, any color or size, default settings for everything else.
+ - Subscribe: Circle, default settings.
 
-  DataReader "TemperatureReader" received sample 18 on Topic "Temperature" sent at 1373936127.699991 s
-  appID: 234
-  value: 28.000000
-```
+**_These applications cannot 'see' each other_** - because they are on different DDS domains (5 and 6), 
+so the subscribed-to topics will receive no data samples.
+The following use-case examples solve this in different ways.
 
-To Start the Routing Services with TCP WAN/LAN Configuration
----------------------------------------------------------
-To start the Routing Services with TCP enabled, please visit the online
-documentation for this example at:
+### 1. UDP LAN Bridge
+
+This case uses a pair of Routing Service instances to bridge domains 5 and 6 via an intermediate UDP domain 0.
+Note that the domains could also have been bridged directly (5 <--> 6) using a single Routing Service
+instance, without using this intermediate domain.  
+
+Open 2 terminals (A2 and B2) in `EXAMPLE_HOME/ExampleCode` and run the following scripts:
+ - **Terminal A2:** `scripts/StartRouterUDPLAN COSI`
+ - **Terminal B2:** `scripts/StartRouterUDPLAN SOCI`
+
+These scripts will launch 2 instances of Routing Service, with topic routing configurations for
+`COSI` (CircleOutSquareIn) and `SOCI` (SquareOutCircleIn), which results in the routing of:
+
+ - Circle topics from domain 5 to domain 6.
+ - Square topics from domain 6 to domain 5, with a content filter to block any Squares in the top half of Shapes Demo.
+
+You should see results similar to:
+
+![shapes demo with filter](img/LanBridgeWithFilter_1240x477.png "LAN bridge with filter on Square")
+
+Note that because this uses an intermediate domain, other Connext DDS applications can also join this domain
+as participants with read/write access.   Launching a 3rd Shapes Demo on domain 0 should have full access to
+all ShapeType data topics (Square, Circle, Triangle).
+
+
+### 2. TCP LAN Bridge
+
+This case also uses a pair of Routing Service instances to bridge domains 5 and 6 via an intermediate TCP domain.
+This is useful for bridging topics between isolated network segments that allow TCP data to pass, but not UDP.
+
+Open or re-use 2 terminals (A2 and B2) in `EXAMPLE_HOME/ExampleCode` and run the following scripts:
+ - **Terminal A2:** `scripts/StartRouterTCPLAN COSI <ip address of the B machine>`
+ - **Terminal B2:** `scripts/StartRouterTCPLAN SOCI <ip address of the A machine>`
+
+These scripts will launch 2 instances of Routing Service, with topic routing configurations for
+`COSI` (CircleOutSquareIn) and `SOCI` (SquareOutCircleIn), which results in the routing of:
+
+ - Circle topics from domain 5 to domain 6.
+ - Square topics from domain 6 to domain 5.
+
+This 'bridge' is a point-to-point connection between the 2 Routing Service instances; no other
+instances of Routing Service can join this intermediate connection.
+
+You should see results similar to:
+
+![shapes demo across TCP LAN](img/LanBridgeTCP_1234x479.png "LAN bridge using TCP")
+
+
+### 3. TCP WAN Bridge
+
+This case is similar to case 2, but will use the TCPv4-WAN transport option to enable traversing
+a WAN such as the internet.  This case requires publicly-accessible IP addresses and open ports on
+the endpoint machines, and some editing of the Routing Service configuration file to match the opened
+port number in the endpoint machines.
+
+Open or re-use 2 terminals (A2 and B2) in `EXAMPLE_HOME/ExampleCode` and run the following scripts:
+ - **Terminal A2:** `scripts/StartRouterTCPWAN COSI <ip address of the B machine> <ip address of this machine>`
+ - **Terminal B2:** `scripts/StartRouterTCPWAN SOCI <ip address of the A machine> <ip address of this machine>`
+
+These scripts will launch 2 instances of Routing Service, with topic routing configurations for
+`COSI` (CircleOutSquareIn) and `SOCI` (SquareOutCircleIn), which results in a point-to-point connection
+between these two Routing Service instances, bridging their respective domains on the selected topics.
+
+
+### 4. TCP WAN Bridge with Relay
+
+This case uses a www-accessible "TCP Relay" machine to bridge and route topic data between separate networks.
+
+  [block diagram image]
+
+The TCP relay is a Routing Service instance, configured to automatically pass discovered topics between
+TCP domains 1 and 2.   When used with Routing Service instances at each end (to pass topic data between
+UDP domain 5 and TCP domain 1, and between UDP domain 6 and TCP domain 2) it creates a bridge that only
+requires the IP address of the relay machine -- not of the endpoint machines.
+
+Open or re-use 2 terminals (A2 and B2) in `EXAMPLE_HOME/ExampleCode` and run the following scripts:
+ - **Terminal A2:** `scripts/StartRouterTCPWANRelay Local5 <ip address of the relay machine>`
+ - **Terminal B2:** `scripts/StartRouterTCPWANRelay Local6 <ip address of the relay machine>`
+
+These scripts will launch 2 instances of Routing Service, both configured for auto-topic routing between
+domains 5 and 6 (over the TCP relay machine), which automatically creates a route for discovered topics. 
+In this case, any shapes published by a Shapes Demo on one domain would be available for subscription on 
+the other.
+
+  [image of lots of shapes]
+  
+Note: in this case, DDS traffic is routed any-to-any on either side of the bridge, so any additional Shapes Demo
+instances or Routing Service instances launched at other locations will also see the shapes demo samples 
+at their location.
+
+### 5. Realtime WAN Transport Bridge using Cloud Discovery Service
+
+This case uses RTI Routing Service with the RTI UDPv4_WAN transport option.  
+The Realtime WAN Transport is an optional component that enables direct connectivity between applications on 
+separate UDP LANs, provided the LANs have connectivity to an external WAN such as the internet, typically
+through a NAT router.  This case uses the assistance of RTI Cloud Discovery Service (CDS) on a web-accessible 
+server to help determine the external address of the DDS participant, which enables discovery by other 
+remote participants on similarly NAT-isolated LANs -- on a global scale.
+
+Open or re-use 2 terminals (A2 and B2) in `EXAMPLE_HOME/ExampleCode` and run the following scripts:
+ - **Terminal A2:** `scripts/StartRouterUDPWAN COSI <ip address of the CDS machine>`
+ - **Terminal B2:** `scripts/StartRouterUDPWAN SOCI <ip address of the CDS machine>`
+
+These scripts will launch Routing Service instances configured for UDPv4_WAN transport option, and with
+a similar routing configuration as the above use cases:
+
+ - Circle topics from domain 5 to domain 6.
+ - Square topics from domain 6 to domain 5.
+
+Note that complete discovery may take several seconds due to network delays in traversing the internet,
+but once the connection is established it should have relatively short latency (to be determined by the 
+specifics of your internet connection performance).
+
+
+### 6. Direct use of Realtime WAN Transport using Cloud Discovery Service
+
+This case has the user application (Shapes Demo) directly using the Realtime WAN transport option to 
+connect with a remote application -- **no Routing Service needed**.  It also relies on Cloud Discovery
+Service (CDS) to facilitate the automated discovery of participants on a global scale.
+
+To launch this use case:  
+Launch 2 copies of RTI Shapes Demo on the same domain, using the provided launch script:
+
+ - **Terminal A1:** `scripts/StartShapesDemo 5'
+ - **Terminal B1:** `scripts/StartShapesDemo 5'
+
+In each instance of Shapes Demo:
+ - Use the `Controls / Configuration` menu to select **Stop**
+ - In the 'Choose the profile' drop-box, select `UDPv4_WAN_Profile` option and then press **Start**
+ 
+This configuration is described in the file at `apps/ShapesDemo/USER_QOS_PROFILES.xml`, and points 
+to an example CDS instace; you may need to change this address to a known-good CDS instance.
+
+You should be able to publish shapes from either Shapes Demo, and to subscribe to them at the other.
+Note that discovery may take several seconds depending on internet conditions.
+
+
+Please visit the online documentation for this example at:
 https://www.rti.com/resources/usecases/real-time-lan-over-wan
