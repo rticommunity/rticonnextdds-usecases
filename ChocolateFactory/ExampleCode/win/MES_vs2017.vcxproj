@@ -23,34 +23,34 @@
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>FlightPlanPublisher</RootNamespace>
     <ProjectName>ManufacturingExecutionSystem</ProjectName>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -92,12 +92,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;RTI_WIN32;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(NDDSHOME)/include;$(NDDSHOME)/include/ndds</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(NDDSHOME)\include;$(NDDSHOME)\include\ndds;$(NDDSHOME)\include\ndds\hpp</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>
       </PrecompiledHeaderOutputFile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -135,8 +136,9 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;RTI_WIN32;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(NDDSHOME)/include;$(NDDSHOME)/include/ndds</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(NDDSHOME)\include;$(NDDSHOME)\include\ndds;$(NDDSHOME)\include\ndds\hpp</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -169,20 +171,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\CommonInfrastructure\ChocolateLotStateEntities.h" />
-    <ClInclude Include="..\src\CommonInfrastructure\DDSCommunicator.h" />
-    <ClInclude Include="..\src\CommonInfrastructure\DDSTypeWrapper.h" />
-    <ClInclude Include="..\src\CommonInfrastructure\EnumPrintHelpers.h" />
-    <ClInclude Include="..\src\CommonInfrastructure\OSAPI.h" />
-    <ClInclude Include="..\src\ManufacturingExecutionSystem\MESInterface.h" />
+    <ClInclude Include="..\src\CommonInfrastructure\ChocolateLotStateEntities.hpp" />
+    <ClInclude Include="..\src\CommonInfrastructure\DDSCommunicator.hpp" />
+    <ClInclude Include="..\src\CommonInfrastructure\EnumPrintHelpers.hpp" />
+    <ClInclude Include="..\src\ManufacturingExecutionSystem\MESInterface.hpp" />
+    <ClInclude Include="InputParser.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\CommonInfrastructure\ChocolateLotStateEntities.cxx" />
     <ClCompile Include="..\src\CommonInfrastructure\DDSCommunicator.cxx" />
     <ClCompile Include="..\src\CommonInfrastructure\EnumPrintHelpers.cxx" />
-    <ClCompile Include="..\src\CommonInfrastructure\OSAPI.cxx" />
     <ClCompile Include="..\src\ManufacturingExecutionSystem\ManufacturingExecutionSystem.cxx" />
     <ClCompile Include="..\src\ManufacturingExecutionSystem\MESInterface.cxx" />
+    <ClCompile Include="InputParser.cxx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\Config\base_profile_multicast.xml" />
@@ -194,6 +195,9 @@
     <ProjectReference Include="SharedDataTypes_vs2017.vcxproj">
       <Project>{e287142f-0d1e-49bf-b3bc-a218c1d1629f}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="..\src\Idl\ChocolateFactory.idl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

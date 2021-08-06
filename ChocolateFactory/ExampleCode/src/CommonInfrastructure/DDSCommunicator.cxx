@@ -1,65 +1,45 @@
-/*********************************************************************************************
-(c) 2005-2013 Copyright, Real-Time Innovations, Inc.  All rights reserved.    	                             
-RTI grants Licensee a license to use, modify, compile, and create derivative works 
-of the Software.  Licensee has the right to distribute object form only for use with RTI 
-products.  The Software is provided “as is”, with no warranty of any type, including 
-any warranty for fitness for any purpose. RTI is under no obligation to maintain or 
-support the Software.  RTI shall not be liable for any incidental or consequential 
-damages arising out of the use or inability to use the software.
-**********************************************************************************************/
-#include "DDSCommunicator.h"
+/*
+ * (c) 2021 Copyright, Real-Time Innovations, Inc. (RTI) All rights reserved.
+ *
+ * RTI grants Licensee a license to use, modify, compile, and create derivative
+ * works of the software solely for use with RTI Connext DDS.  Licensee may
+ * redistribute copies of the software provided that all such copies are
+ * subject to this license. The software is provided "as is", with no warranty
+ * of any type, including any warranty for fitness for any purpose. RTI is
+ * under no obligation to maintain or support the software.  RTI shall not be
+ * liable for any incidental or consequential damages arising out of the use or
+ * inability to use the software.
+ */
 
-using namespace DDS;
+/* DDSCommunicator.cxx
 
+   Defines common DDS communication elements that are to be inherited by other
+   classes in the creation of DDS applications.
+
+*/
+
+#include "DDSCommunicator.hpp"
+
+using namespace std;
 // ------------------------------------------------------------------------- //
-// Destruction of a DDS communication interface.  This first deletes all the
-// entities created by the DomainParticipant object.  Then, it cleans up the 
-// types that have been registered with the DomainParticipant.  (This is not
-// strictly necessary, but will cause a very small memory leak at shutdown if
-// all types are not unregistered.  Thirdly, this deletes the 
-// DomainParticipant.  Lastly, this finalizes the DomainParticipantFactory.
-DDSCommunicator::~DDSCommunicator() 
-{
-	if (_participant != NULL) 
-	{
-
-		// Delete DataWriters, DataReaders, Topics, Subscribers, and Publishers
-		// created by this DomainParticipant.
-		_participant->delete_contained_entities();
-
-		// Unregister all the data types registered with this DomainParticipant
-		for (std::map<std::string, 
-			UnregisterInfo>::iterator it =
-			_typeCleanupFunctions.begin();
-				it != _typeCleanupFunctions.end();  it++)
-		{
-			(*it).second.unregisterFunction(_participant, (
-				*it).first.c_str());
-		}
-
-		// Delete the DomainParticipant
-		TheParticipantFactory->delete_participant(_participant);
-
-		// You finalize the participant factory here, but this
-		// will not work if you have multiple communicators - for example
-		// in different DDS domains.  In that case, you must be more careful
-		// to only finalize the participant factory after all 
-		// DomainParticipants have been deleted.
-		TheParticipantFactory->finalize_instance();
-	}
-}
-
+// Default constructor. Creates a QoS Provider, Participant, Publisher, and
+// Subscriber based on the default profile in the default QoS file.
 // ------------------------------------------------------------------------- //
-// Creating a DomainParticipant 
+// Creating a QosProvider
+//
+// A QoS provider allows access to qos profiles and the ability to choose and
+// modify them.
+// ------------------------------------------------------------------------- //
+// Creating a DomainParticipant
 //
 // A DomainParticipant starts the DDS discovery process.  It creates
-// several threads, sends and receives discovery information over one or 
-// more transports, and maintains an in-memory discovery database of 
+// several threads, sends and receives discovery information over one or
+// more transports, and maintains an in-memory discovery database of
 // remote DomainParticipants, remote DataWriters, and remote DataReaders
 //
-// Quality of Service can be applied on the level of the DomainParticipant.  
-// This QoS controls the characteristics of:	
-// 1. Transport properties such as which type of network (UDPv4, UDPv6, 
+// Quality of Service can be applied on the level of the DomainParticipant.
+// This QoS controls the characteristics of:
+// 1. Transport properties such as which type of network (UDPv4, UDPv6,
 //    shared memory) or which network interfaces it is allowed to use
 // 2. Which applications this discovers.  By default, apps will discover
 //    other DDS applications over multicast, loopback, and shared memory.
@@ -67,263 +47,94 @@ DDSCommunicator::~DDSCommunicator()
 //
 // For more information on participant QoS, see the USER_QOS_PROFILES.xml
 // file
-
 // ------------------------------------------------------------------------- //
-// Creating a DomainParticipant with a specified domain ID  
-DomainParticipant* DDSCommunicator::CreateParticipant(long domain) 
-{
-	_participant = 
-		TheParticipantFactory->create_participant(domain, 
-		PARTICIPANT_QOS_DEFAULT, NULL, STATUS_MASK_NONE);
+DDSCommunicator::DDSCommunicator() : 
+    _qos(dds::core::QosProvider::Default()),
+    _participant(dds::domain::DomainParticipant(0)),
+    _pub(dds::pub::Publisher(_participant)),
+    _sub(dds::sub::Subscriber(_participant))
+{ }
+DDSCommunicator::DDSCommunicator(std::string& qosFile) :
+    _qos(dds::core::QosProvider(qosFile)),
+    _participant(dds::domain::DomainParticipant(0, _qos.participant_qos())),
+    _pub(dds::pub::Publisher(_participant, _qos.publisher_qos())),
+    _sub(dds::sub::Subscriber(_participant, _qos.subscriber_qos()))
+{ }
+DDSCommunicator::DDSCommunicator(std::string& qosFile, std::string& profile) :
+    _qos(dds::core::QosProvider(qosFile, profile)),
+    _participant(dds::domain::DomainParticipant(0, _qos.participant_qos(profile))),
+    _pub(dds::pub::Publisher(_participant, _qos.publisher_qos(profile))),
+    _sub(dds::sub::Subscriber(_participant, _qos.subscriber_qos(profile)))
+{ }
+DDSCommunicator::DDSCommunicator(dds::core::StringSeq& qosFiles) :
+    _qos(dds::core::QosProvider(dds::core::null)),
+    _participant(dds::domain::DomainParticipant(dds::core::null)),
+    _pub(dds::pub::Publisher(dds::core::null)),
+    _sub(dds::sub::Subscriber(dds::core::null))
+{ 
+    ostringstream fileString;
+    if (!qosFiles.empty()) {
+        copy(qosFiles.begin(), qosFiles.end() - 1, ostream_iterator<string>(fileString, "; "));
+        fileString << qosFiles.back();
+    }
 
-	if (_participant == NULL) 
-	{
-		std::stringstream errss;
-		errss << "Failed to create DomainParticipant object";
-		throw errss.str();
-	} 
-
-	return _participant;
+    _qos = dds::core::QosProvider(fileString.str());
+    _participant = dds::domain::DomainParticipant(0, _qos.participant_qos());
+    _pub = dds::pub::Publisher(_participant, _qos.publisher_qos());
+    _sub = dds::sub::Subscriber(_participant, _qos.subscriber_qos());
 }
-
-// ------------------------------------------------------------------------- //
-// Creating a DomainParticipant with a domain ID of zero
-DomainParticipant* DDSCommunicator::CreateParticipant() 
+DDSCommunicator::DDSCommunicator(std::vector<std::string>& qosFiles, std::string& profile) :
+    _qos(dds::core::QosProvider(dds::core::null)),
+    _participant(dds::domain::DomainParticipant(dds::core::null)),
+    _pub(dds::pub::Publisher(dds::core::null)),
+    _sub(dds::sub::Subscriber(dds::core::null))
 {
-	_participant = 
-		TheParticipantFactory->create_participant(
-									0, 
-									PARTICIPANT_QOS_DEFAULT, 
-									NULL, STATUS_MASK_NONE);
+    ostringstream fileString;
+    if (!qosFiles.empty()) {
+        copy(qosFiles.begin(), qosFiles.end() - 1, ostream_iterator<string>(fileString, "; "));
+        fileString << qosFiles.back();
+    }
 
-	if (_participant == NULL) 
-	{
-		std::stringstream errss;
-		errss << "Failed to create DomainParticipant object";
-		throw errss.str();
-	} 
-
-	return _participant;
-}
-
-
-// ------------------------------------------------------------------------- //
-// Creating a DomainParticipant with a specified domain ID and specified QoS 
-DomainParticipant* DDSCommunicator::CreateParticipant(
-	long domain, 
-	const std::string &participantQosLibrary, 
-	const std::string &participantQosProfile) 
-{
-	_participant = 
-		TheParticipantFactory->create_participant_with_profile(
-									domain, 
-									participantQosLibrary.c_str(), 
-									participantQosProfile.c_str(), 
-									NULL, 
-									STATUS_MASK_NONE);
-
-	if (_participant == NULL) 
-	{
-		std::stringstream errss;
-		errss << "Failed to create DomainParticipant object";
-		throw errss.str();
-	} 
-
-	return _participant;
-
+    _qos = dds::core::QosProvider(fileString.str());
+    _participant = dds::domain::DomainParticipant(0, _qos.participant_qos(profile));
+    _pub = dds::pub::Publisher(_participant, _qos.publisher_qos(profile));
+    _sub = dds::sub::Subscriber(_participant, _qos.subscriber_qos(profile));
 }
 
 
 // ------------------------------------------------------------------------- //
-// Creating a DomainParticipant with a specified domain ID, specified QoS file
-// names, and specified QoS 
-DomainParticipant* DDSCommunicator::CreateParticipant(long domain, 
-	std::vector<std::string>fileNames, 
-	const std::string &participantQosLibrary, 
-	const std::string &participantQosProfile) 
+// Destruction of a DDS communication interface.  This first deletes all the
+// entities created by the DomainParticipant object.  Then, it cleans up the
+// types that have been registered with the DomainParticipant.  (This is not
+// strictly necessary, but will cause a very small memory leak at shutdown if
+// all types are not unregistered.  Thirdly, this deletes the
+// DomainParticipant.  Lastly, this finalizes the DomainParticipantFactory.
+DDSCommunicator::~DDSCommunicator()
 {
-
-	// Adding a list of explicit file names to the DomainParticipantFactory
-	// This gives the middleware a set of places to search for the files
-	DomainParticipantFactoryQos factoryQos;
-	TheParticipantFactory->get_qos(factoryQos);
-	factoryQos.profile.url_profile.ensure_length(fileNames.size(),
-												fileNames.size());
-
-	for (unsigned int i = 0; i < fileNames.size(); i++) 
-	{
-		// Note that we copy the file names here, so they cannot go out of 
-		// scope
-		factoryQos.profile.url_profile[i] = DDS_String_dup(
-			fileNames[i].c_str());
-	}
-
-	ReturnCode_t retcode = TheParticipantFactory->set_qos(factoryQos);
-		
-	if (retcode != RETCODE_OK) 
-	{
-		std::stringstream errss;
-		errss << "Failed to create DomainParticipant object";
-		throw errss.str();
-	}
-
-	// Actually creating the DomainParticipant
-	_participant = 
-		TheParticipantFactory->create_participant_with_profile(
-									domain, 
-									participantQosLibrary.c_str(), 
-									participantQosProfile.c_str(), 
-									NULL, 
-									STATUS_MASK_NONE);
-
-	if (_participant == NULL) 
-	{
-		std::stringstream errss;
-		errss << "Failed to create DomainParticipant object";
-		throw errss.str();
-	} 
-
-	return _participant;
-
-}
-
-
-// ------------------------------------------------------------------------- //
-// Creating a Publisher object.  This is used to create type-specific 
-// DataWriter objects in the application
-Publisher* DDSCommunicator::CreatePublisher()
-{
-	if (GetParticipant() == NULL) 
-	{
-		std::stringstream errss;
-		errss << 
-			"DomainParticipant NULL - communicator not properly " << 
-				"initialized";
-		throw errss.str();
-	}
-
-	// Creating a Publisher.  
-	// This object is used to create type-specific DataWriter objects that 
-	// can actually send data.  
-	// 
-	_pub = GetParticipant()->create_publisher(
-									PUBLISHER_QOS_DEFAULT, 
-									NULL, STATUS_MASK_NONE);	
-
-	if (_pub == NULL) 
-	{
-		std::stringstream errss;
-		errss << "Failed to create Publisher";
-		throw errss.str();
-	}
-
-	return _pub;
+    if (_participant != dds::core::null) {
+        // RTI Connext provides a finalize_participant_factory() method if you
+        // want to release memory used by the participant factory singleton.
+        _participant->finalize_participant_factory();
+    }
 }
 
 // ------------------------------------------------------------------------- //
-// Creating a Publisher object with specified QoS.  This is used to create 
-// type-specific DataWriter objects in the application
-Publisher* DDSCommunicator::CreatePublisher(
-	const std::string &qosLibrary, 
-	const std::string &qosProfile)
+// Getters for QoS, Publisher, and Subscriber.
+dds::core::QosProvider& DDSCommunicator::Qos()
 {
-	if (GetParticipant() == NULL) 
-	{
-		std::stringstream errss;
-		errss << 
-			"DomainParticipant NULL - communicator not properly " << 
-				"initialized";
-		throw errss.str();
-	}
-
-	// Creating a Publisher.  
-	// This object is used to create type-specific DataWriter objects that 
-	// can actually send data.  
-	// 
-	_pub = GetParticipant()->create_publisher_with_profile(
-						qosLibrary.c_str(), 
-						qosProfile.c_str(),
-						NULL, STATUS_MASK_NONE);	
-
-	if (_pub == NULL) 
-	{
-		std::stringstream errss;
-		errss << "Failed to create Publisher";
-		throw errss.str();
-	}
-
-	return _pub;
+    return _qos;
 }
 
-
-// ------------------------------------------------------------------------- //
-// Creating a Subscriber object.  This is used to create type-specific 
-// DataReader objects in the application
-Subscriber* DDSCommunicator::CreateSubscriber()
+dds::domain::DomainParticipant& DDSCommunicator::Participant()
 {
-	if (GetParticipant() == NULL) 
-	{
-		std::stringstream errss;
-		errss << 
-			"DomainParticipant NULL - communicator not properly " << 
-				"initialized";
-		throw errss.str();
-	}
-
-	// Creating a Subscriber.  
-	// This object is used to create type-specific DataReader objects that 
-	// can actually receive data.  The Subscriber object is being created
-	//  in the DDSCommunicator class because one Subscriber can be used to
-	//  create multiple DDS DataReaders. 
-	// 
-	_sub = GetParticipant()->create_subscriber(
-								SUBSCRIBER_QOS_DEFAULT, 
-								NULL, STATUS_MASK_NONE);	
-
-	if (_sub == NULL) 
-	{
-		std::stringstream errss;
-		errss << "Failed to create Subscriber";
-		throw errss.str();
-	}
-
-	return _sub;
+    return _participant;
 }
 
-// ------------------------------------------------------------------------- //
-// Creating a Subscriber object with specified QoS.  This is used to create 
-// type-specific DataReader objects in the application
-Subscriber* DDSCommunicator::CreateSubscriber(
-	const std::string &qosLibrary,
-	const std::string &qosProfile)
+dds::pub::Publisher& DDSCommunicator::Publisher()
 {
-	if (GetParticipant() == NULL) 
-	{
-		std::stringstream errss;
-		errss << 
-			"DomainParticipant NULL - communicator not properly " <<
-				"initialized";
-		throw errss.str();
-	}
-
-	// Creating a Subscriber.  
-	// This object is used to create type-specific DataReader objects that 
-	// can actually receive data.  The Subscriber object is being created
-	//  in the DDSCommunicator class because one Subscriber can be used to
-	//  create multiple DDS DataReaders. 
-	// 
-	_sub = GetParticipant()->create_subscriber_with_profile(
-						qosLibrary.c_str(), 
-						qosProfile.c_str(), 
-						NULL, STATUS_MASK_NONE);	
-	if (_sub == NULL) 
-	{
-		std::stringstream errss;
-		errss << "Failed to create Subscriber";
-		throw errss.str();
-	}
-
-	return _sub;
-
+    return _pub;
 }
-
+dds::sub::Subscriber& DDSCommunicator::Subscriber()
+{
+    return _sub;
+}

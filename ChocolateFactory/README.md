@@ -1,5 +1,5 @@
-![Image](https://www.rti.com/hubfs/RTI_Oct2016/Images/rti-logounit.png)  
- RTI Connext DDS Use Case:  
+![Image](https://www.rti.com/hubfs/RTI_Oct2016/Images/rti-logounit.png)
+ RTI Connext DDS Use Case:
  Industrial Automation in a Chocolate Factory
 =======================================================================
 
@@ -57,54 +57,51 @@ can use to visualize and debug your distributed system.
 Visit: https://www.rti.com/downloads
 
 
-How to Build this Code
-----------------------
-o run this example on all platforms, an environment variable called `NDDSHOME`
-must be set to point to the RTI Connext DDS installation directory, such as
-rti_connext_dds-6.0.x.
-For more information on how to set an environment variable, please see the RTI
-Core Libraries and Utilities Getting Started Guide.
+Building the Example :wrench:
+-----------------------------
 
+To build this example, first run CMake to generate the corresponding build
+files. We recommend you use a separate directory to store all the generated
+files (e.g., ./build).
 
-We will refer to the location where you unzipped the example in this document
-as EXAMPLE_HOME.
-
-All source and build files are located in EXAMPLE_HOME/ExampleCode/.  Before
-building or running, change directories into EXAMPLE_HOME/ExampleCode.
-
-
-Windows Systems
----------------
-On a Windows system, start by opening the file
-`win32\ChocolateFactory-<compilerver>.sln`.
-
-This code is made up of a combination of libraries, source, and IDL files that
-represent the interface to the application. The Visual Studio solution files
-are set up to automatically generate the necessary code and link against the
-required libraries.
-
-
-Linux Systems
--------------
-To build the applications on a Linux system, change directories to the
-ExampleCode directory and use the command:
+Starting from the `ExampleCode` directory
+```sh
+mkdir build
+cd build
+cmake ../src
 ```
-(g)make -f make/Makefile.<platform>
-```
-The platform you choose will be the combination of your processor, OS, and
-compiler version.  Right now this example only supports x64Linux3gcc5.4.0
 
+Once you have run CMake, you will find a number of new files in your build
+directory (the list of generated files will depend on the specific CMake
+Generator). To build the example, run CMake as follows:
+
+```sh
+cmake --build .
+```
+
+**Note**: if you are using a multi-configuration generator, such as Visual
+Studio solutions, you can specify the configuration mode to build as follows:
+
+```sh
+cmake --build . --config Release|Debug
+```
+
+Alternatively, you can use directly the generated infrastructure (e.g.,
+Makefiles or Visual Studio Solutions) to build the example. If you generated
+Makefiles in the configuration process, run make to build the example. Likewise,
+if you generated a Visual Studio solution, open the solution and follow the
+regular build process.
 
 Run the Example
 ---------------
-On Windows systems, navigate to the EXAMPLE_HOME\ExampleCode\scripts directory.  
+On Windows systems, navigate to the EXAMPLE_HOME\ExampleCode\scripts directory.
 In this directory are four batch files to start the applications:
   - RecipeGenerator.bat
   - MES.bat
   - StationController.bat (to start a single station controller)
   - AllStationControllers.bat (to start all station controllers)
 
-On Linux systems, navigate to the EXAMPLE_HOME/ExampleCode/scripts directory.  
+On Linux systems, navigate to the EXAMPLE_HOME/ExampleCode/scripts directory.
 In this directory are four batch files to start the applications:
   - RecipeGenerator.sh
   - MES.sh

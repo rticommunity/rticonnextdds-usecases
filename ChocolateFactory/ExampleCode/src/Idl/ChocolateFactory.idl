@@ -17,7 +17,7 @@ const string RECIPE_TOPIC = "ChocolateRecipes";
 const string CHOCOLATE_LOT_TOPIC = "ChocolateLotState";
 
 const string QOS_LIBRARY = "RTIExampleQosLibrary";
-const string QOS_PROFILE_STATE_DATA = "FactoryStateData";
+const string QOS_PROFILE_STATE_DATA = "RTIExampleQosLibrary::FactoryStateData";
 
 const long MAX_INGREDIENT_LIST = 9;
 const long MAX_RECIPE_STEPS = 9;
