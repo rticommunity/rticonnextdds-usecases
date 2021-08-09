@@ -126,4 +126,6 @@ ChocolateRecipe StationControllerInterface::GetRecipe(const string recipeName)
         if (recipeName == sample.data().recipeName())
             return sample.data();
     }
+
+    return ChocolateRecipe();
 }
