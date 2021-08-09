@@ -1,4 +1,5 @@
 ![Image](https://www.rti.com/hubfs/RTI_Oct2016/Images/rti-logounit.png)
+
  RTI Connext DDS Use Case:
  Industrial Automation in a Chocolate Factory
 =======================================================================
@@ -61,8 +62,8 @@ Building the Example :wrench:
 -----------------------------
 
 To build this example, first run CMake to generate the corresponding build
-files. We recommend you use a separate directory to store all the generated
-files (e.g., ./build).
+files. You need to use a separate directory to store all the generated
+files (./build).
 
 Starting from the `ExampleCode` directory
 ```sh
