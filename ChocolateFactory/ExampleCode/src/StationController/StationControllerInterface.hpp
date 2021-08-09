@@ -147,6 +147,8 @@ public:
 private:
     // --- Private members ---
 
+    std::string _profile;
+
     // This contains the calls that allow the interface to create a
     // "DomainParticipant", the first object that must be created to
     // communicate over a DDS middleware.
