@@ -52,10 +52,10 @@ public:
     // to pull the QoS, Publisher, and Subscriber to create DataReaders and
     // DataWriters
 
-    dds::core::QosProvider& Qos();
-    dds::domain::DomainParticipant& Participant();
-    dds::pub::Publisher& Publisher();
-    dds::sub::Subscriber& Subscriber();
+    dds::core::QosProvider& Qos() const;
+    dds::domain::DomainParticipant& Participant() const;
+    dds::pub::Publisher& Publisher() const;
+    dds::sub::Subscriber& Subscriber() const;
 
 private:
     // --- Protected members ---

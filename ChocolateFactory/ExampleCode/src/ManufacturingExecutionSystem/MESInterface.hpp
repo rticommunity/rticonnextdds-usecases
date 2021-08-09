@@ -83,7 +83,7 @@ private:
     // This contains the calls that allow the interface to create a
     // "DomainParticipant", the first object that must be created to
     // communicate over a DDS middleware.
-    DDSCommunicator& _communicator;
+    const DDSCommunicator& _communicator;
 
     // Topic object used to define the datatype use by the ChocolateLotState
     // DataReader and DataWriter

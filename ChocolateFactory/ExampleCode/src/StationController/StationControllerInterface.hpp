@@ -152,7 +152,7 @@ private:
     // This contains the calls that allow the interface to create a
     // "DomainParticipant", the first object that must be created to
     // communicate over a DDS middleware.
-    DDSCommunicator& _comm;
+    const DDSCommunicator& _comm;
 
     // If this is a controller, this filed is used to identify which station
     // controller this is, and what part of the recipe it is responsible for.

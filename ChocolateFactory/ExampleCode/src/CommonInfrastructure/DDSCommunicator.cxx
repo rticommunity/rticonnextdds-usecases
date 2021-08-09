@@ -117,21 +117,21 @@ DDSCommunicator::~DDSCommunicator()
 
 // ------------------------------------------------------------------------- //
 // Getters for QoS, Publisher, and Subscriber.
-dds::core::QosProvider& DDSCommunicator::Qos()
+dds::core::QosProvider& DDSCommunicator::Qos() const
 {
     return *_qos;
 }
 
-dds::domain::DomainParticipant& DDSCommunicator::Participant()
+dds::domain::DomainParticipant& DDSCommunicator::Participant() const
 {
     return *_participant;
 }
 
-dds::pub::Publisher& DDSCommunicator::Publisher()
+dds::pub::Publisher& DDSCommunicator::Publisher() const
 {
     return *_pub;
 }
-dds::sub::Subscriber& DDSCommunicator::Subscriber()
+dds::sub::Subscriber& DDSCommunicator::Subscriber() const
 {
     return *_sub;
 }

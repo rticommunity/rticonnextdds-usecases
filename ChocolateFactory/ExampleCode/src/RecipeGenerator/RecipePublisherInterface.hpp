@@ -62,7 +62,7 @@ private:
     // --- Private members ---
 
     // Used to create basic DDS entities that all applications need
-    DDSCommunicator& _communicator;
+    const DDSCommunicator& _communicator;
 
     // Topic object used by writer
     dds::topic::Topic<ChocolateRecipe>* _topic;
