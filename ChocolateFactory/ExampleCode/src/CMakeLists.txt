@@ -9,7 +9,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../cmake
 #Find the ConnextDDS libraries.This will look fo the core and API libraries
 #only
 find_package(RTIConnextDDS
-  "6.0.1"
+  "6.1.0"
   REQUIRED
   COMPONENTS core)
 
