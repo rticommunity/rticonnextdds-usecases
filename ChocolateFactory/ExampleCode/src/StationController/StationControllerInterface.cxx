@@ -83,8 +83,8 @@ using namespace dds::sub;
 StationControllerInterface::StationControllerInterface(StationControllerKind id,
     vector<string> qosFileNames, string lotStateQosProfile, 
     string recipeQosProfile) : 
-    _comm(DDSCommunicator(qosFileNames, (QOS_LIBRARY + "::" + 
-        QOS_PROFILE_STATE_DATA)))    
+    _profile(QOS_PROFILE_STATE_DATA),
+    _comm(DDSCommunicator(qosFileNames, _profile))    
 {
     _stationControllerID = id;
 
