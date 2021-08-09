@@ -61,16 +61,16 @@ private:
     // --- Protected members ---
 
     // Used to create a QOS Provider to be used by other elements
-    dds::core::QosProvider& _qos;
+    dds::core::QosProvider* _qos;
 
     // Used to create other DDS entities
-    dds::domain::DomainParticipant& _participant;
+    dds::domain::DomainParticipant* _participant;
 
     // Used to create DataWriters
-    dds::pub::Publisher& _pub;
+    dds::pub::Publisher* _pub;
 
     // Used to create DataReaders
-    dds::sub::Subscriber& _sub;
+    dds::sub::Subscriber* _sub;
 };
 
 

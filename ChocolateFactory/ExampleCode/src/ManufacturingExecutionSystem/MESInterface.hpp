@@ -61,7 +61,7 @@ public:
     // the network.
     dds::pub::DataWriter<ChocolateLotState>& WriterChocolateLotState()
     {
-        return _writerChocolateLotState;
+        return *_writerChocolateLotState;
     }
 
     // --- Getter for the ChocolateLotStateReader ---
@@ -71,7 +71,7 @@ public:
     // state updates
     dds::sub::DataReader<ChocolateLotState>& ReaderChocolateLotState()
     {
-        return _readerChocolateLotState;
+        return *_readerChocolateLotState;
     }
 
 private:
@@ -87,13 +87,13 @@ private:
 
     // Topic object used to define the datatype use by the ChocolateLotState
     // DataReader and DataWriter
-    dds::topic::Topic<ChocolateLotState>& _topicChocolateLotState;
+    dds::topic::Topic<ChocolateLotState>* _topicChocolateLotState;
 
     // DataWriter object for ChocolateLotState
-    dds::pub::DataWriter<ChocolateLotState>& _writerChocolateLotState;
+    dds::pub::DataWriter<ChocolateLotState>* _writerChocolateLotState;
 
     // DataReader used for receiving chocolate lot state data
-    dds::sub::DataReader<ChocolateLotState>& _readerChocolateLotState;
+    dds::sub::DataReader<ChocolateLotState>* _readerChocolateLotState;
 };
 
 #endif

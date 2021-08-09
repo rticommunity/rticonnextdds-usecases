@@ -71,22 +71,23 @@ using namespace com::chocolatefactory::generated;
 
 MESInterface::MESInterface(std::vector<std::string>& qosFileNames) :
     _profile(QOS_PROFILE_STATE_DATA),
-    _communicator(DDSCommunicator(qosFileNames, _profile)),
-    _topicChocolateLotState(dds::topic::Topic<ChocolateLotState>(
-        _communicator.Participant(), CHOCOLATE_LOT_TOPIC, 
-        _communicator.Qos().topic_qos(_profile))),
-    _writerChocolateLotState(dds::pub::DataWriter<ChocolateLotState>(
-        _communicator.Publisher(), _topicChocolateLotState,
-        _communicator.Qos().datawriter_qos(_profile))),
-    _readerChocolateLotState(dds::sub::DataReader<ChocolateLotState>(
-        _communicator.Subscriber(), _topicChocolateLotState,
-        _communicator.Qos().datareader_qos(_profile)))
+    _communicator(DDSCommunicator(qosFileNames, _profile))
 {
     // Note: all data in this example is "state data."  The string constants
     // with the QoS library name and the QoS profile name are configured as
     // constants in the .idl file.  The profiles themselves are configured in
     // the .xml file. Look in the XML for more details on the definition of
     // state data.
+
+    _topicChocolateLotState = new dds::topic::Topic<ChocolateLotState>(
+        _communicator.Participant(), CHOCOLATE_LOT_TOPIC,
+        _communicator.Qos().topic_qos(_profile));
+    _writerChocolateLotState = new dds::pub::DataWriter<ChocolateLotState>(
+        _communicator.Publisher(), *_topicChocolateLotState,
+        _communicator.Qos().datawriter_qos(_profile));
+    _readerChocolateLotState = new dds::sub::DataReader<ChocolateLotState>(
+        _communicator.Subscriber(), *_topicChocolateLotState,
+        _communicator.Qos().datareader_qos(_profile));
 }
 
 // ------------------------------------------------------------------------- //

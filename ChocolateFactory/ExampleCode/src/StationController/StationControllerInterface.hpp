@@ -109,7 +109,7 @@ public:
     // write data in RTI Connext DDS.
     dds::pub::DataWriter<ChocolateLotState>& WriterChocolateLotState()
     {
-        return _writerChocolateLotState;
+        return *_writerChocolateLotState;
     }
 
     // --- Getter for the ChocolateLotStateReader ---
@@ -119,7 +119,7 @@ public:
     // state updates
     dds::sub::DataReader<ChocolateLotState>& ReaderChocolateLotState()
     {
-        return _readerChocolateLotState;
+        return *_readerChocolateLotState;
     }
 
     // --- Getter for the RecipeReader ---
@@ -128,7 +128,7 @@ public:
     // DDS "WaitSet" object to wait for recipes
     dds::sub::DataReader<ChocolateRecipe>& ReaderRecipe()
     {
-        return _readerRecipe;
+        return *_readerRecipe;
     }
 
     // --- Getter for Controller ID ---
@@ -159,21 +159,21 @@ private:
 
     // Topic object used to define the datatype use by the ChocolateLotState
     // DataWriter
-    dds::topic::Topic<ChocolateLotState>& _topicChocolateLotState;
+    dds::topic::Topic<ChocolateLotState>* _topicChocolateLotState;
     // Topic object used to define the datatype use by the ChocolateLotState
     // DataReader
-    dds::topic::ContentFilteredTopic<ChocolateLotState>& _cftChocolateLotState;
+    dds::topic::ContentFilteredTopic<ChocolateLotState>* _cftChocolateLotState;
     // Topic object used for Chocolate Recipe reader
-    dds::topic::Topic<ChocolateRecipe>& _topicChocolateRecipe;
+    dds::topic::Topic<ChocolateRecipe>* _topicChocolateRecipe;
 
     // DataWriter object for ChocolateLotState
-    dds::pub::DataWriter<ChocolateLotState>& _writerChocolateLotState;
+    dds::pub::DataWriter<ChocolateLotState>* _writerChocolateLotState;
 
     // DataReader used for receiving chocolate lot state data
-    dds::sub::DataReader<ChocolateLotState>& _readerChocolateLotState;
+    dds::sub::DataReader<ChocolateLotState>* _readerChocolateLotState;
 
     // Used for receiving recipe data, and for looking up received recipes.
-    dds::sub::DataReader<ChocolateRecipe>& _readerRecipe;
+    dds::sub::DataReader<ChocolateRecipe>* _readerRecipe;
 };
 
 #endif

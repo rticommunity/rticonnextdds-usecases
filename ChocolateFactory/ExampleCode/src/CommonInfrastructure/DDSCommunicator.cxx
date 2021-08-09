@@ -48,29 +48,30 @@ using namespace std;
 // For more information on participant QoS, see the USER_QOS_PROFILES.xml
 // file
 // ------------------------------------------------------------------------- //
-DDSCommunicator::DDSCommunicator() : 
-    _qos(dds::core::QosProvider::Default()),
-    _participant(dds::domain::DomainParticipant(0)),
-    _pub(dds::pub::Publisher(_participant)),
-    _sub(dds::sub::Subscriber(_participant))
-{ }
-DDSCommunicator::DDSCommunicator(std::string& qosFile) :
-    _qos(dds::core::QosProvider(qosFile)),
-    _participant(dds::domain::DomainParticipant(0, _qos.participant_qos())),
-    _pub(dds::pub::Publisher(_participant, _qos.publisher_qos())),
-    _sub(dds::sub::Subscriber(_participant, _qos.subscriber_qos()))
-{ }
-DDSCommunicator::DDSCommunicator(std::string& qosFile, std::string& profile) :
-    _qos(dds::core::QosProvider(qosFile, profile)),
-    _participant(dds::domain::DomainParticipant(0, _qos.participant_qos(profile))),
-    _pub(dds::pub::Publisher(_participant, _qos.publisher_qos(profile))),
-    _sub(dds::sub::Subscriber(_participant, _qos.subscriber_qos(profile)))
-{ }
-DDSCommunicator::DDSCommunicator(dds::core::StringSeq& qosFiles) :
-    _qos(dds::core::QosProvider(dds::core::null)),
-    _participant(dds::domain::DomainParticipant(dds::core::null)),
-    _pub(dds::pub::Publisher(dds::core::null)),
-    _sub(dds::sub::Subscriber(dds::core::null))
+DDSCommunicator::DDSCommunicator()
+{
+    _qos = new dds::core::QosProvider(dds::core::null);
+    *_qos = dds::core::QosProvider::Default();
+
+    _participant = new dds::domain::DomainParticipant(0);
+    _pub = new dds::pub::Publisher(*_participant);
+    _sub = new dds::sub::Subscriber(*_participant);
+}
+DDSCommunicator::DDSCommunicator(std::string& qosFile)
+{ 
+    _qos = new dds::core::QosProvider(qosFile);
+    _participant = new dds::domain::DomainParticipant(0, _qos->participant_qos());
+    _pub = new dds::pub::Publisher(*_participant, _qos->publisher_qos());
+    _sub = new dds::sub::Subscriber(*_participant, _qos->subscriber_qos());
+}
+DDSCommunicator::DDSCommunicator(std::string& qosFile, std::string& profile)
+{ 
+    _qos = new dds::core::QosProvider(qosFile, profile);
+    _participant = new dds::domain::DomainParticipant(0, _qos->participant_qos(profile));
+    _pub = new dds::pub::Publisher(*_participant, _qos->publisher_qos(profile));
+    _sub = new dds::sub::Subscriber(*_participant, _qos->subscriber_qos(profile));
+}
+DDSCommunicator::DDSCommunicator(dds::core::StringSeq& qosFiles)
 { 
     ostringstream fileString;
     if (!qosFiles.empty()) {
@@ -78,16 +79,12 @@ DDSCommunicator::DDSCommunicator(dds::core::StringSeq& qosFiles) :
         fileString << qosFiles.back();
     }
 
-    _qos = dds::core::QosProvider(fileString.str());
-    _participant = dds::domain::DomainParticipant(0, _qos.participant_qos());
-    _pub = dds::pub::Publisher(_participant, _qos.publisher_qos());
-    _sub = dds::sub::Subscriber(_participant, _qos.subscriber_qos());
+    _qos = new dds::core::QosProvider(fileString.str());
+    _participant = new dds::domain::DomainParticipant(0, _qos->participant_qos());
+    _pub = new dds::pub::Publisher(*_participant, _qos->publisher_qos());
+    _sub = new dds::sub::Subscriber(*_participant, _qos->subscriber_qos());
 }
-DDSCommunicator::DDSCommunicator(std::vector<std::string>& qosFiles, std::string& profile) :
-    _qos(dds::core::QosProvider(dds::core::null)),
-    _participant(dds::domain::DomainParticipant(dds::core::null)),
-    _pub(dds::pub::Publisher(dds::core::null)),
-    _sub(dds::sub::Subscriber(dds::core::null))
+DDSCommunicator::DDSCommunicator(std::vector<std::string>& qosFiles, std::string& profile)
 {
     ostringstream fileString;
     if (!qosFiles.empty()) {
@@ -95,10 +92,10 @@ DDSCommunicator::DDSCommunicator(std::vector<std::string>& qosFiles, std::string
         fileString << qosFiles.back();
     }
 
-    _qos = dds::core::QosProvider(fileString.str());
-    _participant = dds::domain::DomainParticipant(0, _qos.participant_qos(profile));
-    _pub = dds::pub::Publisher(_participant, _qos.publisher_qos(profile));
-    _sub = dds::sub::Subscriber(_participant, _qos.subscriber_qos(profile));
+    _qos = new dds::core::QosProvider(fileString.str());
+    _participant = new dds::domain::DomainParticipant(0, _qos->participant_qos(profile));
+    _pub = new dds::pub::Publisher(*_participant, _qos->publisher_qos(profile));
+    _sub = new dds::sub::Subscriber(*_participant, _qos->subscriber_qos(profile));
 }
 
 
@@ -122,19 +119,19 @@ DDSCommunicator::~DDSCommunicator()
 // Getters for QoS, Publisher, and Subscriber.
 dds::core::QosProvider& DDSCommunicator::Qos()
 {
-    return _qos;
+    return *_qos;
 }
 
 dds::domain::DomainParticipant& DDSCommunicator::Participant()
 {
-    return _participant;
+    return *_participant;
 }
 
 dds::pub::Publisher& DDSCommunicator::Publisher()
 {
-    return _pub;
+    return *_pub;
 }
 dds::sub::Subscriber& DDSCommunicator::Subscriber()
 {
-    return _sub;
+    return *_sub;
 }

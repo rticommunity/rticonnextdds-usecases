@@ -46,17 +46,18 @@ using namespace com::chocolatefactory::generated;
 
 RecipePublisherInterface::RecipePublisherInterface(
         std::vector<std::string>& xmlFiles) :
-    _communicator(DDSCommunicator(xmlFiles)),
-    _topic(dds::topic::Topic<ChocolateRecipe>(_communicator.Participant(),
-        RECIPE_TOPIC, _communicator.Qos().topic_qos())),
-    _writer(dds::pub::DataWriter<ChocolateRecipe>(_communicator.Publisher(),
-        _topic, _communicator.Qos().datawriter_qos()))
+    _communicator(DDSCommunicator(xmlFiles))
 {
     // Note: all data in this example is "state data."  The string constants
     // with the QoS library name and the QoS profile name are configured as
     // constants in the .idl file.  The profiles themselves are configured in
     // the .xml file. Look in the XML for more details on the definition of
     // state data.
+
+    _topic = new dds::topic::Topic<ChocolateRecipe>(_communicator.Participant(),
+        RECIPE_TOPIC, _communicator.Qos().topic_qos());
+    _writer = new dds::pub::DataWriter<ChocolateRecipe>(_communicator.Publisher(),
+        *_topic, _communicator.Qos().datawriter_qos());
 }
 
 // ----------------------------------------------------------------------------
@@ -82,6 +83,6 @@ void RecipePublisherInterface::Write(ChocolateRecipe data)
     // throughput, so we are not bothering to pre-register the instance
     // handle.  If we did pre-register the instance handle, this could
     // potentially speed up the writing.
-    _writer.write(data);
+    _writer->write(data);
 
 }

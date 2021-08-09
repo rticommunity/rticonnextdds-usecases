@@ -65,10 +65,10 @@ private:
     DDSCommunicator& _communicator;
 
     // Topic object used by writer
-    dds::topic::Topic<ChocolateRecipe>& _topic;
+    dds::topic::Topic<ChocolateRecipe>* _topic;
 
     // Recipe publisher specific to this application
-    dds::pub::DataWriter<ChocolateRecipe>& _writer;
+    dds::pub::DataWriter<ChocolateRecipe>* _writer;
 };
 
 #endif
