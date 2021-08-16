@@ -58,21 +58,21 @@ DDSCommunicator::DDSCommunicator()
     _sub = new dds::sub::Subscriber(*_participant);
 }
 DDSCommunicator::DDSCommunicator(std::string& qosFile)
-{ 
+{
     _qos = new dds::core::QosProvider(qosFile);
     _participant = new dds::domain::DomainParticipant(0, _qos->participant_qos());
     _pub = new dds::pub::Publisher(*_participant, _qos->publisher_qos());
     _sub = new dds::sub::Subscriber(*_participant, _qos->subscriber_qos());
 }
-DDSCommunicator::DDSCommunicator(std::string& qosFile, std::string& profile)
-{ 
+DDSCommunicator::DDSCommunicator(std::string& qosFile, std::string profile)
+{
     _qos = new dds::core::QosProvider(qosFile, profile);
     _participant = new dds::domain::DomainParticipant(0, _qos->participant_qos(profile));
     _pub = new dds::pub::Publisher(*_participant, _qos->publisher_qos(profile));
     _sub = new dds::sub::Subscriber(*_participant, _qos->subscriber_qos(profile));
 }
 DDSCommunicator::DDSCommunicator(dds::core::StringSeq& qosFiles)
-{ 
+{
     ostringstream fileString;
     if (!qosFiles.empty()) {
         copy(qosFiles.begin(), qosFiles.end() - 1, ostream_iterator<string>(fileString, "; "));
@@ -84,7 +84,7 @@ DDSCommunicator::DDSCommunicator(dds::core::StringSeq& qosFiles)
     _pub = new dds::pub::Publisher(*_participant, _qos->publisher_qos());
     _sub = new dds::sub::Subscriber(*_participant, _qos->subscriber_qos());
 }
-DDSCommunicator::DDSCommunicator(std::vector<std::string>& qosFiles, std::string& profile)
+DDSCommunicator::DDSCommunicator(std::vector<std::string>& qosFiles, std::string profile)
 {
     ostringstream fileString;
     if (!qosFiles.empty()) {

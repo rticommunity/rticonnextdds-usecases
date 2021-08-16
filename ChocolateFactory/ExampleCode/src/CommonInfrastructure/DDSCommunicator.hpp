@@ -40,9 +40,9 @@ public:
     // --- Constructor and Destructor ---
     DDSCommunicator();
     DDSCommunicator(std::string& qosFile);
-    DDSCommunicator(std::string& qosFiles, std::string& profile);
+    DDSCommunicator(std::string& qosFiles, std::string profile);
     DDSCommunicator(dds::core::StringSeq& qosFiles);
-    DDSCommunicator(std::vector<std::string>& qosFiles, std::string& profile);
+    DDSCommunicator(std::vector<std::string>& qosFiles, std::string profile);
 
     ~DDSCommunicator();
 
