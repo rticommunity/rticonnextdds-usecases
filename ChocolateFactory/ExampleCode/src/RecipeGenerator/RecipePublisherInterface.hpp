@@ -19,6 +19,7 @@
 #include "../Generated/ChocolateFactory.hpp"
 
 using namespace com::chocolatefactory::generated;
+using namespace std;
 
 // ----------------------------------------------------------------------------
 //
@@ -46,7 +47,7 @@ public:
     // DomainParticipant, creating all publishers and subscribers, topics
     // writers and readers.  Takes as input a vector of xml QoS files that
     // should be loaded to find QoS profiles and libraries.
-    RecipePublisherInterface(std::vector<std::string>& xmlFiles);
+    RecipePublisherInterface(vector<string>& xmlFiles);
 
     // --- Destructor ---
     ~RecipePublisherInterface();
@@ -63,9 +64,6 @@ private:
 
     // Used to create basic DDS entities that all applications need
     const DDSCommunicator& _communicator;
-
-    // Topic object used by writer
-    dds::topic::Topic<ChocolateRecipe>* _topic;
 
     // Recipe publisher specific to this application
     dds::pub::DataWriter<ChocolateRecipe>* _writer;

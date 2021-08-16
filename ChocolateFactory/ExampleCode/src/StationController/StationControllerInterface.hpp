@@ -96,8 +96,7 @@ public:
 
     // --- Constructor ---
     StationControllerInterface(StationControllerKind stationControllerID,
-        vector<string> qosFileNames, string lotStateQosProfile,
-        string recipeQosProfile);
+        vector<string> qosFileNames, string lotStateQosProfile);
 
     // --- Destructor ---
     virtual ~StationControllerInterface();
@@ -122,22 +121,6 @@ public:
         return *_readerChocolateLotState;
     }
 
-    // --- Getter for the RecipeReader ---
-    // This returns the Chocolate recipe reader - a small wrapper around the
-    // ChocolateRecipeDataReader that initializes the reader and uses the
-    // DDS "WaitSet" object to wait for recipes
-    dds::sub::DataReader<ChocolateRecipe>& ReaderRecipe()
-    {
-        return *_readerRecipe;
-    }
-
-    // --- Getter for Controller ID ---
-    // Accessor for the controller ID
-    const StationControllerKind StationControllerID()
-    {
-        return _stationControllerID;
-    }
-
     // --- Retrieve recipes ---
     // This example receives all recipes, and leaves them in the middleware's
     // queue.  It queries for a particular recipe when it receives an update
@@ -147,26 +130,10 @@ public:
 private:
     // --- Private members ---
 
-    std::string _profile;
-
     // This contains the calls that allow the interface to create a
     // "DomainParticipant", the first object that must be created to
     // communicate over a DDS middleware.
     const DDSCommunicator& _comm;
-
-    // If this is a controller, this filed is used to identify which station
-    // controller this is, and what part of the recipe it is responsible for.
-    // If this is not a station controller, this is set to invalid
-    StationControllerKind _stationControllerID;
-
-    // Topic object used to define the datatype use by the ChocolateLotState
-    // DataWriter
-    dds::topic::Topic<ChocolateLotState>* _topicChocolateLotState;
-    // Topic object used to define the datatype use by the ChocolateLotState
-    // DataReader
-    dds::topic::ContentFilteredTopic<ChocolateLotState>* _cftChocolateLotState;
-    // Topic object used for Chocolate Recipe reader
-    dds::topic::Topic<ChocolateRecipe>* _topicChocolateRecipe;
 
     // DataWriter object for ChocolateLotState
     dds::pub::DataWriter<ChocolateLotState>* _writerChocolateLotState;

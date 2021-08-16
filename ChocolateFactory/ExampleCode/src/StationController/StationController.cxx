@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
         // the network
         StationControllerInterface stationControllerInterface(
                         (StationControllerKind) controllerType,
-                        xmlFiles, QOS_PROFILE_STATE_DATA, QOS_PROFILE_STATE_DATA);
+                        xmlFiles, QOS_PROFILE_STATE_DATA);
 
         // Create a new Station Controller object.
         StationController controller((StationControllerKind) controllerType,

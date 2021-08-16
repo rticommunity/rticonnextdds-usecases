@@ -14,6 +14,7 @@
 #include "RecipePublisherInterface.hpp"
 
 using namespace com::chocolatefactory::generated;
+using namespace std;
 
 // ----------------------------------------------------------------------------
 // The RecipePublisherInterface is the network interface to the whole
@@ -44,8 +45,7 @@ using namespace com::chocolatefactory::generated;
 // file.
 // ------------------------------------------------------------------------- //
 
-RecipePublisherInterface::RecipePublisherInterface(
-        std::vector<std::string>& xmlFiles) :
+RecipePublisherInterface::RecipePublisherInterface(vector<string>& xmlFiles) :
     _communicator(DDSCommunicator(xmlFiles))
 {
     // Note: all data in this example is "state data."  The string constants
@@ -54,10 +54,11 @@ RecipePublisherInterface::RecipePublisherInterface(
     // the .xml file. Look in the XML for more details on the definition of
     // state data.
 
-    _topic = new dds::topic::Topic<ChocolateRecipe>(_communicator.Participant(),
+     auto topic = dds::topic::Topic<ChocolateRecipe>(_communicator.Participant(),
         RECIPE_TOPIC, _communicator.Qos().topic_qos());
+
     _writer = new dds::pub::DataWriter<ChocolateRecipe>(_communicator.Publisher(),
-        *_topic, _communicator.Qos().datawriter_qos());
+        topic, _communicator.Qos().datawriter_qos());
 }
 
 // ----------------------------------------------------------------------------

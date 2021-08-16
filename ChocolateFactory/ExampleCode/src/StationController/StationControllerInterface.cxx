@@ -81,34 +81,31 @@ using namespace dds::sub;
 // ------------------------------------------------------------------------- //
 
 StationControllerInterface::StationControllerInterface(StationControllerKind id,
-    vector<string> qosFileNames, string lotStateQosProfile, 
-    string recipeQosProfile) : 
-    _profile(QOS_PROFILE_STATE_DATA),
-    _comm(DDSCommunicator(qosFileNames, _profile))    
+    vector<string> qosFileNames, string lotStateQosProfile) : 
+    _comm(DDSCommunicator(qosFileNames, string(QOS_PROFILE_STATE_DATA)))
 {
-    _stationControllerID = id;
-
     // All data in this example is "state data."  The string constants with the
     // QoS library name and the QoS profile name are configured as constants in
     // the .idl file.  The profiles themselves are configured in the .xml file.
     // Look in the XML for more details on the definition of state data.
 
-    _topicChocolateLotState = new Topic<ChocolateLotState>(_comm.Participant(),
+    auto topicChocolateLotState = Topic<ChocolateLotState>(_comm.Participant(),
         CHOCOLATE_LOT_TOPIC, _comm.Qos().topic_qos(lotStateQosProfile));
-    _cftChocolateLotState = new ContentFilteredTopic<ChocolateLotState>(
-        *_topicChocolateLotState, "ContentFilter", Filter(
+    auto cftChocolateLotState = ContentFilteredTopic<ChocolateLotState>(
+        topicChocolateLotState, "ContentFilter", Filter(
             "lotStatus = 'LOT_COMPLETED' OR nextController = %0", {
                 StationControllerType::ControllerEnumName(id)
             })
         );
-    _topicChocolateRecipe = new Topic<ChocolateRecipe>(_comm.Participant(),
-        RECIPE_TOPIC, _comm.Qos().topic_qos(recipeQosProfile));
+    auto topicChocolateRecipe = Topic<ChocolateRecipe>(_comm.Participant(),
+        RECIPE_TOPIC, _comm.Qos().topic_qos());
+
     _writerChocolateLotState = new DataWriter<ChocolateLotState>(_comm.Publisher(),
-        *_topicChocolateLotState, _comm.Qos().datawriter_qos(lotStateQosProfile));
+        topicChocolateLotState, _comm.Qos().datawriter_qos(lotStateQosProfile));
     _readerChocolateLotState = new DataReader<ChocolateLotState>(_comm.Subscriber(),
-        *_cftChocolateLotState, _comm.Qos().datareader_qos(lotStateQosProfile));
+        cftChocolateLotState, _comm.Qos().datareader_qos(lotStateQosProfile));
     _readerRecipe = new DataReader<ChocolateRecipe>(_comm.Subscriber(),
-        *_topicChocolateRecipe, _comm.Qos().datareader_qos(recipeQosProfile));
+        topicChocolateRecipe, _comm.Qos().datareader_qos());
 }
 
 // ------------------------------------------------------------------------- //

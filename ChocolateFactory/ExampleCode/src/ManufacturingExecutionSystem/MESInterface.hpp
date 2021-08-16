@@ -17,6 +17,7 @@ the software.
 #include "../CommonInfrastructure/DDSCommunicator.hpp"
 
 using namespace com::chocolatefactory::generated;
+using namespace std;
 
 // ----------------------------------------------------------------------------
 //
@@ -50,7 +51,7 @@ public:
     // DomainParticipant, creating all publishers and subscribers, topics
     // writers and readers.  Takes as input a vector of xml QoS files that
     // should be loaded to find QoS profiles and libraries.
-    MESInterface(std::vector<std::string>& xmlFiles);
+    MESInterface(vector<string>& xmlFiles);
 
     // --- Destructor ---
     ~MESInterface();
@@ -77,17 +78,10 @@ public:
 private:
     // --- Private members ---
 
-    // Stores profile based on elements from IDL file
-    std::string _profile;
-
     // This contains the calls that allow the interface to create a
     // "DomainParticipant", the first object that must be created to
     // communicate over a DDS middleware.
     const DDSCommunicator& _communicator;
-
-    // Topic object used to define the datatype use by the ChocolateLotState
-    // DataReader and DataWriter
-    dds::topic::Topic<ChocolateLotState>* _topicChocolateLotState;
 
     // DataWriter object for ChocolateLotState
     dds::pub::DataWriter<ChocolateLotState>* _writerChocolateLotState;

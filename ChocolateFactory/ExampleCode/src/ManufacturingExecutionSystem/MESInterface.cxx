@@ -14,6 +14,7 @@
 #include "MESInterface.hpp"
 
 using namespace com::chocolatefactory::generated;
+using namespace std;
 
 // ------------------------------------------------------------------------- //
 // The MESInterface is the network interface to the whole Manufacturing
@@ -70,8 +71,7 @@ using namespace com::chocolatefactory::generated;
 // ------------------------------------------------------------------------- //
 
 MESInterface::MESInterface(std::vector<std::string>& qosFileNames) :
-    _profile(QOS_PROFILE_STATE_DATA),
-    _communicator(DDSCommunicator(qosFileNames, _profile))
+    _communicator(DDSCommunicator(qosFileNames, string(QOS_PROFILE_STATE_DATA)))
 {
     // Note: all data in this example is "state data."  The string constants
     // with the QoS library name and the QoS profile name are configured as
@@ -79,15 +79,16 @@ MESInterface::MESInterface(std::vector<std::string>& qosFileNames) :
     // the .xml file. Look in the XML for more details on the definition of
     // state data.
 
-    _topicChocolateLotState = new dds::topic::Topic<ChocolateLotState>(
+    auto topicChocolateLotState = dds::topic::Topic<ChocolateLotState>(
         _communicator.Participant(), CHOCOLATE_LOT_TOPIC,
-        _communicator.Qos().topic_qos(_profile));
+        _communicator.Qos().topic_qos(QOS_PROFILE_STATE_DATA));
+
     _writerChocolateLotState = new dds::pub::DataWriter<ChocolateLotState>(
-        _communicator.Publisher(), *_topicChocolateLotState,
-        _communicator.Qos().datawriter_qos(_profile));
+        _communicator.Publisher(), topicChocolateLotState,
+        _communicator.Qos().datawriter_qos(QOS_PROFILE_STATE_DATA));
     _readerChocolateLotState = new dds::sub::DataReader<ChocolateLotState>(
-        _communicator.Subscriber(), *_topicChocolateLotState,
-        _communicator.Qos().datareader_qos(_profile));
+        _communicator.Subscriber(), topicChocolateLotState,
+        _communicator.Qos().datareader_qos(QOS_PROFILE_STATE_DATA));
 }
 
 // ------------------------------------------------------------------------- //
