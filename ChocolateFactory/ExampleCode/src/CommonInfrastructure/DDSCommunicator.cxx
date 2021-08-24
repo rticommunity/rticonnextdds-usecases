@@ -107,13 +107,7 @@ DDSCommunicator::DDSCommunicator(std::vector<std::string>& qosFiles, std::string
 // all types are not unregistered.  Thirdly, this deletes the
 // DomainParticipant.  Lastly, this finalizes the DomainParticipantFactory.
 DDSCommunicator::~DDSCommunicator()
-{
-    if (_participant != dds::core::null) {
-        // RTI Connext provides a finalize_participant_factory() method if you
-        // want to release memory used by the participant factory singleton.
-        _participant->finalize_participant_factory();
-    }
-}
+{ }
 
 // ------------------------------------------------------------------------- //
 // Getters for QoS, Publisher, and Subscriber.
