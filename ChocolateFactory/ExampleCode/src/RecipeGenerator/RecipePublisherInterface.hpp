@@ -56,17 +56,17 @@ public:
     // Uses DDS interface to send a recipe efficiently over the network
     // or shared memory to interested applications subscribing to recipe
     // information.
-    void Write(ChocolateRecipe data);
+    void Write(ChocolateRecipe& data);
 
 
 private:
     // --- Private members ---
 
     // Used to create basic DDS entities that all applications need
-    const DDSCommunicator& _communicator;
+    const DDSCommunicator& communicator_;
 
     // Recipe publisher specific to this application
-    dds::pub::DataWriter<ChocolateRecipe>* _writer;
+    dds::pub::DataWriter<ChocolateRecipe>* writer_;
 };
 
 #endif

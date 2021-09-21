@@ -50,26 +50,26 @@ using namespace std;
 // ------------------------------------------------------------------------- //
 DDSCommunicator::DDSCommunicator()
 {
-    _qos = new dds::core::QosProvider(dds::core::null);
-    *_qos = dds::core::QosProvider::Default();
+    qos_ = new dds::core::QosProvider(dds::core::null);
+    *qos_ = dds::core::QosProvider::Default();
 
-    _participant = new dds::domain::DomainParticipant(0);
-    _pub = new dds::pub::Publisher(*_participant);
-    _sub = new dds::sub::Subscriber(*_participant);
+    participant_ = new dds::domain::DomainParticipant(0);
+    pub_ = new dds::pub::Publisher(*participant_);
+    sub_ = new dds::sub::Subscriber(*participant_);
 }
 DDSCommunicator::DDSCommunicator(std::string& qosFile)
 {
-    _qos = new dds::core::QosProvider(qosFile);
-    _participant = new dds::domain::DomainParticipant(0, _qos->participant_qos());
-    _pub = new dds::pub::Publisher(*_participant, _qos->publisher_qos());
-    _sub = new dds::sub::Subscriber(*_participant, _qos->subscriber_qos());
+    qos_ = new dds::core::QosProvider(qosFile);
+    participant_ = new dds::domain::DomainParticipant(0, qos_->participant_qos());
+    pub_ = new dds::pub::Publisher(*participant_, qos_->publisher_qos());
+    sub_ = new dds::sub::Subscriber(*participant_, qos_->subscriber_qos());
 }
 DDSCommunicator::DDSCommunicator(std::string& qosFile, std::string profile)
 {
-    _qos = new dds::core::QosProvider(qosFile, profile);
-    _participant = new dds::domain::DomainParticipant(0, _qos->participant_qos(profile));
-    _pub = new dds::pub::Publisher(*_participant, _qos->publisher_qos(profile));
-    _sub = new dds::sub::Subscriber(*_participant, _qos->subscriber_qos(profile));
+    qos_ = new dds::core::QosProvider(qosFile, profile);
+    participant_ = new dds::domain::DomainParticipant(0, qos_->participant_qos(profile));
+    pub_ = new dds::pub::Publisher(*participant_, qos_->publisher_qos(profile));
+    sub_ = new dds::sub::Subscriber(*participant_, qos_->subscriber_qos(profile));
 }
 DDSCommunicator::DDSCommunicator(dds::core::StringSeq& qosFiles)
 {
@@ -79,10 +79,10 @@ DDSCommunicator::DDSCommunicator(dds::core::StringSeq& qosFiles)
         fileString << qosFiles.back();
     }
 
-    _qos = new dds::core::QosProvider(fileString.str());
-    _participant = new dds::domain::DomainParticipant(0, _qos->participant_qos());
-    _pub = new dds::pub::Publisher(*_participant, _qos->publisher_qos());
-    _sub = new dds::sub::Subscriber(*_participant, _qos->subscriber_qos());
+    qos_ = new dds::core::QosProvider(fileString.str());
+    participant_ = new dds::domain::DomainParticipant(0, qos_->participant_qos());
+    pub_ = new dds::pub::Publisher(*participant_, qos_->publisher_qos());
+    sub_ = new dds::sub::Subscriber(*participant_, qos_->subscriber_qos());
 }
 DDSCommunicator::DDSCommunicator(std::vector<std::string>& qosFiles, std::string profile)
 {
@@ -92,10 +92,10 @@ DDSCommunicator::DDSCommunicator(std::vector<std::string>& qosFiles, std::string
         fileString << qosFiles.back();
     }
 
-    _qos = new dds::core::QosProvider(fileString.str());
-    _participant = new dds::domain::DomainParticipant(0, _qos->participant_qos(profile));
-    _pub = new dds::pub::Publisher(*_participant, _qos->publisher_qos(profile));
-    _sub = new dds::sub::Subscriber(*_participant, _qos->subscriber_qos(profile));
+    qos_ = new dds::core::QosProvider(fileString.str());
+    participant_ = new dds::domain::DomainParticipant(0, qos_->participant_qos(profile));
+    pub_ = new dds::pub::Publisher(*participant_, qos_->publisher_qos(profile));
+    sub_ = new dds::sub::Subscriber(*participant_, qos_->subscriber_qos(profile));
 }
 
 
@@ -113,19 +113,19 @@ DDSCommunicator::~DDSCommunicator()
 // Getters for QoS, Publisher, and Subscriber.
 dds::core::QosProvider& DDSCommunicator::Qos() const
 {
-    return *_qos;
+    return *qos_;
 }
 
 dds::domain::DomainParticipant& DDSCommunicator::Participant() const
 {
-    return *_participant;
+    return *participant_;
 }
 
 dds::pub::Publisher& DDSCommunicator::Publisher() const
 {
-    return *_pub;
+    return *pub_;
 }
 dds::sub::Subscriber& DDSCommunicator::Subscriber() const
 {
-    return *_sub;
+    return *sub_;
 }

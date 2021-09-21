@@ -27,6 +27,7 @@
 
 #include <dds/dds.hpp>
 
+using namespace std;
 // ------------------------------------------------------------------------- //
 //
 // DDSCommunicator:
@@ -39,10 +40,10 @@ class DDSCommunicator {
 public:
     // --- Constructor and Destructor ---
     DDSCommunicator();
-    DDSCommunicator(std::string& qosFile);
-    DDSCommunicator(std::string& qosFiles, std::string profile);
+    DDSCommunicator(string& qosFile);
+    DDSCommunicator(string& qosFiles, string profile);
     DDSCommunicator(dds::core::StringSeq& qosFiles);
-    DDSCommunicator(std::vector<std::string>& qosFiles, std::string profile);
+    DDSCommunicator(vector<string>& qosFiles, string profile);
 
     ~DDSCommunicator();
 
@@ -61,16 +62,16 @@ private:
     // --- Protected members ---
 
     // Used to create a QOS Provider to be used by other elements
-    dds::core::QosProvider* _qos;
+    dds::core::QosProvider* qos_;
 
     // Used to create other DDS entities
-    dds::domain::DomainParticipant* _participant;
+    dds::domain::DomainParticipant* participant_;
 
     // Used to create DataWriters
-    dds::pub::Publisher* _pub;
+    dds::pub::Publisher* pub_;
 
     // Used to create DataReaders
-    dds::sub::Subscriber* _sub;
+    dds::sub::Subscriber* sub_;
 };
 
 

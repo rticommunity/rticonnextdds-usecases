@@ -81,31 +81,31 @@ using namespace dds::sub;
 // ------------------------------------------------------------------------- //
 
 StationControllerInterface::StationControllerInterface(StationControllerKind id,
-    vector<string> qosFileNames, string lotStateQosProfile) : 
-    _comm(DDSCommunicator(qosFileNames, string(QOS_PROFILE_STATE_DATA)))
+    vector<string>& qosFileNames, string& lotStateQosProfile) : 
+    comm_(DDSCommunicator(qosFileNames, string(QOS_PROFILE_STATE_DATA)))
 {
     // All data in this example is "state data."  The string constants with the
     // QoS library name and the QoS profile name are configured as constants in
     // the .idl file.  The profiles themselves are configured in the .xml file.
     // Look in the XML for more details on the definition of state data.
 
-    auto topicChocolateLotState = Topic<ChocolateLotState>(_comm.Participant(),
-        CHOCOLATE_LOT_TOPIC, _comm.Qos().topic_qos(lotStateQosProfile));
+    auto topicChocolateLotState = Topic<ChocolateLotState>(comm_.Participant(),
+        CHOCOLATE_LOT_TOPIC, comm_.Qos().topic_qos(lotStateQosProfile));
     auto cftChocolateLotState = ContentFilteredTopic<ChocolateLotState>(
         topicChocolateLotState, "ContentFilter", Filter(
             "lotStatus = 'LOT_COMPLETED' OR nextController = %0", {
                 StationControllerType::ControllerEnumName(id)
             })
         );
-    auto topicChocolateRecipe = Topic<ChocolateRecipe>(_comm.Participant(),
-        RECIPE_TOPIC, _comm.Qos().topic_qos());
+    auto topicChocolateRecipe = Topic<ChocolateRecipe>(comm_.Participant(),
+        RECIPE_TOPIC, comm_.Qos().topic_qos());
 
-    _writerChocolateLotState = new DataWriter<ChocolateLotState>(_comm.Publisher(),
-        topicChocolateLotState, _comm.Qos().datawriter_qos(lotStateQosProfile));
-    _readerChocolateLotState = new DataReader<ChocolateLotState>(_comm.Subscriber(),
-        cftChocolateLotState, _comm.Qos().datareader_qos(lotStateQosProfile));
-    _readerRecipe = new DataReader<ChocolateRecipe>(_comm.Subscriber(),
-        topicChocolateRecipe, _comm.Qos().datareader_qos());
+    writerChocolateLotState_ = new DataWriter<ChocolateLotState>(comm_.Publisher(),
+        topicChocolateLotState, comm_.Qos().datawriter_qos(lotStateQosProfile));
+    readerChocolateLotState_ = new DataReader<ChocolateLotState>(comm_.Subscriber(),
+        cftChocolateLotState, comm_.Qos().datareader_qos(lotStateQosProfile));
+    readerRecipe_ = new DataReader<ChocolateRecipe>(comm_.Subscriber(),
+        topicChocolateRecipe, comm_.Qos().datareader_qos());
 }
 
 // ------------------------------------------------------------------------- //
@@ -115,11 +115,11 @@ StationControllerInterface::StationControllerInterface(StationControllerKind id,
 StationControllerInterface::~StationControllerInterface()
 { }
 
-ChocolateRecipe StationControllerInterface::GetRecipe(const string recipeName)
+ChocolateRecipe StationControllerInterface::GetRecipe(const string& recipeName)
 {
     // Create a placeholder with only the key field filled in.  This will be
     // used to retrieve the recipe instance (if it exists).
-    for (auto sample : _readerRecipe->read()) {
+    for (auto sample : readerRecipe_->read()) {
         if (recipeName == sample.data().recipeName())
             return sample.data();
     }

@@ -62,7 +62,7 @@ public:
     // the network.
     dds::pub::DataWriter<ChocolateLotState>& WriterChocolateLotState()
     {
-        return *_writerChocolateLotState;
+        return *writerChocolateLotState_;
     }
 
     // --- Getter for the ChocolateLotStateReader ---
@@ -72,7 +72,7 @@ public:
     // state updates
     dds::sub::DataReader<ChocolateLotState>& ReaderChocolateLotState()
     {
-        return *_readerChocolateLotState;
+        return *readerChocolateLotState_;
     }
 
 private:
@@ -81,13 +81,13 @@ private:
     // This contains the calls that allow the interface to create a
     // "DomainParticipant", the first object that must be created to
     // communicate over a DDS middleware.
-    const DDSCommunicator& _communicator;
+    const DDSCommunicator& communicator_;
 
     // DataWriter object for ChocolateLotState
-    dds::pub::DataWriter<ChocolateLotState>* _writerChocolateLotState;
+    dds::pub::DataWriter<ChocolateLotState>* writerChocolateLotState_;
 
     // DataReader used for receiving chocolate lot state data
-    dds::sub::DataReader<ChocolateLotState>* _readerChocolateLotState;
+    dds::sub::DataReader<ChocolateLotState>* readerChocolateLotState_;
 };
 
 #endif

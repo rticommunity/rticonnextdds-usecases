@@ -46,7 +46,7 @@ using namespace std;
 // ------------------------------------------------------------------------- //
 
 RecipePublisherInterface::RecipePublisherInterface(vector<string>& xmlFiles) :
-    _communicator(DDSCommunicator(xmlFiles))
+    communicator_(DDSCommunicator(xmlFiles))
 {
     // Note: all data in this example is "state data."  The string constants
     // with the QoS library name and the QoS profile name are configured as
@@ -54,11 +54,11 @@ RecipePublisherInterface::RecipePublisherInterface(vector<string>& xmlFiles) :
     // the .xml file. Look in the XML for more details on the definition of
     // state data.
 
-     auto topic = dds::topic::Topic<ChocolateRecipe>(_communicator.Participant(),
-        RECIPE_TOPIC, _communicator.Qos().topic_qos());
+     auto topic = dds::topic::Topic<ChocolateRecipe>(communicator_.Participant(),
+        RECIPE_TOPIC, communicator_.Qos().topic_qos());
 
-    _writer = new dds::pub::DataWriter<ChocolateRecipe>(_communicator.Publisher(),
-        topic, _communicator.Qos().datawriter_qos());
+    writer_ = new dds::pub::DataWriter<ChocolateRecipe>(communicator_.Publisher(),
+        topic, communicator_.Qos().datawriter_qos());
 }
 
 // ----------------------------------------------------------------------------
@@ -72,7 +72,7 @@ RecipePublisherInterface::~RecipePublisherInterface()
 // Sends the recipe over a transport (such as shared memory or UDPv4)
 // This writes the Recipe data using RTI Connext DDS to any DataReader
 // that shares the same Topic
-void RecipePublisherInterface::Write(ChocolateRecipe data)
+void RecipePublisherInterface::Write(ChocolateRecipe& data)
 {
     // This actually sends the recipe data over the network.
 
@@ -84,6 +84,6 @@ void RecipePublisherInterface::Write(ChocolateRecipe data)
     // throughput, so we are not bothering to pre-register the instance
     // handle.  If we did pre-register the instance handle, this could
     // potentially speed up the writing.
-    _writer->write(data);
+    writer_->write(data);
 
 }

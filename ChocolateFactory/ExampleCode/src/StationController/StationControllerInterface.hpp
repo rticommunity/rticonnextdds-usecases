@@ -96,7 +96,7 @@ public:
 
     // --- Constructor ---
     StationControllerInterface(StationControllerKind stationControllerID,
-        vector<string> qosFileNames, string lotStateQosProfile);
+        vector<string>& qosFileNames, string& lotStateQosProfile);
 
     // --- Destructor ---
     virtual ~StationControllerInterface();
@@ -108,7 +108,7 @@ public:
     // write data in RTI Connext DDS.
     dds::pub::DataWriter<ChocolateLotState>& WriterChocolateLotState()
     {
-        return *_writerChocolateLotState;
+        return *writerChocolateLotState_;
     }
 
     // --- Getter for the ChocolateLotStateReader ---
@@ -118,14 +118,14 @@ public:
     // state updates
     dds::sub::DataReader<ChocolateLotState>& ReaderChocolateLotState()
     {
-        return *_readerChocolateLotState;
+        return *readerChocolateLotState_;
     }
 
     // --- Retrieve recipes ---
     // This example receives all recipes, and leaves them in the middleware's
     // queue.  It queries for a particular recipe when it receives an update
     // about a lot and it needs to check the recipe for that lot.
-    ChocolateRecipe GetRecipe(const string recipeName);
+    ChocolateRecipe GetRecipe(const string& recipeName);
 
 private:
     // --- Private members ---
@@ -133,16 +133,16 @@ private:
     // This contains the calls that allow the interface to create a
     // "DomainParticipant", the first object that must be created to
     // communicate over a DDS middleware.
-    const DDSCommunicator& _comm;
+    const DDSCommunicator& comm_;
 
     // DataWriter object for ChocolateLotState
-    dds::pub::DataWriter<ChocolateLotState>* _writerChocolateLotState;
+    dds::pub::DataWriter<ChocolateLotState>* writerChocolateLotState_;
 
     // DataReader used for receiving chocolate lot state data
-    dds::sub::DataReader<ChocolateLotState>* _readerChocolateLotState;
+    dds::sub::DataReader<ChocolateLotState>* readerChocolateLotState_;
 
     // Used for receiving recipe data, and for looking up received recipes.
-    dds::sub::DataReader<ChocolateRecipe>* _readerRecipe;
+    dds::sub::DataReader<ChocolateRecipe>* readerRecipe_;
 };
 
 #endif

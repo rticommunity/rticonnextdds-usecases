@@ -33,8 +33,8 @@ public:
 
 private:
     // --- Private members ---
-    StationControllerInterface& _networkInterface;
-    StationControllerKind _stationControllerKind;
+    StationControllerInterface& networkInterface_;
+    StationControllerKind stationControllerKind_;
 };
 
 #endif
