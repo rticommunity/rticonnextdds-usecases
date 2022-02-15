@@ -5,16 +5,18 @@
 
 Concept
 -------
-This use case example includes two applications that send and receive
-streaming video data.
+This use case example will stream compressed video over a local or wide area network
+such as the Internet.  RTI Connext provides the communications framework with adjustments
+for Quality of Service and sample size, while external applications are used to 
+encode ([FFMPEG](https://www.ffmpeg.org/)) and decode/display ([FFPLAY](https://www.ffmpeg.org/)) 
+video and audio, in this case from a pre-recorded file or from a camera connected to the host system.  
 
-The two applications are:
 
-1. Video Publisher (VideoPublisher)
-    - Provides streaming video in VP8 format
-
-2. Video Subscriber (VideoSubscriber)
-    - Receives streaming video in VP8 format
+FFMPEG and FFPLAY are available as buildable source code or as pre-built binary executables for 
+most desktop host platforms, and are used here to encode video and audio using h.264 compression 
+into an [MPEG-TS](https://en.wikipedia.org/wiki/MPEG_transport_stream) stream of 188-byte 'packets', 
+which are then grouped and sent over a Connext DDS topic to one or more subscribers for presentation.
+Note that this example could be made to work with other streaming video codecs.  
 
 
 Additional Documentation
@@ -39,9 +41,12 @@ You can download RTI Connext here: https://www.rti.com/downloads/
 
 How to Build this Code
 ----------------------
-To run this example on all platforms, an environment variable called `NDDSHOME`
+To build this example, an environment variable called `NDDSHOME`
 must be set to point to the RTI Connext DDS installation directory, such as
-rti_connext_dds-6.0.x.
+`~/rti_connext_dds-6.1.0`.   This variable can be set manually, or by running
+the `rtisetenv_xxx` configuration script located in the `resources/scripts` 
+directory of the Connext installation, or by opening a "Connext DDS Professional 
+Terminal" from the Utilities tab of the RTI Launcher. 
 For more information on how to set an environment variable, please see the RTI
 Core Libraries and Utilities Getting Started Guide.
 
@@ -49,73 +54,94 @@ Core Libraries and Utilities Getting Started Guide.
 We will refer to the location where you unzipped the example in this document
 as EXAMPLE_HOME.  
 
-All source and build files are located in EXAMPLE_HOME/ExampleCode/.  Before
-building or running, change directories into EXAMPLE_HOME/ExampleCode.
+All source and build files are located in `EXAMPLE_HOME/VideoData/ExampleCode/`.  
+Before building or running the example, change directories into EXAMPLE_HOME/ExampleCode.
+
+**Building on Windows**  
+To build the application on a Windows host PC, open a terminal at `EXAMPLE_HOME/VideoData/ExampleCode/` and:
+````
+    (setup RTI build environment per above)
+    (ensure Windows build tools are configured; 'vcvarsall.bat' is an example config script)
+    mkdir build
+    cd build
+    cmake ..
+    msbuild cc_streamvid.sln
+````
 
 
-Windows Systems
+**Building on Linux**  
+To build the application on a Linux host PC, open a terminal at `EXAMPLE_HOME/VideoData/ExampleCode/` and:
+````
+    (setup RTI build environment per above)
+    (ensure Linux build tools are configured)
+    mkdir build
+    cd build
+    cmake ..
+    make
+````
+
+The build process will create an executable application: `streamvid`, which is used as both 
+publisher and subscriber of the streaming data.  
+
+
+Running the Example
 ---------------
-On a Windows system, start by opening the file
-`win32\StreamingVideoExample-<compilerver>.sln`.
+Open a terminal in the `EXAMPLE_HOME/VideoData/ExampleCode/` directory.   This terminal
+must have the `FFMPEG` and `FFPLAY` utilities available in the system PATH variable.  
 
-This code is made up of a combination of libraries, source, and IDL files that
-represent the interface to the application. The Visual Studio solution files
-are set up to automatically generate the necessary code and link against the
-required libraries.
+**Scripted Demonstrators**  
+For convenience, a set of scripts are included to launch all of the needed components on 
+a common host system;  this will 'stream' the video only within that machine, but serves as 
+a baseline test that things are working correctly.  
 
-
-Linux Systems
--------------
-To build the applications on a Linux system, change directories to the
-ExampleCode directory and use the command:
-
-`gmake -f make/Makefile.<platform>`  
-
-The platform you choose will be the combination of your processor, OS, and
-compiler version.  Right now this example only supports x64Linux3gcc4.8.2
-
-
-Run the Example
----------------
-On Windows systems, navigate to the `EXAMPLE_HOME\ExampleCode\scripts` directory.  
-In this directory are two batch files to start the applications:
+The scripts are:
 ````
-  - VideoPublisher.bat
-  - VideoSubscriber.bat
+    run_demo         == File --> FFMPEG --> Connext pub --> Connext sub --> FFPLAY
+    run_demo_ff_only == File --> FFMPEG --> FFPLAY (no Connext)
+                        Fils is at: resource/RTI-vehicles-captions-480.mp4
+    run_cam_demo     == Camera --> FFMPEG --> Connext pub --> Connext sub --> FFPLAY
+    run_cam_ff_only  == Camera --> FFMPEG --> FFPLAY
+                        This script may need editing to match your system/camera
 ````
 
-On Linux systems, navigate to the `EXAMPLE_HOME/ExampleCode/scripts` directory.
-In this directory are two batch files to start the applications:
-````
-  - VideoPublisher.sh
-  - VideoSubscriber.sh
-````
+Be sure to run the appropriate script for your system (*.bat scripts for Windows, *.sh scripts for Linux)  
 
-You can run these script or batch files on the same machine, or you can copy
-this example and run on multiple machines. If you run them on the same machine,
-they will communicate over the shared memory transport. If you run them on
-multiple machines, they will communicate over UDP.
+**Command-Line Operation**  
+
+`streamvid` can be run with several command-line arguments.  These can be viewed using the `-h` option, also printed below:
+
+| argument | description |
+| ---------- | ----------- |
+| -d, --domain <int> | DDS Domain ID for this application (0) |
+| -p, --pub <string> | Publish (video stream) as this ID |
+| -s, --sub <string> | Subscribe (video stream) from this ID |
+| -b, --buffer <int> | Size of the published DDS samples in bytes (1316) |
+| -c, --configfile <string> | Configuration filename to load (config.properties)  |
+| -w, --writeback | Write-back to the config file, updated args ||
+| -q, --qos <a,b,c> | QoS profile to use: a:rel, b:besteffort, c:userdef (USER_QOS_PROFILES.xml) |
+| -v, --verbosity <int> | How much debugging output to show (1:EXCEPTION)|
+| -h, --help | Print this list and exit|
+| ---------- | ----------- |
+
+To launch as individual applications (on one or more host machines): Open 4 terminals:  
+
+To launch as separate applications: Two pairs of terminals will be needed: 2 for publish, 2 for subscribe
+
+Publisher terminal 1:
+
+    build/streamvid.exe -p PubMachine
+
+Publisher terminal 2:
+
+    ffmpeg -re -i resource/RTI-vehicles-captioned-480.mp4 -g 15 -pix_fmt yuv420p -vcodec libx264 -preset ultrafast -tune zerolatency -f mpegts udp://127.0.0.1:2277
+
+Subscriber terminal 1:
+
+    build/streamvid.exe -s PubMachine
+
+Subscriber terminal 2:
+
+    ffplay -fflags nobuffer -i udp://127.0.0.1:2278
 
 
-
-VideoPublisher Parameters:
---------------------------
-The video publisher includes the option to disable multicast if your network
-does not support it.
-````
-Valid options are:
-    --no-multicast       Do not use any multicast, including for discovery
-                         (note you must edit XML config to include IP
-                         addresses)
-````
-VideoSubscriber Parameters:
---------------------------
-The video subscriber can choose to receive video streams over multicast. It
-can also be configured to use no multicast at all, including for discovery.
-````
-Valid options are:
-    --multicast          Use multicast for streaming video
-    --no-multicast       Do not use any multicast, including for discovery
-                         (note you must edit XML config to include IP
-                         addresses)
-````
+See the detailed description at: https://www.rti.com/resources/usecases/streaming-video
