@@ -22,7 +22,7 @@ Note that this example could be made to work with other streaming video codecs.
 Additional Documentation
 ------------------------
 Detailed documentation and how-to videos for this example are available online at:
-  https://www.rti.com/resources/usecases/streaming-video
+  https://www.rti.com/developers/case-code/video-data-streaming
 
 More Case + Code examples are available at:
   https://www.rti.com/resources/usecases
@@ -144,4 +144,4 @@ Subscriber terminal 2:
     ffplay -fflags nobuffer -i udp://127.0.0.1:2278
 
 
-See the detailed description at: https://www.rti.com/resources/usecases/streaming-video
+See the detailed description at: https://www.rti.com/developers/case-code/video-data-streaming
