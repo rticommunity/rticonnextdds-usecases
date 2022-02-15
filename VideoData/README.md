@@ -107,21 +107,19 @@ The scripts are:
 Be sure to run the appropriate script for your system (*.bat scripts for Windows, *.sh scripts for Linux)  
 
 **Command-Line Operation**  
-
 `streamvid` can be run with several command-line arguments.  These can be viewed using the `-h` option, also printed below:
 
 | argument | description |
 | ---------- | ----------- |
-| -d, --domain <int> | DDS Domain ID for this application (0) |
-| -p, --pub <string> | Publish (video stream) as this ID |
-| -s, --sub <string> | Subscribe (video stream) from this ID |
-| -b, --buffer <int> | Size of the published DDS samples in bytes (1316) |
-| -c, --configfile <string> | Configuration filename to load (config.properties)  |
+| -d, --domain [int] | DDS Domain ID for this application (0) |
+| -p, --pub [string] | Publish (video stream) as this ID |
+| -s, --sub [string] | Subscribe (video stream) from this ID |
+| -b, --buffer [int] | Size of the published DDS samples in bytes (1316) |
+| -c, --configfile [string] | Configuration filename to load (config.properties)  |
 | -w, --writeback | Write-back to the config file, updated args ||
-| -q, --qos <a,b,c> | QoS profile to use: a:rel, b:besteffort, c:userdef (USER_QOS_PROFILES.xml) |
-| -v, --verbosity <int> | How much debugging output to show (1:EXCEPTION)|
+| -q, --qos [a,b,c] | QoS profile to use: a:rel, b:besteffort, c:userdef (USER_QOS_PROFILES.xml) |
+| -v, --verbosity [int] | How much debugging output to show (1:EXCEPTION)|
 | -h, --help | Print this list and exit|
-| ---------- | ----------- |
 
 To launch as individual applications (on one or more host machines): Open 4 terminals:  
 
