@@ -57,29 +57,39 @@ We will refer to the location where you unzipped the example in this document
 as EXAMPLE_HOME.  
 
 All source and build files are located in EXAMPLE_HOME/ExampleCode/.  Before
-building or running, change directories into EXAMPLE_HOME/ExampleCode.
+building or running, change directories into EXAMPLE_HOME/ExampleCode. A 
+CMakeLists.txtis provided and has been tested with Visual Studio 2017 64-bit 
+and Ubuntu 18.04 
 
 
 Windows Systems
 ---------------
-On a Windows system, start by opening the file
-`win32\AirTrafficExample-<compilerver>.sln`.
+Under EXAMPLE_HOME/ExampleCode/ create a build directory 
+`mkdir build`
 
-This code is made up of a combination of libraries, source, and IDL files that
-represent the interface to the application. The Visual Studio solution files
-are set up to automatically generate the necessary code and link against the
-required libraries.
+Change to the build directory
+`cd build`
+
+Run CMake to generate the build files
+`cmake -G "Visual Studio 15 2017" -Ax64 ..`
+ 
+Build the example
+`cmake --build .`
 
 
 Linux Systems
 -------------
-To build the applications on a Linux system, change directories to the
-ExampleCode directory and use the command:
+Under EXAMPLE_HOME/ExampleCode/ create a build directory 
+`mkdir build`
 
-`gmake -f make/Makefile.<platform>`  
+Change to the build directory
+`cd build`
 
-The platform you choose will be the combination of your processor, OS, and
-compiler version.  Right now this example only supports x64Linux3gcc5.4.0
+Run CMake to generate the build files
+`cmake ..`
+ 
+Build the example
+`cmake --build .`
 
 
 Run the Example
