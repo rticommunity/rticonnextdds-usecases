@@ -142,4 +142,12 @@ Subscriber terminal 2:
     ffplay -fflags nobuffer -i udp://127.0.0.1:2278
 
 
+**Streaming over Internet**  
+By default this example uses a UDP LAN connection, as directed in the `USER_QOS_PROFILES.xml` file.
+Operation over Internet may be achieved using the RTI [Connext Anywhere](https://www.rti.com/products/connext-anywhere) 
+transport option, which is a separately-installed product that can be enabled by editing the
+`USER_QOS_PROFILES.xml` file: comment-out the `<transport_builtin>` section that specifies using 
+UDP, and un-comment the next section that specifies using `UDPV4_WAN` to enable Connext Anywhere
+transport and discovery using RTI Cloud Discovery Service.
+
 See the detailed description at: https://www.rti.com/developers/case-code/video-data-streaming
