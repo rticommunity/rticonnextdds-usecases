@@ -20,7 +20,7 @@ The two applications are:
 Additional Documentation
 ------------------------
 Detailed documentation and how-to videos for this example are available online at:
-  https://www.rti.com/resources/usecases/streaming-video
+  https://www.rti.com/developers/case-code/video-data-streaming
 
 More Case + Code examples are available at:
   https://www.rti.com/resources/usecases
