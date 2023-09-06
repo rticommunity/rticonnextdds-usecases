@@ -1,153 +1,168 @@
-![Image](https://www.rti.com/hubfs/RTI_Oct2016/Images/rti-logounit.png)  
- RTI Connext DDS Use Case:  
- Streaming Video
-==========================================
+# RTI Connext GStreamer Plugin
 
-Concept
--------
-This use case example will stream compressed video over a local or wide area network
-such as the Internet.  RTI Connext provides the communications framework with adjustments
-for Quality of Service and sample size, while external applications are used to 
-encode ([FFMPEG](https://www.ffmpeg.org/)) and decode/display ([FFPLAY](https://www.ffmpeg.org/)) 
-video and audio, in this case from a pre-recorded file or from a camera connected to the host system.  
+This repository builds GStreamer plugins that allow to publish, subscribe and process video frames using RTI Connext Professional. GStreamer works by constructing a "pipeline" made out of "elements" that start with a source, end with a sink, and have filters in between. Please read more about GStreamer basics in the tutorials [here](https://gstreamer.freedesktop.org/documentation/tutorials/basic/concepts.html?gi-language=c). Currently this repo creates the following GStreamer plugins:
 
+- `connextsink`: takes camera frames at the end of a pipeline and publishes them to Connext DDS.
+- `connextsrc`: subscribes to camera frames from Connext DDS and acts as a GStreamer source at the start of the pipeline.
 
-FFMPEG and FFPLAY are available as buildable source code or as pre-built binary executables for 
-most desktop host platforms, and are used here to encode video and audio using h.264 compression 
-into an [MPEG-TS](https://en.wikipedia.org/wiki/MPEG_transport_stream) stream of 188-byte 'packets', 
-which are then grouped and sent over a Connext DDS topic to one or more subscribers for presentation.
-Note that this example could be made to work with other streaming video codecs.  
+This repository also contains a set of QoS profiles optimized for video streaming in the `USER_QOS_PROFILES.xml` file.
 
+## Cloning Repository
 
-Additional Documentation
-------------------------
-Detailed documentation and how-to videos for this example are available online at:
-  https://www.rti.com/developers/case-code/video-data-streaming
+To clone the repository you will need to run git clone as follows to download both the repository and its submodule dependencies:
 
-More Case + Code examples are available at:
-  https://www.rti.com/resources/usecases
+```sh
+git clone --recurse-submodule https://github.com/rticommunity/rticonnextdds-usecases.git
+```
 
+If you forget to clone the repository with `--recurse-submodule`, simply run
+the following command to pull all the dependencies:
 
+```sh
+git submodule update --init --recursive
+```
 
-Download RTI Connext DDS
-------------------------
-If you do not already have RTI Connext DDS installed, download and install it
-now. You can use a 30-day trial license to try out the product. Your download
-will include the libraries that are required to run the example, and tools you
-can use to visualize and debug your distributed system.
+## Prerequisites
 
-You can download RTI Connext here: https://www.rti.com/downloads/
+- Linux-based OS or WSL.
+- Follow the official [documentation](https://gstreamer.freedesktop.org/documentation/installing/on-linux.html?gi-language=c) to setup GStreamer on your machine.
+- Necessary GStreamer plugins include:
 
+```text
+    libgstreamer1.0-0 \
+    gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-bad \
+    gstreamer1.0-plugins-ugly \
+    libgstreamer1.0-dev \
+    libgstreamer-plugins-base1.0-dev \
+    libgstreamer-plugins-good1.0-dev \
+    libgstreamer-plugins-bad1.0-dev
+```
 
-How to Build this Code
-----------------------
-To build this example, an environment variable called `NDDSHOME`
-must be set to point to the RTI Connext DDS installation directory, such as
-`~/rti_connext_dds-6.1.0`.   This variable can be set manually, or by running
-the `rtisetenv_xxx` configuration script located in the `resources/scripts` 
-directory of the Connext installation, or by opening a "Connext DDS Professional 
-Terminal" from the Utilities tab of the RTI Launcher. 
-For more information on how to set an environment variable, please see the RTI
-Core Libraries and Utilities Getting Started Guide.
+## Building the Plugin
 
+### Configure
 
-We will refer to the location where you unzipped the example in this document
-as EXAMPLE_HOME.  
+```sh
+cd rticonnextdds-usecases/VideoData/
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+```
 
-All source and build files are located in `EXAMPLE_HOME/VideoData/ExampleCode/`.  
-Before building or running the example, change directories into EXAMPLE_HOME/ExampleCode.
+### Build
 
-**Building on Windows**  
-To build the application on a Windows host PC, open a terminal at `EXAMPLE_HOME/VideoData/ExampleCode/` and:
-````
-    (setup RTI build environment per above)
-    (ensure Windows build tools are configured; 'vcvarsall.bat' is an example config script)
-    mkdir build
-    cd build
-    cmake ..
-    msbuild cc_streamvid.sln
-````
+```sh
+cmake --build ./build --config Release
+```
 
+### Install
 
-**Building on Linux**  
-To build the application on a Linux host PC, open a terminal at `EXAMPLE_HOME/VideoData/ExampleCode/` and:
-````
-    (setup RTI build environment per above)
-    (ensure Linux build tools are configured)
-    mkdir build
-    cd build
-    cmake ..
-    make
-````
+```sh
+sudo cmake --install build/
+```
 
-The build process will create an executable application: `streamvid`, which is used as both 
-publisher and subscriber of the streaming data.  
+This will install the plugins and add them to your GStreamer plugin directory so you can use them directly from the command line like other GStreamer plugins.
 
+## Sample Pipelines
 
-Running the Example
----------------
-Open a terminal in the `EXAMPLE_HOME/VideoData/ExampleCode/` directory.   This terminal
-must have the `FFMPEG` and `FFPLAY` utilities available in the system PATH variable.  
+Here are some example pipelines you can use to test the plugin is correctly installed:
 
-**Scripted Demonstrators**  
-For convenience, a set of scripts are included to launch all of the needed components on 
-a common host system;  this will 'stream' the video only within that machine, but serves as 
-a baseline test that things are working correctly.  
+### Publishing live video
 
-The scripts are:
-````
-    run_demo         == File --> FFMPEG --> Connext pub --> Connext sub --> FFPLAY
-    run_demo_ff_only == File --> FFMPEG --> FFPLAY (no Connext)
-                        Fils is at: resource/RTI-vehicles-captions-480.mp4
-    run_cam_demo     == Camera --> FFMPEG --> Connext pub --> Connext sub --> FFPLAY
-    run_cam_ff_only  == Camera --> FFMPEG --> FFPLAY
-                        This script may need editing to match your system/camera
-````
+```sh
+source qos_variables.sh
+source buffer_script.sh
+gst-launch-1.0  videotestsrc ! x264enc speed-preset=ultrafast tune=zerolatency byte-stream=true key-int-max=15  ! h264parse ! video/x-h264,stream-format=byte-stream,alignment=au ! connextsink domain=0 topic=Video key=cam1 dp-qos-profile="TransportLibrary::SHMEM" dw-qos-profile="DataFlowLibrary::Reliable"
+```
 
-Be sure to run the appropriate script for your system (*.bat scripts for Windows, *.sh scripts for Linux)  
+This command takes frames from the GStreamer `videotestsrc`, and encodes it with H.264, and then publishes it using Connext. The `connextsink` accepts parameters for DDS Domain, Topic name, and the key as defined in `/idl/video.idl`. It also accepts parameters for DomainParticipant and DataWriter Quality-of-Service profiles. If you are using the provided USER_QOS_PROFILES.xml in this repository, you will need to `source qos_variables.sh`. You should also run `source buffer_script.sh` to update the sizes of the send / receive socket buffers. The example above publishes reliably over Shared Memory. The other profiles are optimized for other transports, including UDP and the RTI Real-Time WAN Transport.
 
-**Command-Line Operation**  
-`streamvid` can be run with several command-line arguments.  These can be viewed using the `-h` option, also printed below:
+### Subscribing to live video
 
-| argument | description |
-| ---------- | ----------- |
-| -d, --domain [int] | DDS Domain ID for this application (0) |
-| -p, --pub [string] | Publish (video stream) as this ID |
-| -s, --sub [string] | Subscribe (video stream) from this ID |
-| -b, --buffer [int] | Size of the published DDS samples in bytes (1316) |
-| -c, --configfile [string] | Configuration filename to load (config.properties)  |
-| -w, --writeback | Write-back to the config file, updated args ||
-| -q, --qos [a,b,c] | QoS profile to use: a:rel, b:besteffort, c:userdef (USER_QOS_PROFILES.xml) |
-| -v, --verbosity [int] | How much debugging output to show (1:EXCEPTION)|
-| -h, --help | Print this list and exit|
+```sh
+source qos_variables.sh
+source buffer_script.sh
+gst-launch-1.0 connextsrc domain=0 topic=Video key=cam1 dp-qos-profile="TransportLibrary::SHMEM" dr-qos-profile="DataFlowLibrary::Reliable" ! h264parse ! avdec_h264 ! videoconvert ! fpsdisplaysink
+```
 
-To launch as individual applications (on one or more host machines): Open 4 terminals:  
+Similarly, this command subscribes using the `connextsrc` plugin to the Connext databus with the provided domain, topic, key and QoS. The pipeline parses the H.264 encoding and displays it with the GStreamer `fpsdisplaysink`. There may be some latency depending on the capabilities of your hardware to perform video encoding. The plugin also supports `x-raw`
 
-To launch as separate applications: Two pairs of terminals will be needed: 2 for publish, 2 for subscribe
+With GStreamer, you can customize every aspect of the pipeline you build, allowing for different forms of encoding, as well as adjustments to the resolution and framerate. This allows you to make further performance optimizations depending on your hardware, network environment and available bandwidth. Some of the ways you can do this are described below:
 
-Publisher terminal 1:
+## Other Useful Tools
 
-    build/streamvid.exe -p PubMachine
+On **Linux**, the following commands may be helpful (you'll need to `sudo apt install v4l2-ctl`):
 
-Publisher terminal 2:
+```sh
+v4l2-ctl --list-devices
+```
 
-    ffmpeg -re -i resource/RTI-vehicles-captioned-480.mp4 -g 15 -pix_fmt yuv420p -vcodec libx264 -preset ultrafast -tune zerolatency -f mpegts udp://127.0.0.1:2277
+This will list the video devices available on your machine.
 
-Subscriber terminal 1:
+```sh
+v4l2-ctl -d /dev/video0 --list-formats-ext
+```
 
-    build/streamvid.exe -s PubMachine
+This command will list the available output formats of a specific video device (/dev/video0) in this case. This is useful to see what resolutions, framerates and formats your camera is able to support for your GStreamer pipeline.
 
-Subscriber terminal 2:
+The output can look like this, depending on the capabilities of the camera you are using:
 
-    ffplay -fflags nobuffer -i udp://127.0.0.1:2278
+```sh
+ioctl: VIDIOC_ENUM_FMT
+    Type: Video Capture
 
+        [0]: 'MJPG' (Motion-JPEG, compressed)
+            Size: Discrete 1280x720
+                Interval: Discrete 0.033s (30.000 fps)
+            Size: Discrete 960x540
+                Interval: Discrete 0.033s (30.000 fps)
+            Size: Discrete 848x480
+                Interval: Discrete 0.033s (30.000 fps)
+            Size: Discrete 640x360
+                Interval: Discrete 0.033s (30.000 fps)
+            Size: Discrete 640x480
+                Interval: Discrete 0.033s (30.000 fps)
+            
+        [1]: 'YUYV' (YUYV 4:2:2)
+            Size: Discrete 160x120
+                Interval: Discrete 0.033s (30.000 fps)
+            Size: Discrete 320x180
+                Interval: Discrete 0.033s (30.000 fps)
+            Size: Discrete 320x240
+                Interval: Discrete 0.033s (30.000 fps)
+            Size: Discrete 424x240
+                Interval: Discrete 0.033s (30.000 fps)
+            Size: Discrete 640x360
+                Interval: Discrete 0.033s (30.000 fps)
+            Size: Discrete 640x480
+                Interval: Discrete 0.033s (30.000 fps)
+```
 
-**Streaming over Internet**  
-By default this example uses a UDP LAN connection, as directed in the `USER_QOS_PROFILES.xml` file.
-Operation over Internet may be achieved using the RTI [Connext Anywhere](https://www.rti.com/products/connext-anywhere) 
-transport option, which is a separately-installed product that can be enabled by editing the
-`USER_QOS_PROFILES.xml` file: comment-out the `<transport_builtin>` section that specifies using 
-UDP, and un-comment the next section that specifies using `UDPV4_WAN` to enable Connext Anywhere
-transport and discovery using RTI Cloud Discovery Service.
+This camera is able to output two different formats, MJPG and YUY2.
+You can adjust your publisher pipeline like to use different formats like so:
 
-See the detailed description at: https://www.rti.com/developers/case-code/video-data-streaming
+```sh
+gst-launch-1.0  v4l2src device=/dev/video0 ! 'video/x-raw, width=640, height=480, framerate=30/1, format=YUY2' ! autovideoconvert ! x264enc speed-preset=ultrafast tune=zerolatency byte-stream=true key-int-max=15  ! h264parse ! video/x-h264,stream-format=byte-stream,alignment=au ! connextsink domain=0 topic=Video key=cam1 dp-qos-profile="TransportLibrary::SHMEM" dw-qos-profile="DataFlowLibrary::Reliable"
+```
+
+The above pipeline captures the video from `/dev/video0` with 640x480p resolution at 30FPS, encodes it into H.264 format, and then publishes it over Connext. You can modify the second stage of the pipeline with different supported resolutions and framerates.
+The corresponding subscriber pipeline is the same as the one above:
+
+```sh
+gst-launch-1.0 connextsrc domain=0 topic=Video key=cam1 dp-qos-profile="TransportLibrary::SHMEM" dr-qos-profile="DataFlowLibrary::Reliable" ! h264parse ! avdec_h264 ! videoconvert ! fpsdisplaysink
+```
+
+For more information on GStreamer and how to construct your pipeline, refer to the [GStreamer documentation](https://gstreamer.freedesktop.org/documentation/?gi-language=c). This plugin example currently supports H.264 encoded video.
+To use other formats, you will need to modify the `CONNEXTSRC_VIDEO_CAPS` defined in each plugin.
+
+## Special Thanks
+
+RTI would like to acknowledge the European Space Agency (ESA) Human Robot Interaction Lab and the following contributors for their role in creating this plugin:
+
+- Thomas Krueger <https://github.com/kruegerrobotics>
+- Andrei Gherghescu <https://github.com/andrei-ng>
+- Edmundo Ferreira <https://github.com/edmundoferreira>
+- Lukas Hann <lukas.hann@protonmail.com>
+- Peter Schmaus <peter.schmaus@dle.de>
+
+This software was developed by RTI with help from contributors at the European Space Agency.  It is not affiliated with, nor authorized, sponsored, or approved by, the developers of GStreamer.  GStreamer is subject to separate license terms and conditions.  IT IS YOUR RESPONSIBILITY TO ENSURE THAT YOUR USE OF GSTREAMER, AND ANY OTHER THIRD-PARTY SOFTWARE, COMPLIES WITH THE CORRESPONDING THIRD-PARTY LICENSE TERMS AND CONDITIONS.

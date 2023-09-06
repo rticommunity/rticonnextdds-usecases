@@ -1,0 +1,25 @@
+/* 
+ * (c) 2023 Copyright, Real-Time Innovations, Inc. (RTI) All rights reserved.
+ *
+ * RTI grants Licensee a license to use, modify, compile, and create derivative
+ * works of the software.  Licensee may
+ * redistribute copies of the software provided that all such copies are
+ * subject to this license. The software is provided "as is", with no warranty
+ * of any type, including any warranty for fitness for any purpose. RTI is
+ * under no obligation to maintain or support the software.  RTI shall not be
+ * liable for any incidental or consequential damages arising out of the use or
+ * inability to use the software.
+ */
+
+module Video
+{
+	// 6220800 = 1920 * 1080 * 3 is the maximum frame size (fullHD with 3 bytes pp)
+	// Data will be allocated at this size, but only the actual size of the
+	// frame will be sent.
+	const int32 MAX_BUFFER_SIZE = 6220800;
+	struct Stream
+	{
+		@key string id;                  // unique node id
+		sequence <octet, MAX_BUFFER_SIZE> frame;
+	};
+};
