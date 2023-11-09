@@ -16,7 +16,7 @@ damages arising out of the use or inability to use the software.
 #include "StationControllerInterface.h"
 
 using namespace DDS;
-using namespace com::rti::chocolatefactory::generated;
+using namespace com::chocolatefactory::generated;
 
 
 // ------------------------------------------------------------------------- //

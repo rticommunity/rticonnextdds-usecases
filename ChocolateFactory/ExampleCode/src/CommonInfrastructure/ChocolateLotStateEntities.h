@@ -44,7 +44,7 @@ public:
 		DDS::Subscriber *sub, 
 		const std::string &qosLibrary, 
 		const std::string &qosProfile,
-		com::rti::chocolatefactory::generated::StationControllerKind 
+		com::chocolatefactory::generated::StationControllerKind 
 			stationControllerKind);
 
 
@@ -58,7 +58,7 @@ public:
 	// state)
 	void WaitForChocolateLotUpdates(
 		std::vector< 
-		DdsAutoType<com::rti::chocolatefactory::generated::ChocolateLotState> >
+		DdsAutoType<com::chocolatefactory::generated::ChocolateLotState> >
 			*lotState);
 
 
@@ -68,7 +68,7 @@ private:
 	// --- Process chocolate lot state updates in queue ---	
 	bool ProcessChocolateLot(
 		std::vector< 
-		DdsAutoType<com::rti::chocolatefactory::generated::ChocolateLotState> >
+		DdsAutoType<com::chocolatefactory::generated::ChocolateLotState> >
 			*lotState);
 
 	// --- Private members ---
@@ -77,7 +77,7 @@ private:
 	DDSCommunicator *_communicator;
 
 	// Application-specific DDS DataReader for receiving chocolate lot state data
-	com::rti::chocolatefactory::generated::ChocolateLotStateDataReader *_reader;
+	com::chocolatefactory::generated::ChocolateLotStateDataReader *_reader;
 
 	// Objects to block a thread until chocolate lot state update arrives
 	DDS::WaitSet *_waitSet;
@@ -114,14 +114,14 @@ public:
 	// or shared memory to interested applications subscribing to chocolate
 	// lot state information.
 	void PublishChocolateLotState(
-		DdsAutoType<com::rti::chocolatefactory::generated::ChocolateLotState> 
+		DdsAutoType<com::chocolatefactory::generated::ChocolateLotState> 
 			&lotState);
 
 	// --- Unregisters the lot state --- 
 	// When this application sees that the chocolate lot is finished, it 
 	// unregisters the lot state
 	void UnregisterChocolateLotState(
-		DdsAutoType<com::rti::chocolatefactory::generated::ChocolateLotState> 
+		DdsAutoType<com::chocolatefactory::generated::ChocolateLotState> 
 			&lotState);
 
 private:
@@ -132,7 +132,7 @@ private:
 
 	// The application-specific DDS DataWriter that sends chocolate lot state
 	// updates over the network or shared memory
-	com::rti::chocolatefactory::generated::ChocolateLotStateDataWriter 
+	com::chocolatefactory::generated::ChocolateLotStateDataWriter 
 		*_chocolateLotStateWriter;
 
 

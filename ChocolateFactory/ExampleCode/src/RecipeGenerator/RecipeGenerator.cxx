@@ -17,7 +17,7 @@ damages arising out of the use or inability to use the software.
 #include "RecipePublisherInterface.h"
 
 using namespace std;
-using namespace com::rti::chocolatefactory::generated;
+using namespace com::chocolatefactory::generated;
 
 void PrintHelp();
 

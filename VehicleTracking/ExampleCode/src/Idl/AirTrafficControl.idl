@@ -1,15 +1,17 @@
-/*********************************************************************************************
-(c) 2005-2013 Copyright, Real-Time Innovations, Inc.  All rights reserved.    	                             
-RTI grants Licensee a license to use, modify, compile, and create derivative works 
-of the Software.  Licensee has the right to distribute object form only for use with RTI 
-products.  The Software is provided “as is”, with no warranty of any type, including 
-any warranty for fitness for any purpose. RTI is under no obligation to maintain or 
-support the Software.  RTI shall not be liable for any incidental or consequential 
-damages arising out of the use or inability to use the software.
-**********************************************************************************************/
+/*
+ * (c) 2021 Copyright, Real-Time Innovations, Inc. (RTI) All rights reserved.
+ *
+ * RTI grants Licensee a license to use, modify, compile, and create derivative
+ * works of the software solely for use with RTI Connext DDS.  Licensee may
+ * redistribute copies of the software provided that all such copies are
+ * subject to this license. The software is provided "as is", with no warranty
+ * of any type, including any warranty for fitness for any purpose. RTI is
+ * under no obligation to maintain or support the software.  RTI shall not be
+ * liable for any incidental or consequential damages arising out of the use or
+ * inability to use the software.
+ */
 
 module com {
-module rti {
 module atc {
 module generated {
 
@@ -79,7 +81,7 @@ const string AIRCRAFT_FLIGHT_PLAN_TOPIC = "FlightPlan";
 
 
 // Note: In C and C++, these enumeration values are declared in the top-level
-// scope of the module.  So if this were not nested in com::rti::atc::generated
+// scope of the module.  So if this were not nested in com::atc::generated
 // there would be a concern that they would be global.  This is usually only
 // a problem if you define enumerations like OFF and ON or TRUE and FALSE.
 enum FlightRulesKind {
@@ -144,7 +146,6 @@ struct FlightPlan {
 
 };
 
-};
 };
 };
 };	

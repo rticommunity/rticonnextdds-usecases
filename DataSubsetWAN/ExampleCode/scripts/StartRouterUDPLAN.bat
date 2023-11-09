@@ -1,14 +1,22 @@
 @echo off
 setlocal
 
-IF []==[%ROUTER_HOME%] (
-  @echo The ROUTER_HOME environment variable must be set to Connext_install_dir/RTI_Routing_Service_5.0.0 to run this example
-)
+IF []==[%NDDSHOME%] GOTO NeedNDDSHome
+
+IF "%1"=="" GOTO NeedArgs
 
 set dir=%~dp0
 set executable_name=rtiroutingservice
 
-
 cd %dir%\..\routing
 
-call %ROUTER_HOME%\scripts\%executable_name% -cfgFile Routing-UDP-LAN.xml -cfgName %1
+call "%NDDSHOME%\bin\%executable_name%" -cfgFile Routing-UDP-LAN.xml -cfgName %1
+EXIT /B 0
+
+:NeedNDDSHome
+@echo NDDSHOME must be set to the RTI Connext install dir to run this example
+EXIT /B 1
+
+:NeedArgs
+@echo Needs an arg for RS config (SOCI or COSI) for 'SquareOutCircleIn' or 'CircleOutSquareIn'
+EXIT /B 1

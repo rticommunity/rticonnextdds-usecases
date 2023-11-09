@@ -1,11 +1,36 @@
 @echo off
 setlocal
 
-set dir=%~dp0
-set executable_name=RadarGenerator
+rem (c) 2021 Copyright, Real-Time Innovations, Inc. (RTI)
+rem All rights reserved.
+rem
+rem RTI grants Licensee a license to use, modify, compile, and create derivative
+rem works of the Software solely in combination with RTI Connext DDS. Licensee
+rem may redistribute copies of the Software provided that all such copies are
+rem subject to this License. The Software is provided "as is", with no warranty
+rem of any type, including any warranty for fitness for any purpose. RTI is
+rem under no obligation to maintain or support the Software. RTI shall not be
+rem liable for any incidental or consequential damages arising out of the use or
+rem inability to use the Software. For purposes of clarity, nothing in this
+rem License prevents Licensee from using alternate versions of DDS, provided
+rem that Licensee may not combine or link such alternate versions of DDS with
+rem the Software.
 
-set Path=%NDDSHOME%\lib\i86Win32VS2010;%dir%\..\thirdparty\wxWidgets-2.9.4\lib\vc_dll;%dir%\..\thirdparty\proj-4.8.0\lib\i86Win32VS2010;%PATH%
+set dir=%~dp0..\build
+set executable_name=RadarGenerator.exe
 
-cd %dir%\..\win32\Release\i86Win32VS2010\
 
-call %executable_name% %*
+set exeDir=%dir%\Release\
+if not exist  %exeDir%\%executable_name% (
+    set exeDir=%dir%\Debug\
+)
+if not exist  %exeDir%\%executable_name% (
+   echo %dir%\Release\%executable_name% or %dir%\Debug\%executable_name% does not exists
+    echo Please compile the application using the Visual Studio project
+    exit /b
+)
+
+set Path=%NDDSHOME%\lib\;%dir%\..\thirdparty\wxWidgets-3.1.2\Win32\lib\vc_dll;%dir%\..\thirdparty\proj-5.2\Win32\lib;%dir%\..\thirdparty\wxWidgets-3.1.2\Win64\lib\vc_x64_dll;%dir%\..\thirdparty\proj-5.2\Win64\lib;"%PATH%"
+
+
+call %exeDir%\%executable_name% %* 

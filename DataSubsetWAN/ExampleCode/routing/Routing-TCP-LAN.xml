@@ -1,84 +1,50 @@
 <?xml version="1.0"?>
 <dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:noNamespaceSchemaLocation="c:/program files/rti/5.0.0/RTI_Routing_Service_5.0.0/resource/schema/rti_routing_service.xsd">
+  xsi:noNamespaceSchemaLocation="http://community.rti.com/schema/6.0.1/rti_routing_service.xsd">
 
     <qos_library name="RoutingLibrary">
-        <datareader_qos name="StateDataReader">
-
-            <!-- The Alarm topic is:  -->
-            <!--   1) Reliable        -->
-            <!--   2) Durable         -->
-            <!--   3) History of 1    -->
+        <!-- QoS for ShapeType topics  -->
+        <datareader_qos name="ShapeDataReader">
             <reliability>
                 <kind>RELIABLE_RELIABILITY_QOS</kind>
             </reliability>
             <durability>
-                <kind>TRANSIENT_LOCAL_DURABILITY_QOS</kind>
+                <kind>VOLATILE_DURABILITY_QOS</kind>
             </durability>
-            <history>
-                <kind>KEEP_LAST_HISTORY_QOS</kind>
-                <depth>1</depth>
-            </history>
-
         </datareader_qos>
-        <datawriter_qos name="StateDataWriter">
-            <!-- The Alarm topic is:  -->
-            <!--   1) Reliable        -->
-            <!--   2) Durable         -->
-            <!--   3) History of 1    -->
+        <datawriter_qos name="ShapeDataWriter">
             <reliability>
                 <kind>RELIABLE_RELIABILITY_QOS</kind>
             </reliability>
             <durability>
-                <kind>TRANSIENT_LOCAL_DURABILITY_QOS</kind>
+                <kind>VOLATILE_DURABILITY_QOS</kind>
             </durability>
-            <history>
-                <kind>KEEP_LAST_HISTORY_QOS</kind>
-                <depth>1</depth>
-            </history>
         </datawriter_qos>
-
-        <!-- The Temperature topic is:  -->
-        <!-- 1) Best effort             -->
-        <datareader_qos name="SensorDataReader">
-            <reliability>
-                <kind>BEST_EFFORT_RELIABILITY_QOS</kind>
-            </reliability>
-        </datareader_qos>
-
-        <!-- The Temperature topic is:  -->
-        <!-- 1) Best effort             -->
-        <datawriter_qos name="SensorDataWriter">
-            <reliability>
-                <kind>BEST_EFFORT_RELIABILITY_QOS</kind>
-            </reliability>
-        </datawriter_qos>
-
     </qos_library>
 
     <!-- ****************************************************************** -->
     <!-- Configuration file for RTI Routing Service showing usage of TCP    -->
     <!-- ****************************************************************** -->
 
-    <routing_service name="Router1">
-
+    <!-- Square Out, Circle In -->
+    <routing_service name="SOCI">
         <annotation>
             <documentation>
-                Routes Alarm and Temperature topics from one domain to second
-    domain and the other way around over UDP and TCP.
+                Routes Shape topics from one domain to second
+                domain and the other way around over UDP and TCP.
 
-    Configurations in this file with this Routing Service configuration marked
-    as *RS1*:
+                Configurations in this file with this Routing Service 
+                configuration marked as *RS1*:
 
-    UDP LAN ==[domain 6]== *RS1* ==[TCP + domain 0]== RS2 ==[domain 5]== UDP LAN
+                UDP LAN ==[domain 6]== *RS1* ==[TCP + domain 0]== RS2 ==[domain 5]== UDP LAN
 
-    UDP side:  Sending to/receiving from everybody in domain 6
-    TCP side:  Sending to/receiving from Routing Service #2 in
-        domain 0, on LAN machine with IP/port 10.211.55.3:9400.
-        Configured with local port 9401.
+                UDP side:  Subscribe to 'Square' / Publish 'Circle' in domain 6
+                TCP side:  Sending to/receiving from Routing Service #2 in
+                    domain 0, on LAN machine with IP/port 10.211.55.3:9400.
+                    Configured with local port 9401.
 
-    !!Please change these IP addresses to match your network settings. !!
-    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                !!Please change these IP addresses to match your network settings. !!
+                - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             </documentation>
         </annotation>
 
@@ -93,13 +59,13 @@
         <domain_route name="DataDomain">
 
 
-            <!-- This routes from a local area network on domain 6 to a TCP -->
-            <!-- network on domain 0 -->
-            <participant_1>
+            <!-- This routes from a local UDP LAN on domain 6 to a TCP -->
+            <!-- bridge network on domain 0 -->
+            <participant name="LocalDomain">
                 <domain_id>6</domain_id>
-            </participant_1>
+            </participant>
 
-            <participant_2>
+            <participant name="BridgeDomain">
                 <domain_id>0</domain_id>
                 <participant_qos>
                     <!-- Turning off the shared memory and UDPv4/UDPv6 -->
@@ -116,7 +82,7 @@
                             <!-- change the server_bind_port the OTHER      -->
                             <!-- configuration specifies                    -->
                             <!--                                            -->
-                            <element>tcpv4_lan://10.211.55.3:9400</element>
+                            <element>tcpv4_lan://$(REMOTE_IPADDR):9400</element>
                         </initial_peers>
                     </discovery>
                     <!-- These are the settings to enable TCP for your      -->
@@ -149,161 +115,67 @@
                         </value>
                     </property>
                 </participant_qos>
-            </participant_2>
+            </participant>
 
             <session name="SessionForward">
-                <topic_route name="AlarmForward">
+                <topic_route name="ShapeForward">
                     <route_types>true</route_types> 
                     <publish_with_original_info>true</publish_with_original_info>
                     <publish_with_original_timestamp>true</publish_with_original_timestamp>
 
                     <!-- The DomainParticipant in domain 6 that uses UDP -->
-                    <input participant="1">
-                        <topic_name>Alarm</topic_name>
-                        <registered_type_name>AlarmType</registered_type_name>
+                    <input participant="LocalDomain">
+                        <topic_name>Square</topic_name>
+                        <registered_type_name>ShapeType</registered_type_name>
                         <creation_mode>IMMEDIATE</creation_mode>
-
-                        <!-- The Alarm topic is:  -->
-                        <!--   1) Reliable        -->
-                        <!--   2) Durable         -->
-                        <!--   3) History of 1    -->
-                        <datareader_qos base_name="RoutingLibrary::StateDataReader">
+                        <datareader_qos base_name="RoutingLibrary::ShapeDataReader">
                         </datareader_qos>
                     </input>
 
                     <!-- The DomainParticipant that uses TCP in domain 0 -->
-                    <output>
-                        <topic_name>Alarm</topic_name>
-                        <registered_type_name>AlarmType</registered_type_name>
+                    <output participant="BridgeDomain">
+                        <topic_name>Square</topic_name>
+                        <registered_type_name>ShapeType</registered_type_name>
                         <creation_mode>IMMEDIATE</creation_mode>
-
-                        <!-- The Alarm topic is:  -->
-                        <!--   1) Reliable        -->
-                        <!--   2) Durable         -->
-                        <!--   3) History of 1    -->
-                        <datawriter_qos base_name="RoutingLibrary::StateDataWriter">    
-                        </datawriter_qos>
-
-                    </output>
-                </topic_route>
-                
-                <topic_route name="TemperatureForward">
-                    <route_types>true</route_types>
-                    <publish_with_original_info>true</publish_with_original_info>
-                    <publish_with_original_timestamp>true</publish_with_original_timestamp>
-
-                    <!-- The DomainParticipant in domain 6 that uses UDP -->
-                    <input participant="1">
-                        <topic_name>Temperature</topic_name>
-                        <registered_type_name>TemperatureType</registered_type_name>
-                        <creation_mode>IMMEDIATE</creation_mode>
- 
-                        <!-- Only pass the data through if the temperature is high or low -->
-                        <content_filter>
-                            <expression>value &gt; %0 OR value &lt; %1 </expression>
-                            <parameter>100</parameter>
-                            <parameter>32</parameter>
-                        </content_filter>
-
-                        <!-- The Temperature topic is:  -->
-                        <!-- 1) Best effort -->
-                        <datareader_qos base_name="RoutingLibrary::SensorDataReader">
-                        </datareader_qos>
-
-                    </input>
-
-                    <!-- The DomainParticipant that uses TCP in domain 0 -->
-                    <output>
-                        <topic_name>Temperature</topic_name>
-                        <registered_type_name>TemperatureType</registered_type_name>
-                        <creation_mode>IMMEDIATE</creation_mode>
-
-                        <!-- The Temperature topic is:  -->
-                        <!-- 1) Best effort             -->
-                        <datawriter_qos base_name="RoutingLibrary::SensorDataWriter">
+                        <datawriter_qos base_name="RoutingLibrary::ShapeDataWriter">    
                         </datawriter_qos>
                     </output>
-
                 </topic_route>
             </session>
             <session name="SessionBackward">
-                <topic_route name="AlarmBackward">
+                <topic_route name="ShapeBackward">
                     <route_types>true</route_types>
                     <publish_with_original_info>true</publish_with_original_info>
                     <publish_with_original_timestamp>true</publish_with_original_timestamp>
 
                     <!-- The DomainParticipant that uses TCP in domain 0 -->
-                    <input participant="2">
-                        <topic_name>Alarm</topic_name>
-                        <registered_type_name>AlarmType</registered_type_name>
+                    <input participant="BridgeDomain">
+                        <topic_name>Circle</topic_name>
+                        <registered_type_name>ShapeType</registered_type_name>
                         <creation_mode>IMMEDIATE</creation_mode>
-
-                        <!-- The Alarm topic is:  -->
-                        <!--   1) Reliable        -->
-                        <!--   2) Durable         -->
-                        <!--   3) History of 1    -->
-                        <datareader_qos base_name="RoutingLibrary::StateDataReader">
+                        <datareader_qos base_name="RoutingLibrary::ShapeDataReader">
                         </datareader_qos>
-
                     </input>
-                    <!-- The DomainParticipant in domain 6 that uses UDP -->
-                    <output>
-                        <topic_name>Alarm</topic_name>
-                        <registered_type_name>AlarmType</registered_type_name>
-                        <creation_mode>IMMEDIATE</creation_mode>
 
-                        <!-- The Alarm topic is:  -->
-                        <!--   1) Reliable        -->
-                        <!--   2) Durable         -->
-                        <!--   3) History of 1    -->
-                        <datawriter_qos base_name="RoutingLibrary::StateDataWriter">
+                    <!-- The DomainParticipant in domain 6 that uses UDP -->
+                    <output participant="LocalDomain">
+                        <topic_name>Circle</topic_name>
+                        <registered_type_name>ShapeType</registered_type_name>
+                        <creation_mode>IMMEDIATE</creation_mode>
+                        <datawriter_qos base_name="RoutingLibrary::ShapeDataWriter">
                         </datawriter_qos>
 
                     </output>
-                </topic_route>
-                <topic_route name="TemperatureBackward">
-                    <route_types>true</route_types>
-                    <publish_with_original_info>true</publish_with_original_info>
-                    <publish_with_original_timestamp>true</publish_with_original_timestamp>
-
-                    <!-- The DomainParticipant that uses TCP in domain 0 -->
-                    <input participant="2">
-                        <topic_name>Temperature</topic_name>
-                        <registered_type_name>TemperatureType</registered_type_name>
-                        <creation_mode>IMMEDIATE</creation_mode>
-
-                        <!-- The Temperature topic is:  -->
-                        <!-- 1) Best effort -->
-                        <datareader_qos base_name="RoutingLibrary::SensorDataReader">
-                        </datareader_qos>
-
-                    </input>
-                    <!-- The DomainParticipant in domain 6 that uses UDP -->
-                    <output>
-                        <topic_name>Temperature</topic_name>
-                        <registered_type_name>TemperatureType</registered_type_name>
-                        <creation_mode>IMMEDIATE</creation_mode>
-
-                        <!-- The Temperature topic is:  -->
-                        <!-- 1) Best effort -->
-                        <datawriter_qos base_name="RoutingLibrary::SensorDataWriter">
-                        </datawriter_qos>
-
-                    </output>
-
                 </topic_route>
             </session>
-
-
         </domain_route>
-
     </routing_service>
 
-    <routing_service name="Router2">
+    <routing_service name="COSI">
 
         <annotation>
             <documentation>
-                Routes Alarm and Temperature topics from one domain to second
+                Routes Shape topics from one domain to second
     domain and the other way around over UDP and TCP.
 
     Configurations in this file with this Routing Service configuration marked 
@@ -332,11 +204,11 @@
         <domain_route name="DataDomain">
             <!-- This routes from a local area network on domain 5 to a -->
             <!-- TCP network on domain 0 -->
-            <participant_1>
+            <participant name="LocalDomain">
                 <domain_id>5</domain_id>
-            </participant_1>
+            </participant>
 
-            <participant_2>
+            <participant name="BridgeDomain">
                 <domain_id>0</domain_id>
                 <participant_qos>
 
@@ -355,7 +227,7 @@
                             <!-- specifies                                      -->
                             <!--                                                -->
                             <!--                                                -->
-                            <element>tcpv4_lan://10.211.55.3:9401</element>
+                            <element>tcpv4_lan://$(REMOTE_IPADDR):9401</element>
                         </initial_peers>
                     </discovery>
                     <property>
@@ -386,129 +258,51 @@
                         </value>
                     </property>
                 </participant_qos>
-            </participant_2>
+            </participant>
 
             <session name="SessionForward">
-                <topic_route name="AlarmForward">
+                <topic_route name="ShapeForward">
                     <route_types>true</route_types>
                     <publish_with_original_info>true</publish_with_original_info>
                     <publish_with_original_timestamp>true</publish_with_original_timestamp>
-                    <input participant="1">
-                        <topic_name>Alarm</topic_name>
-                        <registered_type_name>AlarmType</registered_type_name>
+                    <input participant="LocalDomain">
+                        <topic_name>Circle</topic_name>
+                        <registered_type_name>ShapeType</registered_type_name>
                         <creation_mode>IMMEDIATE</creation_mode>
-
-                        <!-- The Alarm topic is:  -->
-                        <!--   1) Reliable        -->
-                        <!--   2) Durable         -->
-                        <!--   3) History of 1    -->
-                        <datareader_qos base_name="RoutingLibrary::StateDataReader">
+                        <datareader_qos base_name="RoutingLibrary::ShapeDataReader">
                         </datareader_qos>
                     </input>
-                    <output>
-                        <topic_name>Alarm</topic_name>
-                        <registered_type_name>AlarmType</registered_type_name>
+                    <output participant="BridgeDomain">
+                        <topic_name>Circle</topic_name>
+                        <registered_type_name>ShapeType</registered_type_name>
                         <creation_mode>IMMEDIATE</creation_mode>
-                        <!-- The Alarm topic is:  -->
-                        <!--   1) Reliable        -->
-                        <!--   2) Durable         -->
-                        <!--   3) History of 1    -->
-                        <datawriter_qos base_name="RoutingLibrary::StateDataWriter">
+                        <datawriter_qos base_name="RoutingLibrary::ShapeDataWriter">
                         </datawriter_qos>
-
-                    </output>
-                </topic_route>
-                <topic_route name="TemperatureForward">
-                    <route_types>true</route_types>
-                    <publish_with_original_info>true</publish_with_original_info>
-                    <publish_with_original_timestamp>true</publish_with_original_timestamp>
-                    <input participant="1">
-                        <topic_name>Temperature</topic_name>
-                        <registered_type_name>TemperatureType</registered_type_name>
-                        <creation_mode>IMMEDIATE</creation_mode>
-
-                        <!-- Only pass the data through if the temperature is high or low -->
-                        <content_filter>
-                            <expression>value &gt; %0 OR value &lt; %1 </expression>
-                            <parameter>100</parameter>
-                            <parameter>32</parameter>
-                        </content_filter>
-
-                        <!-- The Temperature topic is:  -->
-                        <!--   1) Best effort           -->
-                        <datareader_qos base_name="RoutingLibrary::SensorDataReader">
-                        </datareader_qos>
-                    </input>
-                    <output>
-                        <topic_name>Temperature</topic_name>
-                        <registered_type_name>TemperatureType</registered_type_name>
-                        <creation_mode>IMMEDIATE</creation_mode>
-                        <!-- The Temperature topic is:  -->
-                        <!--   1) Best effort           -->
-                        <datawriter_qos base_name="RoutingLibrary::SensorDataWriter">
-                        </datawriter_qos>
-
                     </output>
                 </topic_route>
             </session>
             <session name="SessionBackward">
-                <topic_route name="AlarmBackward">
+                <topic_route name="ShapeBackward">
                     <route_types>true</route_types>
                     <publish_with_original_info>true</publish_with_original_info>
                     <publish_with_original_timestamp>true</publish_with_original_timestamp>
-                    <input participant="2">
-                        <topic_name>Alarm</topic_name>
-                        <registered_type_name>AlarmType</registered_type_name>
+                    <input participant="BridgeDomain">
+                        <topic_name>Square</topic_name>
+                        <registered_type_name>ShapeType</registered_type_name>
                         <creation_mode>IMMEDIATE</creation_mode>
-                        <!-- The Alarm topic is:  -->
-                        <!--   1) Reliable        -->
-                        <!--   2) Durable         -->
-                        <!--   3) History of 1    -->
-                        <datareader_qos base_name="RoutingLibrary::StateDataReader">
+                        <datareader_qos base_name="RoutingLibrary::ShapeDataReader">
                         </datareader_qos>
                     </input>
 
-                    <output>
-                        <topic_name>Alarm</topic_name>
-                        <registered_type_name>AlarmType</registered_type_name>
+                    <output participant="LocalDomain">
+                        <topic_name>Square</topic_name>
+                        <registered_type_name>ShapeType</registered_type_name>
                         <creation_mode>IMMEDIATE</creation_mode>
-
-                        <!-- The Alarm topic is:  -->
-                        <!--   1) Reliable        -->
-                        <!--   2) Durable         -->
-                        <!--   3) History of 1    -->
-                        <datawriter_qos base_name="RoutingLibrary::StateDataWriter">
+                        <datawriter_qos base_name="RoutingLibrary::ShapeDataWriter">
                         </datawriter_qos>
-                    </output>
-                </topic_route>
-                <topic_route name="TemperatureBackward">
-                    <route_types>true</route_types>
-                    <publish_with_original_info>true</publish_with_original_info>
-                    <publish_with_original_timestamp>true</publish_with_original_timestamp>
-                    <input participant="2">
-                        <topic_name>Temperature</topic_name>
-                        <registered_type_name>TemperatureType</registered_type_name>
-                        <creation_mode>IMMEDIATE</creation_mode>
-                        
-                        <!-- The Temperature topic is:  -->
-                        <!--   1) Best effort           -->
-                        <datareader_qos base_name="RoutingLibrary::SensorDataReader">
-                        </datareader_qos>
-                    </input>
-                    <output>
-                        <topic_name>Temperature</topic_name>
-                        <registered_type_name>TemperatureType</registered_type_name>
-                        <creation_mode>IMMEDIATE</creation_mode>
-                        <!-- The Temperature topic is:  -->
-                        <!--   1) Best effort           -->
-                        <datawriter_qos base_name="RoutingLibrary::SensorDataWriter">
-                        </datawriter_qos>
-
                     </output>
                 </topic_route>
             </session>
-
         </domain_route>
-
     </routing_service>
 </dds>

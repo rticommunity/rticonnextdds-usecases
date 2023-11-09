@@ -1,12 +1,21 @@
 <?xml version="1.0"?>
 <!-- 
-(c) 2005-2013 Copyright, Real-Time Innovations, Inc.  All rights reserved.    	                             
-RTI grants Licensee a license to use, modify, compile, and create derivative works 
-of the Software.  Licensee has the right to distribute object form only for use with RTI 
-products.  The Software is provided “as is”, with no warranty of any type, including 
-any warranty for fitness for any purpose. RTI is under no obligation to maintain or 
-support the Software.  RTI shall not be liable for any incidental or consequential 
-damages arising out of the use or inability to use the software.
+/*
+ * (c) 2021 Copyright, Real-Time Innovations, Inc. (RTI)
+ * All rights reserved.
+ *
+ * RTI grants Licensee a license to use, modify, compile, and create derivative
+ * works of the Software solely in combination with RTI Connext DDS. Licensee
+ * may redistribute copies of the Software provided that all such copies are
+ * subject to this License. The Software is provided "as is", with no warranty
+ * of any type, including any warranty for fitness for any purpose. RTI is
+ * under no obligation to maintain or support the Software. RTI shall not be
+ * liable for any incidental or consequential damages arising out of the use or
+ * inability to use the Software. For purposes of clarity, nothing in this
+ * License prevents Licensee from using alternate versions of DDS, provided
+ * that Licensee may not combine or link such alternate versions of DDS with
+ * the Software.
+ */
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -61,11 +70,8 @@ RTI Connext user manual.
                         <!-- Configure shared memory transport for higher 
                              throughput: -->
                         <element>
-                            <!--  Set the shared memory maximum message size to
-                                  the same value that was set for UDP.   -->
                             <name>dds.transport.shmem.builtin.parent.message_size_max</name>
-                            <value>65507</value>
-                            <!-- 64 KB - header sizes -->
+                            <value>65536</value>
                         </element>
                         <element>
                             <!-- Set the size of the shared memory transport's

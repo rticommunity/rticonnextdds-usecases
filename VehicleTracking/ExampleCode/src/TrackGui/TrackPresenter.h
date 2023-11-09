@@ -1,12 +1,16 @@
-/*********************************************************************************************
-(c) 2005-2013 Copyright, Real-Time Innovations, Inc.  All rights reserved.    	                             
-RTI grants Licensee a license to use, modify, compile, and create derivative works 
-of the Software.  Licensee has the right to distribute object form only for use with RTI 
-products.  The Software is provided “as is”, with no warranty of any type, including 
-any warranty for fitness for any purpose. RTI is under no obligation to maintain or 
-support the Software.  RTI shall not be liable for any incidental or consequential 
-damages arising out of the use or inability to use the software.
-**********************************************************************************************/
+/*
+ * (c) 2021 Copyright, Real-Time Innovations, Inc. (RTI) All rights reserved.
+ *
+ * RTI grants Licensee a license to use, modify, compile, and create derivative
+ * works of the software solely for use with RTI Connext DDS.  Licensee may
+ * redistribute copies of the software provided that all such copies are
+ * subject to this license. The software is provided "as is", with no warranty
+ * of any type, including any warranty for fitness for any purpose. RTI is
+ * under no obligation to maintain or support the software.  RTI shall not be
+ * liable for any incidental or consequential damages arising out of the use or
+ * inability to use the software.
+ */
+
 #ifndef TRACK_PRESENTER_H
 #define TRACK_PRESENTER_H
 
@@ -15,7 +19,7 @@ damages arising out of the use or inability to use the software.
 
 // ------------------------------------------------------------------------- //
 //
-// Classes that are used to present data from the network interface to the 
+// Classes that are used to present data from the network interface to the
 // application.  This is the connection between what happens in the network
 // and the UI.
 //
@@ -23,92 +27,86 @@ damages arising out of the use or inability to use the software.
 
 
 class TrackApp;
-class OSMutex;
+// class OSMutex;
 
 // ------------------------------------------------------------------------- //
 //
-// Listener interface for classes that will receive updates from the 
+// Listener interface for classes that will receive updates from the
 // presentation classes, and will notify the UI that it needs to update.
 // ------------------------------------------------------------------------- //
 
-class FlightInfoListener
-{
+class FlightInfoListener {
 public:
-
-	virtual bool TrackUpdate(const std::vector<FlightInfo *> flights) = 0;
-	virtual bool TrackDelete(const std::vector<FlightInfo *> flights) = 0;
-	virtual ~FlightInfoListener() {}
+    virtual bool TrackUpdate(const std::vector<FlightInfo*> flights) = 0;
+    virtual bool TrackDelete(const std::vector<FlightInfo*> flights) = 0;
+    virtual ~FlightInfoListener()
+    {
+    }
 };
 
 // ------------------------------------------------------------------------- //
 //
 // FlightInfoNetworkReceiver:
 // The model in this case is stored in the middleware, so this class is the
-// presenter of a Model-View-Presenter pattern.  This receives notifications 
+// presenter of a Model-View-Presenter pattern.  This receives notifications
 // of changes to the model - when track data arrives.
 //
 // This notifies the view of updates to the model by using TrackListeners
 //
 // ------------------------------------------------------------------------- //
-class FlightInfoNetworkReceiver 
-{
+class FlightInfoNetworkReceiver {
 public:
-	// --- Constructor and destructor --- 
-	FlightInfoNetworkReceiver(TrackApp *parent); 
-	~FlightInfoNetworkReceiver();
+    // --- Constructor and destructor ---
+    FlightInfoNetworkReceiver(TrackApp* parent);
+    ~FlightInfoNetworkReceiver();
 
-	// --- Create thread for receiving --- 
-	// Creates a new thread that will call ReceiveTracks()
-	void StartReceiving();
+    // --- Create thread for receiving ---
+    // Creates a new thread that will call ReceiveTracks()
+    void StartReceiving();
 
-	// --- Check for receipt of track data ---
-	// 
-	// This loops until the application is shutting down, and checks for
-	// updates to track data.  If there is new track data, it notifies
-	// any listeners (observers) that the track information has been
-	// updated.
-	static void ReceiveTracks(void *param);
+    // --- Check for receipt of track data ---
+    //
+    // This loops until the application is shutting down, and checks for
+    // updates to track data.  If there is new track data, it notifies
+    // any listeners (observers) that the track information has been
+    // updated.
+    static void* ReceiveTracks(void* param);
 
-	// --- Add or remove listeners --- 
-	// Adds a listener that will be notified of track updates
-	void AddListener(FlightInfoListener *listener) 
-	{
-		_listeners.push_back(listener);
-	}
+    // --- Add or remove listeners ---
+    // Adds a listener that will be notified of track updates
+    void AddListener(FlightInfoListener* listener)
+    {
+        _listeners.push_back(listener);
+    }
 
-	// Removes a listener that will no longer be notified of track updates
-	void RemoveListener(const FlightInfoListener *listener);
+    // Removes a listener that will no longer be notified of track updates
+    void RemoveListener(const FlightInfoListener* listener);
 
 
-	// --- Notify listeners of track state updates --- 
-	void NotifyListenersUpdateTrack(const std::vector<FlightInfo *> flights);
-	void NotifyListenersDeleteTrack(const std::vector<FlightInfo *> flights);
+    // --- Notify listeners of track state updates ---
+    void NotifyListenersUpdateTrack(const std::vector<FlightInfo*> flights);
+    void NotifyListenersDeleteTrack(const std::vector<FlightInfo*> flights);
 
-	// --- Is shutting down? --- 
-	bool IsShuttingDown() const 
-	{ 
-		return _shuttingDown; 
-	}
+    // --- Is shutting down? ---
+    bool IsShuttingDown() const
+    {
+        return _shuttingDown;
+    }
 
 private:
-	// --- Private methods --- 
+    // --- Private methods ---
 
-	// Convert from network formats of data to the formats expected by the 
-	// GUI that uses the data.
-	static void PrepareUpdate(
-		TrackApp *app,
-		std::vector< DdsAutoType<com::rti::atc::generated::Track> > 
-				*updateData,
-		std::vector<FlightInfo *> *flightData);
+    // Convert from network formats of data to the formats expected by the
+    // GUI that uses the data.
+    static void PrepareUpdate(
+            TrackApp* app,
+            std::vector<com::atc::generated::Track> updateData,
+            std::vector<FlightInfo*>* flightData);
 
-	// --- Private members --- 
-	bool _shuttingDown;
-	TrackApp* _app;
-	std::vector<FlightInfoListener *> _listeners;
-
-	// Control access to listeners that may be
-	// accessed by multiple threads
-	OSMutex *_mutex;
+    // --- Private members ---
+    bool _shuttingDown;
+    TrackApp* _app;
+    std::vector<FlightInfoListener*> _listeners;
 };
 
 #endif

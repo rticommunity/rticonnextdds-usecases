@@ -1,0 +1,342 @@
+<?xml version="1.0"?>
+<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xsi:noNamespaceSchemaLocation="http://community.rti.com/schema/6.0.1/rti_routing_service.xsd">
+
+    <!-- ********************************************************************** -->
+    <!--                                                                        -->
+    <!-- RTI Routing service examples for TCP over WAN                          -->
+    <!--                                                                        -->
+    <!-- Note: Change the IPs and ports below to fit yours                      -->
+    <!--                                                                        -->
+    <!-- ********************************************************************** -->
+      <qos_library name="SIE_Modified">
+        <qos_profile name="SIE_RelProfileQos" base_name="BuiltinQosLib::Generic.StrictReliable" is_default_qos="true">
+            <participant_qos>
+                <receiver_pool>
+                    <buffer_size>65536</buffer_size>
+                    <thread>
+                        <priority>THREAD_PRIORITY_NORMAL</priority>
+                    </thread>
+                </receiver_pool>
+
+                <resource_limits>
+                    <type_code_max_serialized_length>2048</type_code_max_serialized_length>
+                    <participant_property_string_max_length>4096</participant_property_string_max_length>
+                    <participant_property_list_max_length>64</participant_property_list_max_length>
+                </resource_limits>
+
+                <transport_builtin>
+                    <mask>MASK_NONE</mask>
+                </transport_builtin>
+
+                <property>
+                    <value>
+                        <element>
+                            <name>dds.transport.UDPv4.builtin.parent.message_size_max</name>
+                            <value>65536</value>
+                        </element>
+                        <element>
+                            <name>dds.transport.UDPv4.builtin.send_socket_buffer_size</name>
+                            <value>524288</value>
+                        </element>
+                        <element>
+                            <name>dds.transport.UDPv4.builtin.recv_socket_buffer_size</name>
+                            <value>2097152</value>
+                        </element>
+
+                        <element>
+                            <name>dds.transport.shmem.builtin.parent.message_size_max</name>
+                            <value>65536</value>
+                        </element>
+                        <element>
+                            <name>dds.transport.shmem.builtin.receive_buffer_size</name>
+                            <value>2097152</value>
+                        </element>
+
+                        <element>
+                            <name>dds.transport.TCPv4.tcp1.library</name>
+                            <value>nddstransporttcp</value>
+                        </element>
+                        <element>
+                            <name>dds.transport.TCPv4.tcp1.create_function</name>
+                            <value>NDDS_Transport_TCPv4_create</value>
+                        </element>
+                        <element>
+                            <name>dds.transport.TCPv4.tcp1.disable_nagle</name>
+                            <value>1</value>
+                        </element>
+                        <element>
+                            <name>dds.transport.TCPv4.tcp1.parent.message_size_max</name>
+                            <value>65536</value>
+                        </element>
+                    </value>
+                </property>
+
+            </participant_qos>
+
+            <publisher_qos>
+                <presentation>
+                    <access_scope>INSTANCE_PRESENTATION_QOS</access_scope>
+                    <ordered_access>false</ordered_access>
+                </presentation>
+            </publisher_qos>
+
+            <subscriber_qos>
+                <presentation>
+                    <access_scope>INSTANCE_PRESENTATION_QOS</access_scope>
+                    <ordered_access>false</ordered_access>
+                </presentation>
+            </subscriber_qos>
+
+            <datawriter_qos>
+                <resource_limits>
+                    <max_instances>10</max_instances>
+                    <initial_instances>1</initial_instances>
+                    <instance_hash_buckets>10</instance_hash_buckets>
+                </resource_limits>
+            </datawriter_qos>
+
+            <datareader_qos>
+                <resource_limits>
+                    <max_instances>10</max_instances>
+                    <initial_instances>1</initial_instances>
+                    <instance_hash_buckets>10</instance_hash_buckets>
+                </resource_limits>
+            </datareader_qos>
+        </qos_profile>
+    </qos_library>
+
+    <!-- ********************************************************************** -->
+    <!-- UDP/Shared memory (domain 6) => TCP (domain 2)                         -->
+    <!-- ********************************************************************** -->
+    <routing_service name="Local6">
+
+        <annotation>
+            <documentation>
+                In a WAN, routes from UDP or shared memory to TCP.
+                Remember to edit the file and change the public IP address.
+            </documentation>
+        </annotation>
+      
+      
+        <administration>
+          <domain_id>0</domain_id>
+        </administration>
+      
+         <!-- This is the Monitoring configuration for 
+             all the entities in this routing service -->
+        <monitoring>
+            <!-- The domain id where to publish the monitoring information -->
+            <domain_id>2</domain_id>
+            <!-- How often to publish it -->
+            <status_publication_period>
+                <sec>5</sec>
+                <nanosec>0</nanosec>
+            </status_publication_period>
+            <!-- How often to compute statistics -->
+            <statistics_sampling_period>
+                <sec>1</sec>
+                <nanosec>0</nanosec>
+            </statistics_sampling_period>
+        </monitoring>
+
+
+        <domain_route name="DR_UDPLAN_TCPWAN">
+
+            <participant name="BridgeDomain">
+               <domain_id>2</domain_id>
+                 <participant_qos>
+                    <transport_builtin>
+                        <mask>MASK_NONE</mask>
+                    </transport_builtin>
+                    <discovery>
+                       <initial_peers>
+                          <element>tcpv4_wan://$(RELAY_IPADDR):8502</element>
+                       </initial_peers>
+                    </discovery>
+                    <property>
+                        <value>
+                            <element>
+                                <name>dds.transport.load_plugins</name>
+                                <value>dds.transport.TCPv4.tcp1</value>
+                            </element>
+                            <element>
+                                <name>dds.transport.TCPv4.tcp1.library</name>
+                                <value>nddstransporttcp</value>
+                            </element>
+                            <element>
+                                <name>dds.transport.TCPv4.tcp1.create_function</name>
+                                <value>NDDS_Transport_TCPv4_create</value>
+                            </element>
+                            <element>
+                                <name>dds.transport.TCPv4.tcp1.parent.classid</name>
+                                <value>NDDS_TRANSPORT_CLASSID_TCPV4_WAN</value>
+                            </element>
+                            <element>
+                                <name>dds.transport.TCPv4.tcp1.server_bind_port</name>
+                                <value>0</value>
+                            </element>
+                            <element>
+                                <name>dds.transport.TCPv4.tcp1.disable_nagle</name>
+                                <value>1</value>
+                            </element>
+                        </value>
+                    </property>
+                </participant_qos>
+            </participant>
+
+            <participant name="LocalDomain">
+                <domain_id>6</domain_id>
+             </participant>
+
+            <session name="Session">
+                <publisher_qos base_name="SIE_Modified::SIE_RelProfileQos"/>
+                <subscriber_qos base_name="SIE_Modified::SIE_RelProfileQos"/>
+              
+                <auto_topic_route name="AllForward">
+                    <publish_with_original_info>true</publish_with_original_info>                    
+                    <input participant="BridgeDomain">
+                        <deny_topic_name_filter>rti/*</deny_topic_name_filter>
+                        <creation_mode>IMMEDIATE</creation_mode>
+                        <datareader_qos base_name="SIE_Modified::SIE_RelProfileQos"/>
+                    </input>
+                    <output participant="LocalDomain">
+                        <deny_topic_name_filter>rti/*</deny_topic_name_filter>
+                        <creation_mode>IMMEDIATE</creation_mode>
+                        <datawriter_qos base_name="SIE_Modified::SIE_RelProfileQos"/>
+                    </output>
+                </auto_topic_route>              
+
+                <auto_topic_route name="AllBackward">
+                    <publish_with_original_info>true</publish_with_original_info>                    
+                    <input participant="LocalDomain">
+                        <deny_topic_name_filter>rti/*</deny_topic_name_filter>
+                        <creation_mode>IMMEDIATE</creation_mode>
+                        <datareader_qos base_name="SIE_Modified::SIE_RelProfileQos"/>
+                    </input>
+                    <output participant="BridgeDomain">
+                        <deny_topic_name_filter>rti/*</deny_topic_name_filter>
+                        <creation_mode>IMMEDIATE</creation_mode>
+                        <datawriter_qos base_name="SIE_Modified::SIE_RelProfileQos"/>
+                    </output>
+                </auto_topic_route>
+            </session>
+        </domain_route>
+    </routing_service>
+
+    <!-- ********************************************************************** -->
+    <!-- UDP/Shared memory (domain 5) => TCP (domain 1)                         -->
+    <!-- ********************************************************************** -->
+    <routing_service name="Local5">
+        <annotation>
+            <documentation>
+                In a WAN, routes from UDP or shared memory to TCP.
+                Remember to edit the file and change the public IP address.
+            </documentation>
+        </annotation>
+      
+      
+        <administration>
+          <domain_id>0</domain_id>
+        </administration>
+      
+         <!-- This is the Monitoring configuration for 
+             all the entities in this routing service -->
+        <monitoring>
+            <!-- The domain id where to publish the monitoring information -->
+            <domain_id>2</domain_id>
+            <!-- How often to publish it -->
+            <status_publication_period>
+                <sec>5</sec>
+                <nanosec>0</nanosec>
+            </status_publication_period>
+            <!-- How often to compute statistics -->
+            <statistics_sampling_period>
+                <sec>1</sec>
+                <nanosec>0</nanosec>
+            </statistics_sampling_period>
+        </monitoring>
+
+
+        <domain_route name="DR_UDPLAN_TCPWAN">
+
+            <participant name="LocalDomain">
+                <domain_id>5</domain_id>
+            </participant>
+
+            <participant name="BridgeDomain">
+                <domain_id>1</domain_id>
+                <participant_qos>
+                    <transport_builtin>
+                        <mask>MASK_NONE</mask>
+                    </transport_builtin>
+                    <discovery>
+                       <initial_peers>
+                          <element>tcpv4_wan://$(RELAY_IPADDR):8501</element>
+                       </initial_peers>
+                    </discovery>
+                    <property>
+                        <value>
+                            <element>
+                                <name>dds.transport.load_plugins</name>
+                                <value>dds.transport.TCPv4.tcp1</value>
+                            </element>
+                            <element>
+                                <name>dds.transport.TCPv4.tcp1.library</name>
+                                <value>nddstransporttcp</value>
+                            </element>
+                            <element>
+                                <name>dds.transport.TCPv4.tcp1.create_function</name>
+                                <value>NDDS_Transport_TCPv4_create</value>
+                            </element>
+                            <element>
+                                <name>dds.transport.TCPv4.tcp1.parent.classid</name>
+                                <value>NDDS_TRANSPORT_CLASSID_TCPV4_WAN</value>
+                            </element>
+                            <element>
+                                <name>dds.transport.TCPv4.tcp1.server_bind_port</name>
+                                <value>0</value>
+                            </element>
+                            <element>
+                                <name>dds.transport.TCPv4.tcp1.disable_nagle</name>
+                                <value>1</value>
+                            </element>
+                        </value>
+                    </property>
+                </participant_qos>
+           </participant>
+
+            <session name="AllOtherTraffic">
+                <publisher_qos base_name="SIE_Modified::SIE_RelProfileQos"/>
+                <subscriber_qos base_name="SIE_Modified::SIE_RelProfileQos"/>
+                <auto_topic_route name="AllForward">
+                    <publish_with_original_info>true</publish_with_original_info>                    
+                    <input participant="LocalDomain">
+                        <deny_topic_name_filter>rti/*</deny_topic_name_filter>
+                        <creation_mode>IMMEDIATE</creation_mode>
+                        <datareader_qos base_name="SIE_Modified::SIE_RelProfileQos"/>
+                    </input>
+                    <output participant="BridgeDomain">
+                        <deny_topic_name_filter>rti/*</deny_topic_name_filter>
+                        <creation_mode>IMMEDIATE</creation_mode>
+                        <datawriter_qos base_name="SIE_Modified::SIE_RelProfileQos"/>
+                    </output>
+                </auto_topic_route>              
+
+                <auto_topic_route name="AllBackward">
+                    <publish_with_original_info>true</publish_with_original_info>                    
+                    <input participant="BridgeDomain">
+                        <deny_topic_name_filter>rti/*</deny_topic_name_filter>
+                        <creation_mode>IMMEDIATE</creation_mode>
+                        <datareader_qos base_name="SIE_Modified::SIE_RelProfileQos"/>
+                    </input>
+                    <output participant="LocalDomain">
+                        <deny_topic_name_filter>rti/*</deny_topic_name_filter>
+                        <creation_mode>IMMEDIATE</creation_mode>
+                        <datawriter_qos base_name="SIE_Modified::SIE_RelProfileQos"/>
+                    </output>
+                </auto_topic_route>
+            </session>            
+        </domain_route>
+    </routing_service>
+</dds>

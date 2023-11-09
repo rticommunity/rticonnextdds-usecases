@@ -9,7 +9,7 @@
 # This Makefile contains the common rules to build for all the architectures.
 # It is included from the architecture-specific Makefile.
 # This Makefile requires the following variables:
-# - ARCH: Architecture to build (for example i86Linux2.6gcc4.4.5)
+# - ARCH: Architecture to build (for example x64Linux3gcc5.4.0)
 #
 # Optional variables:
 # - DEBUG: If set to '1', it turns on debugging information
@@ -28,7 +28,7 @@ all:
 	@echo "***************************************************************"
 	@echo "You cannot use this Makefile directly, instead use the"
 	@echo "architecture-specific Makefile. For example:"
-	@echo "         gmake -f make/Makefile.i86Linux2.6gcc4.4.5"
+	@echo "         gmake -f make/Makefile.x64Linux3gcc5.4.0"
 	@echo "***************************************************************"
 	@false
 else
@@ -165,9 +165,9 @@ objs/$(ARCH)/StationController/%.o: src/StationController/%.cxx $(COMMON_H)
 $(SOURCES_IDL) $(HEADERS_IDL): src/Idl/ChocolateFactory.idl
 	@mkdir -p src/Generated
 ifeq ($(OS_ARCH), i86Win32)
-	call $(NDDSHOME)/scripts/rtiddsgen.bat -d src/idl src/ChocolateFactory.idl -replace -language C++
+	call $(NDDSHOME)/bin/rtiddsgen.bat -d src/idl src/ChocolateFactory.idl -replace -language C++
 else
-	$(NDDSHOME)/scripts/rtiddsgen -namespace -d src/Generated src/Idl/ChocolateFactory.idl -replace -language C++
+	$(NDDSHOME)/bin/rtiddsgen -namespace -d src/Generated src/Idl/ChocolateFactory.idl -replace -language C++
 endif
 
 generate: $(SOURCES_IDL) $(HEADERS_IDL)

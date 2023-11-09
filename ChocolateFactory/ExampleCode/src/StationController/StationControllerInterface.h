@@ -105,7 +105,7 @@ public:
 
 	// --- Constructor --- 
 	StationControllerInterface(
-		com::rti::chocolatefactory::generated::StationControllerKind 
+		com::chocolatefactory::generated::StationControllerKind 
 				stationControllerID, 
 		std::vector<std::string>qosFileNames);
 
@@ -154,7 +154,7 @@ public:
 
 	// --- Getter for Controller ID --- 
 	// Accessor for the controller ID
-	const com::rti::chocolatefactory::generated::StationControllerKind 
+	const com::chocolatefactory::generated::StationControllerKind 
 		GetStationControllerID() 
 	{
 		return _stationControllerID; 
@@ -171,7 +171,7 @@ private:
 	// If this is a controller, this filed is used to identify which station 
 	// controller this is, and what part of the recipe it is responsible for.
 	// If this is not a station controller, this is set to invalid
-	com::rti::chocolatefactory::generated::StationControllerKind 
+	com::chocolatefactory::generated::StationControllerKind 
 		_stationControllerID;
 
 	// Wrapper class around RTI Connext DDS for writing chocolate lot state
@@ -224,7 +224,7 @@ public:
 	// about a lot and it needs to check the recipe for that lot.
 	bool GetRecipe(
 		std::string recipeName,
-		DdsAutoType<com::rti::chocolatefactory::generated::ChocolateRecipe>
+		DdsAutoType<com::chocolatefactory::generated::ChocolateRecipe>
 			*recipe);
 
 
@@ -238,7 +238,7 @@ private:
 	StationControllerInterface *_communicator;
 
 	// Application-specific DDS DataReader for receiving recipe data
-	com::rti::chocolatefactory::generated::ChocolateRecipeDataReader *_reader;
+	com::chocolatefactory::generated::ChocolateRecipeDataReader *_reader;
 
 };
 

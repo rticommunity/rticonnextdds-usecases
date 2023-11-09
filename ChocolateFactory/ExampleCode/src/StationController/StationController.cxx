@@ -17,7 +17,7 @@ damages arising out of the use or inability to use the software.
 
 using namespace DDS;
 using namespace std;
-using namespace com::rti::chocolatefactory::generated;
+using namespace com::chocolatefactory::generated;
 
 void PrintHelp();
 
@@ -267,6 +267,11 @@ void StationController::UpdateState(DdsAutoType<ChocolateLotState> *lotState)
 // ProcessLot:
 void StationController::ProcessLot(DdsAutoType<ChocolateLotState> *lotState)
 {
+	// If this lot is completed, don't process it.
+	if (lotState->lotStatus == LOT_COMPLETED)
+	{
+		return;
+	}
 
 	// Copy the lot state that was received into a new object we can modify
 	DdsAutoType<ChocolateLotState> updatedState = *lotState;
@@ -317,7 +322,7 @@ void StationController::ProcessLot(DdsAutoType<ChocolateLotState> *lotState)
 		= *lotState;
 
 	// Iterate over the recipe steps 
-	for (int j = 0; j < MAX_RECIPE_STEPS; j++)
+	for (int j = 0; j < recipe.steps.length(); j++)
 	{
 		// Iterate over the recipe until reaching the current step
 		// in the process.

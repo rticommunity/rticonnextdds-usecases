@@ -4,12 +4,12 @@ filename=$0
 script_dir=`dirname $filename`
 executable_name="rtiroutingservice"
 
-if [ -f $ROUTER_HOME/scripts/$executable_name ]
+if [ -f $NDDSHOME/bin/$executable_name ]
 then
-    if [ "$1" = "Router1" ] || [ "$1" = "Router2" ]
+    if [ "$1" = "SOCI" ] || [ "$1" = "COSI" ]
     then 
         cd $script_dir/../routing
-        $ROUTER_HOME/scripts/$executable_name \
+        $NDDSHOME/bin/$executable_name \
             -cfgFile Routing-UDP-LAN.xml \
             -cfgName $1
     else
@@ -17,12 +17,14 @@ then
         echo " $0: Wrong parameters"
         echo "" 
         echo " Usage:"
-        echo " $0 [Router1|Router2]"
+        echo " $0 [SOCI|COSI]"
+        echo " Where:"
+        echo "    SOCI = SquareOutCircleIn, COSI = CircleOutSquareIn"
         echo "*************************************************************"
     fi
 else
     echo "*****************************************************************"
-    echo "The ROUTER_HOME environment variable must be set to"
-    echo "Connext_install_dir/RTI_Routing_service_5.0.0 to run this example"
+    echo "The NDDSHOME environment variable must be set to"
+    echo "the Connext installation directory to run this example"
     echo "*****************************************************************"
 fi
