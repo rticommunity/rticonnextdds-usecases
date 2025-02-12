@@ -66,15 +66,27 @@ module Metrics {
     };  
 
     @appendable
-    union MetricUnion switch (long) {
-        case 0: UInt64Counter uint64_counter;
-        case 1: DoubleCounter double_counter;
-        case 2: UInt64Histogram uint64_histogram;
-        case 3: DoubleHistogram double_histogram;
-        case 4: UInt64UpDownCounter uint64_updown_counter;
-        case 5: DoubleUpDownCounter double_updown_counter;
-        case 6: Int64Gauge int64_gauge;
-        case 7: DoubleGauge double_gauge; 
+    enum MetricType {
+        UInt64CounterMetric = 0,
+        DoubleCounterMetric = 1,
+        UInt64HistogramMetric = 2,
+        DoubleHistogramMetric = 3,
+        UInt64UpDownCounterMetric = 4,
+        DoubleUpDownCounterMetric = 5,
+        Int64GaugeMetric = 6,
+        DoubleGaugeMetric = 7 
+    };
+
+    @appendable
+    union MetricUnion switch (MetricType) {
+        case UInt64CounterMetric: UInt64Counter uint64_counter;
+        case DoubleCounterMetric: DoubleCounter double_counter;
+        case UInt64HistogramMetric: UInt64Histogram uint64_histogram;
+        case DoubleHistogramMetric: DoubleHistogram double_histogram;
+        case UInt64UpDownCounterMetric: UInt64UpDownCounter uint64_updown_counter;
+        case DoubleUpDownCounterMetric: DoubleUpDownCounter double_updown_counter;
+        case Int64GaugeMetric: Int64Gauge int64_gauge;
+        case DoubleGaugeMetric: DoubleGauge double_gauge; 
     };
 
     @appendable

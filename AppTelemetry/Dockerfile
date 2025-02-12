@@ -8,7 +8,7 @@
 # The CMD instruction specifies the default command to run when the container starts. In this case, it runs the /bin/bash shell.
 #
 # To build the Docker image, run the following command from the root repository folder:
-#   docker build -t connext:oteladapter -f docker/Dockerfile --build-arg RTI_LICENSE_AGREEMENT_ACCEPTED=accepted --build-arg CONNEXT_VERSION=7.3.0 .
+#   docker build -t connext:oteladapter -f ./Dockerfile --build-arg RTI_LICENSE_AGREEMENT_ACCEPTED=accepted --build-arg CONNEXT_VERSION=7.3.0 .
 #
 # To run the Docker container, run the following command:
 #   docker run -it --rm --net=host -v $RTI_LICENSE_FILE:/root/rti_license.dat connext:oteladapter 
@@ -25,6 +25,7 @@ ARG RTI_LICENSE_AGREEMENT_ACCEPTED
 
 ENV DISPLAY=:0
 ENV SHELL=/bin/bash
+# CHANGE THE FOLLOWING LINE TO MATCH YOUR TIMEZONE
 ENV TZ=Europe/Madrid
 ENV NDDSHOME=/opt/rti.com/rti_connext_dds-${CONNEXT_VERSION}
 

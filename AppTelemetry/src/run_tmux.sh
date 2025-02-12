@@ -10,13 +10,20 @@ then
     # Start new session with our name
     tmux new-session -d -s $SESSION
 
-    # Name first pane and start the routing service
-    tmux rename-window -t 0 'Routing Service'
-    tmux send-keys -t 'Routing Service' 'rtiroutingservice -cfgFile ./RsTelemetryGateway.xml -cfgName "OpenTelemetryGateway"' C-m 'clear' C-m
+    tmux rename-window "Routing Service"
 
-    # Create and setup pane for generator
-    tmux new-window -t $SESSION:1 -n 'Metrics Generator'
-    tmux send-keys -t 'Metrics Generator' './generator -d 2 -q generator_qos.xml' C-m
+    # Split the window into two horizontal panes (top and bottom)
+    tmux split-window -v
+
+    # Setup pane for Prometheus Gateway (pane 0)
+    tmux select-pane -t 0
+    tmux select-pane -T "Routing-Service"
+    tmux send-keys 'rtiroutingservice -cfgFile ./RsTelemetryGateway.xml -cfgName "OpenTelemetryGateway"' C-m 'clear' C-m
+
+    # Create and setup pane for Generator
+    tmux select-pane -t 1
+    tmux select-pane -T "Gateway"
+    tmux send-keys './generator -d 2 -q generator_qos.xml' C-m
 fi
 
 # Attach session, on the main window

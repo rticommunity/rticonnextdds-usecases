@@ -1,5 +1,5 @@
 /*
-* (c) Copyright, Real-Time Innovations, 2024.  All rights reserved.
+* (c) Copyright, Real-Time Innovations, 2025.  All rights reserved.
 * RTI grants Licensee a license to use, modify, compile, and create derivative
 * works of the software solely for use with RTI Connext DDS. Licensee may
 * redistribute copies of the software provided that all such copies are subject
@@ -22,39 +22,23 @@
 #include "application.hpp"  // for command line parsing and ctrl-c
 #include "telemetry.hpp"
 
+using MetricType = Metrics::MetricType;
+
 static std::mt19937 twister;
 static std::uniform_real_distribution<double> distribution(1, 999);
-
-namespace MetricTypes {
-    enum Enum {
-        UInt64Counter = 0,
-        DoubleCounter = 1,
-        UInt64Histogram = 2,
-        DoubleHistogram = 3,
-        UInt64UpDownCounter = 4,
-        DoubleUpDownCounter = 5,
-        Int64Gauge = 6,
-        DoubleGauge = 7 
-    };
-}
 
 static void AddLabel(
     ::Metrics::Metric& metric,
     const std::string& key,
     const std::string& value)
 {
-    ::Metrics::Label label;
-    label.key(key);
-    label.value(value);
+    ::Metrics::Label label(key, value);
     
-    if (metric.labels().is_set()) {
-        auto labels = metric.labels().get();
-        labels.push_back(label);
-        metric.labels(labels);
-    } else {
-        auto labels = rti::core::bounded_sequence<Metrics::Label, 100>();
-        labels.push_back(label);
-        metric.labels(labels);
+    if (metric.labels().has_value()) {
+        metric.labels().value().push_back(label);
+    } 
+    else {
+        metric.labels() = { label };
     }
 }
 
@@ -66,7 +50,7 @@ void PublishUint64Counter(dds::pub::DataWriter< ::Metrics::Metric> &writer, cons
     metric.name("rti.example.uint64.counter");
     metric.description("Example UInt64 Counter");
     metric.unit("Jiffy");
-    metric.data()._d(MetricTypes::UInt64Counter);
+    metric.data()._d(MetricType::UInt64CounterMetric);
     metric.data().uint64_counter().value(val);
 
     // Add a label to to test sending metric quality and/or other attributes from the client
@@ -87,7 +71,7 @@ void PublishDoubleCounter(dds::pub::DataWriter< ::Metrics::Metric> &writer, cons
     metric.name("rti.example.double.counter");
     metric.description("Example Double Counter");
     metric.unit("Micro-Fortnight");
-    metric.data()._d(MetricTypes::DoubleCounter);
+    metric.data()._d(MetricType::DoubleCounterMetric);
     metric.data().double_counter().value(val);
 
     AddLabel(metric, 
@@ -105,7 +89,7 @@ void PublishUInt64Histogram(dds::pub::DataWriter< ::Metrics::Metric> &writer, co
     metric.name("rti.example.uint64.histogram");
     metric.description("Example UInt64 Histogram");
     metric.unit("Milliblatt");
-    metric.data()._d(MetricTypes::UInt64Histogram);
+    metric.data()._d(MetricType::UInt64HistogramMetric);
     
     for (uint32_t i = 0; i < 5; ++i) {
         ::Metrics::Label label;
@@ -128,7 +112,7 @@ void PublishDoubleHistogram(dds::pub::DataWriter< ::Metrics::Metric> &writer, co
     metric.name("rti.example.double.histogram");
     metric.description("Example Double Histogram");
     metric.unit("Light-nanosecond");
-    metric.data()._d(MetricTypes::DoubleHistogram);
+    metric.data()._d(MetricType::DoubleHistogramMetric);
     
     for (uint32_t i = 0; i < 5; ++i) {
         ::Metrics::Label label;
@@ -150,16 +134,14 @@ static int64_t counter_uint = 0;
 
 void PublishUInt64UpDownCounter(dds::pub::DataWriter< ::Metrics::Metric> &writer, const int counter) {
     
-    if (0 == counter % 100)
-        counting_up = !counting_up;
-    
+    if (0 == counter % 100) { counting_up = !counting_up; }    
     counter_uint = counting_up ? counter_uint + 1 : counter_uint - 1;
     
     ::Metrics::Metric metric;
     metric.name("rti.example.uint64.updowncounter");
     metric.description("Example UInt64 UpDownCounter");
     metric.unit("Sheppey");    
-    metric.data()._d(MetricTypes::UInt64UpDownCounter);
+    metric.data()._d(MetricType::UInt64UpDownCounterMetric);
     metric.data().uint64_updown_counter().value(counter_uint);
 
     AddLabel(metric, 
@@ -174,16 +156,14 @@ void PublishUInt64UpDownCounter(dds::pub::DataWriter< ::Metrics::Metric> &writer
 static double counter_double = (distribution(twister) / 1000);
 void PublishDoubleUpDownCounter(dds::pub::DataWriter< ::Metrics::Metric> &writer, const int counter) {
     
-    if (0 == counter % 100)
-        counting_up = !counting_up;
-        
+    if (0 == counter % 100) { counting_up = !counting_up; }        
     counter_double = counting_up ? counter_double + 0.1 : counter_double - 0.1;
 
     ::Metrics::Metric metric;
     metric.name("rti.example.double.updowncounter");
     metric.description("Example Double UpDownCounter");
     metric.unit("Muggeseggele");
-    metric.data()._d(MetricTypes::DoubleUpDownCounter);
+    metric.data()._d(MetricType::DoubleUpDownCounterMetric);
     metric.data().double_updown_counter().value(counter_double);
     
     AddLabel(metric, 
@@ -203,7 +183,7 @@ void PublishInt64Gauge(dds::pub::DataWriter< ::Metrics::Metric> &writer, const i
     metric.name("rti.example.int64.gauge");
     metric.description("Example Int64 Gauge");
     metric.unit("Gloops");
-    metric.data()._d(MetricTypes::Int64Gauge);
+    metric.data()._d(MetricType::Int64GaugeMetric);
     metric.data().int64_gauge().value(val);
 
     AddLabel(metric, 
@@ -227,7 +207,7 @@ void PublishDoubleGauge(dds::pub::DataWriter< ::Metrics::Metric> &writer, const 
     metric.name("rti.example.double.gauge");
     metric.description("Example Double Gauge");
     metric.unit("MegaFonzie");
-    metric.data()._d(MetricTypes::DoubleGauge);
+    metric.data()._d(MetricType::DoubleGaugeMetric);
     metric.data().double_gauge().value(val);
 
     AddLabel(metric, 
@@ -267,10 +247,8 @@ void run_publisher_application(unsigned int domain_id, const std::string& qos_fi
         ,PublishDoubleHistogram
         ,PublishUInt64UpDownCounter
         ,PublishDoubleUpDownCounter
-#if OPENTELEMETRY_ABI_VERSION_NO >= 2        
         ,PublishInt64Gauge
         ,PublishDoubleGauge
-#endif
     };
 
     // Main loop, publish telemetry data    
