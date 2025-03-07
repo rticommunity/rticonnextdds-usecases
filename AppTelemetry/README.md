@@ -19,14 +19,24 @@ At the time of writing, RTI's Observability Framework supports middleware teleme
 
 This example details the process of creating an adapter for [RTI's Routing Service](https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/services/routing_service/index.html) to collect application-level metrics published on a DDS topic. The adapter will transform and expose this telemetry data in a format compatible with Prometheus, a widely-used open-source monitoring system. Additionally you will learn how to visualize the application-level metrics alongside Connext DDS telemetry in a Grafana dashboard, enabling a unified and comprehensive monitoring experience.
 
-  
-
 Through this guide, you will learn to:
 1. Develop a custom Routing Service adapter for application telemetry.
 2. Configure Prometheus to scrape and display application telemetry data.
 3. Integrate application telemetry into Grafana for a combined view with Connext telemetry.
 
 By the end, you'll have a robust solution for monitoring both DDS system performance and application-level insights, helping you maximise the value of your telemetry data.
+
+
+## Motivation
+Why might it be preferable to use RTI's Routing Service with an OpenTelemetry adapter to collect telemetry data for Prometheus, rather than directly using the OpenTelemetry SDK or some other observability APIs?
+
+This method offers several advantages over directly using the **OpenTelemetry SDK** or other observability APIs:  
+
+- **Centralized Data Collection**: Routing Service allows the collection of telemetry from multiple distributed DDS applications.
+- **Efficient Data Processing and Filtering**: The Routing Service adapter can preprocess telemetry data, i.e. **content filtering, aggregation, or transformation**,  before offering it to Prometheus, reducing unnecessary traffic and making telemetry collection more efficient.
+- **Built-in Scalability**: By offloading telemetry collection and processing to Routing Service, **DDS applications remain focused on their primary functions**, avoiding performance degradation. Applications can be added, and additionally new Metrics can be added to applications with no changes required to the adapter. 
+- **Easier Deployment and Maintenance**: The OpenTelemetry adapter can be configured within Routing Service without modifying application code.  
+- **Better Observability in Complex DDS Architectures**: Routing Service can **correlate telemetry data across different DDS domains, partitions, and topics**, providing a more **comprehensive view** of the system.  
 
 ##  Cloning the repository
 

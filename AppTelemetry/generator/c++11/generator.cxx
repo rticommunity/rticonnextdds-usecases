@@ -65,7 +65,7 @@ void PublishUint64Counter(dds::pub::DataWriter< ::Metrics::Metric> &writer, cons
 
 void PublishDoubleCounter(dds::pub::DataWriter< ::Metrics::Metric> &writer, const int counter)
 {
-    double val = (distribution(twister) / 1000) + (double)counter;
+    double val = (distribution(twister) / 1000) + static_cast<double>(counter);
 
     ::Metrics::Metric metric;
     metric.name("rti.example.double.counter");
@@ -99,7 +99,7 @@ void PublishUInt64Histogram(dds::pub::DataWriter< ::Metrics::Metric> &writer, co
     }
 
     for (uint32_t i = 0; i < 20; ++i) {
-        metric.data().uint64_histogram().buckets().push_back(counter + (int)distribution(twister));
+        metric.data().uint64_histogram().buckets().push_back(counter + static_cast<int>(distribution(twister)));
     }
 
     writer.write(metric);
@@ -122,7 +122,7 @@ void PublishDoubleHistogram(dds::pub::DataWriter< ::Metrics::Metric> &writer, co
     }
 
     for (uint32_t i = 0; i < 20; ++i) {
-        metric.data().double_histogram().buckets().push_back((distribution(twister) / 1000) + (double)counter);
+        metric.data().double_histogram().buckets().push_back((distribution(twister) / 1000) + static_cast<double>(counter));
     }
 
     writer.write(metric);
@@ -177,7 +177,7 @@ void PublishDoubleUpDownCounter(dds::pub::DataWriter< ::Metrics::Metric> &writer
 
 void PublishInt64Gauge(dds::pub::DataWriter< ::Metrics::Metric> &writer, const int counter) {
     
-    int64_t val = (int)distribution(twister);
+    int64_t val = static_cast<int64_t>(distribution(twister));
 
     ::Metrics::Metric metric;
     metric.name("rti.example.int64.gauge");
@@ -197,7 +197,7 @@ void PublishInt64Gauge(dds::pub::DataWriter< ::Metrics::Metric> &writer, const i
 
 void PublishDoubleGauge(dds::pub::DataWriter< ::Metrics::Metric> &writer, const int counter) {
     
-    double val = (distribution(twister) / 1000) + (double)counter;
+    double val = (distribution(twister) / 1000) + static_cast<double>(counter);
     if (counter % 2 == 0)
         val = val - distribution(twister);
     else

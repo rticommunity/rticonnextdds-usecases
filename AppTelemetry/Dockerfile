@@ -1,3 +1,13 @@
+# (c) 2025 Copyright, Real-Time Innovations, Inc.  All rights reserved.
+# RTI grants Licensee a license to use, modify, compile, and create derivative
+# works of the Software.  Licensee has the right to distribute object form only
+# for use with RTI products.  The Software is provided "as is", with no warranty
+# of any type, including any warranty for fitness for any purpose. RTI is under
+# no obligation to maintain or support the Software.  RTI shall not be liable
+# for any incidental or consequential damages arising out of the use or
+# inability to use the software.
+
+
 # The Dockerfile is based on the official Ubuntu image for the jammy release. 
 # The CONNEXT_VERSION argument is used to specify the version of RTI Connext to install. 
 # The RTI_LICENSE_AGREEMENT_ACCEPTED argument is used to accept the RTI license agreement during installation.
@@ -8,7 +18,7 @@
 # The CMD instruction specifies the default command to run when the container starts. In this case, it runs the /bin/bash shell.
 #
 # To build the Docker image, run the following command from the root repository folder:
-#   docker build -t connext:oteladapter -f ./Dockerfile --build-arg RTI_LICENSE_AGREEMENT_ACCEPTED=accepted --build-arg CONNEXT_VERSION=7.3.0 .
+#   docker build -t connext:oteladapter --build-arg RTI_LICENSE_AGREEMENT_ACCEPTED=accepted --build-arg CONNEXT_VERSION=7.3.0 .
 #
 # To run the Docker container, run the following command:
 #   docker run -it --rm --net=host -v $RTI_LICENSE_FILE:/root/rti_license.dat connext:oteladapter 

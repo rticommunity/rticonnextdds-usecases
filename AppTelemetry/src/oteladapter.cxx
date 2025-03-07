@@ -1,5 +1,5 @@
 /*
- * (c) 2024 Copyright, Real-Time Innovations, Inc.  All rights reserved.
+ * (c) 2025 Copyright, Real-Time Innovations, Inc.  All rights reserved.
  *
  * RTI grants Licensee a license to use, modify, compile, and create derivative
  * works of the Software.  Licensee has the right to distribute object form
@@ -16,21 +16,20 @@
 #include <rti/routing/Logger.hpp>
 
 using namespace rti::routing;
-using namespace rti::routing::adapter;
 
 OpenTelemetryAdapter::OpenTelemetryAdapter(PropertySet &)
 {}
 
-Connection *OpenTelemetryAdapter::create_connection(
-        rti::routing::adapter::detail::StreamReaderListener *,
-        rti::routing::adapter::detail::StreamReaderListener *,
+adapter::Connection *OpenTelemetryAdapter::create_connection(    
+        adapter::detail::StreamReaderListener *,
+        adapter::detail::StreamReaderListener *,
         const PropertySet &properties)
 {
     std::cout << "Creating OpenTelemetry connection" << std::endl;
     return new OpenTelemetryConnection(properties);
 }
 
-void OpenTelemetryAdapter::delete_connection(Connection *connection)
+void OpenTelemetryAdapter::delete_connection(adapter::Connection *connection)
 {
     delete connection;
 }
