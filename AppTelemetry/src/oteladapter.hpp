@@ -20,7 +20,7 @@
 
 class OpenTelemetryAdapter : public rti::routing::adapter::AdapterPlugin {
 public:
-    explicit OpenTelemetryAdapter(rti::routing::PropertySet &);
+    explicit OpenTelemetryAdapter(rti::routing::PropertySet&);
 
     /*
      * --- AdapterPlugin interface
@@ -29,7 +29,7 @@ public:
     rti::routing::adapter::Connection *create_connection(
             rti::routing::adapter::detail::StreamReaderListener *,
             rti::routing::adapter::detail::StreamReaderListener *,
-            const rti::routing::PropertySet &) final;
+            const rti::routing::PropertySet&) final;
 
     void delete_connection(
             rti::routing::adapter::Connection *connection) override final;

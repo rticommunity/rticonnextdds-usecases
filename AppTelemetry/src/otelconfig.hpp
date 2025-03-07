@@ -18,25 +18,29 @@
 #include <rti/routing/PropertySet.hpp>
 
 namespace keys {
-    enum Enum {
-        PROMETHEUS_SCRAPE_URL,
-        EXPORT_DEBUG,
-    };
-
-    const std::string ToStr[] = {
-        "Prometheus.scrape_url",
-        "OpenTelemetry.debug",
-    };
+enum Enum {
+    PROMETHEUS_SCRAPE_URL,
+    EXPORT_DEBUG,
 };
+
+const std::string ToStr[] = {
+    "Prometheus.scrape_url",
+    "OpenTelemetry.debug",
+};
+};  // namespace keys
 
 class OpenTelemetryConfig {
 public:
-    
     template <typename T>
-    bool GetValue(const rti::routing::PropertySet &properties, const keys::Enum& key, T& value) {
-         bool result = false;
+    bool GetValue(
+            const rti::routing::PropertySet& properties,
+            const keys::Enum& key,
+            T& value)
+    {
+        bool result = false;
 
-        rti::routing::PropertySet::const_iterator it = properties.find(keys::ToStr[key]);
+        rti::routing::PropertySet::const_iterator it =
+                properties.find(keys::ToStr[key]);
         if (it != properties.end())
             result = this->StringToType<T>(it->second, value);
 
@@ -44,14 +48,21 @@ public:
     }
 
     template <typename T>
-    T GetValue(const rti::routing::PropertySet &properties, const keys::Enum& key) {
+    T GetValue(
+            const rti::routing::PropertySet& properties,
+            const keys::Enum& key)
+    {
         T tmp;
         GetValue<T>(properties, key, tmp);
         return tmp;
     }
-        
+
     template <typename T>
-    T GetValue(const rti::routing::PropertySet &properties, const keys::Enum& key, const T& defaultValue) {
+    T GetValue(
+            const rti::routing::PropertySet& properties,
+            const keys::Enum& key,
+            const T& defaultValue)
+    {
         T tmp = defaultValue;
         GetValue<T>(properties, key, tmp);
         return tmp;
@@ -59,7 +70,8 @@ public:
 
 protected:
     template <typename T>
-    bool StringToType(const std::string& before, T& after) {
+    bool StringToType(const std::string& before, T& after)
+    {
         bool result = false;
         std::istringstream ss(before);
         if (!ss.str().empty()) {
@@ -71,20 +83,19 @@ protected:
     }
 };
 
-template <> // string to int
-bool OpenTelemetryConfig::StringToType(const std::string& before, int& after) {
+template <>  // string to int
+bool OpenTelemetryConfig::StringToType(const std::string& before, int& after)
+{
     bool result = false;
     try {
         after = std::stoi(before);
         result = true;
-    } 
-    catch (std::invalid_argument &e) {
+    } catch (std::invalid_argument& e) {
         std::ostringstream oss;
-                
+
         oss << "Invalid argument: " << e.what();
         rti::routing::Logger::instance().warn(oss.str());
-    }
-    catch (std::out_of_range &e) {
+    } catch (std::out_of_range& e) {
         std::ostringstream oss;
 
         oss << "Out of range: " << e.what();
@@ -93,9 +104,9 @@ bool OpenTelemetryConfig::StringToType(const std::string& before, int& after) {
     return result;
 }
 
-template <> // string to bool
-bool OpenTelemetryConfig::StringToType(const std::string& before, bool& after) {
-
+template <>  // string to bool
+bool OpenTelemetryConfig::StringToType(const std::string& before, bool& after)
+{
     bool result = false;
 
     std::string::size_type eq = before.find_first_of("TtYy1");
@@ -112,8 +123,11 @@ bool OpenTelemetryConfig::StringToType(const std::string& before, bool& after) {
     return result;
 }
 
-template <> // string to string
-bool OpenTelemetryConfig::StringToType(const std::string& before, std::string& after) {
+template <>  // string to string
+bool OpenTelemetryConfig::StringToType(
+        const std::string& before,
+        std::string& after)
+{
     after = before;
     return true;
 }

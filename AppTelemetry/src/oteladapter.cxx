@@ -17,13 +17,13 @@
 
 using namespace rti::routing;
 
-OpenTelemetryAdapter::OpenTelemetryAdapter(PropertySet &)
-{}
+OpenTelemetryAdapter::OpenTelemetryAdapter(PropertySet&)
+{ }
 
-adapter::Connection *OpenTelemetryAdapter::create_connection(    
+adapter::Connection *OpenTelemetryAdapter::create_connection(
         adapter::detail::StreamReaderListener *,
         adapter::detail::StreamReaderListener *,
-        const PropertySet &properties)
+        const PropertySet& properties)
 {
     std::cout << "Creating OpenTelemetry connection" << std::endl;
     return new OpenTelemetryConnection(properties);

@@ -27,7 +27,7 @@ public:
      *      <connection>.
      *
      */
-    OpenTelemetryConnection(const rti::routing::PropertySet &properties);
+    OpenTelemetryConnection(const rti::routing::PropertySet& properties);
     ~OpenTelemetryConnection();
 
     /*
@@ -36,13 +36,12 @@ public:
      */
     rti::routing::adapter::StreamWriter *create_stream_writer(
             rti::routing::adapter::Session *session,
-            const rti::routing::StreamInfo &info,
-            const rti::routing::PropertySet &properties) override final;
+            const rti::routing::StreamInfo& info,
+            const rti::routing::PropertySet& properties) override final;
 
     void delete_stream_writer(
             rti::routing::adapter::StreamWriter *writer) override final;
 
 private:
     friend OpenTelemetryStreamWriter;
-
 };

@@ -21,15 +21,15 @@ class OpenTelemetryStreamWriter
         : public rti::routing::adapter::DynamicDataStreamWriter {
 public:
     OpenTelemetryStreamWriter(
-            OpenTelemetryConnection &connection,
-            const rti::routing::StreamInfo &stream_info,
-            const rti::routing::PropertySet &properties);
+            OpenTelemetryConnection& connection,
+            const rti::routing::StreamInfo& stream_info,
+            const rti::routing::PropertySet& properties);
 
     int write(
-            const std::vector<dds::core::xtypes::DynamicData *> &samples,
-            const std::vector<dds::sub::SampleInfo *> &infos) override final;
+            const std::vector<dds::core::xtypes::DynamicData *>& samples,
+            const std::vector<dds::sub::SampleInfo *>& infos) override final;
 
 private:
-    OpenTelemetryConnection &_connection;
+    OpenTelemetryConnection& _connection;
     std::string _stream_name;
 };

@@ -26,40 +26,47 @@
 using namespace rti::routing;
 using namespace rti::routing::adapter;
 
-using rti::routing::PropertySet;
 using rti::routing::Logger;
+using rti::routing::PropertySet;
 using std::string;
 
 namespace metrics_api = opentelemetry::metrics;
 namespace metrics_sdk = opentelemetry::sdk::metrics;
 namespace metrics_exporter = opentelemetry::exporter::metrics;
 
-OpenTelemetryConnection::OpenTelemetryConnection(const PropertySet &properties)
-{      
+OpenTelemetryConnection::OpenTelemetryConnection(const PropertySet& properties)
+{
     metrics_exporter::PrometheusExporterOptions options;
 
     OpenTelemetryConfig config;
     if (config.GetValue<bool>(properties, keys::EXPORT_DEBUG, false)) {
         Logger::instance().service_verbosity(rti::config::Verbosity::WARNING);
-    }    
-    
-    if (!config.GetValue<std::string>(properties, keys::PROMETHEUS_SCRAPE_URL, options.url)) {
-        Logger::instance().error("OpenTelemetryConnection: No URL provided for Prometheus exporter");
+    }
+
+    if (!config.GetValue<std::string>(
+                properties,
+                keys::PROMETHEUS_SCRAPE_URL,
+                options.url)) {
+        Logger::instance().error(
+                "OpenTelemetryConnection: No URL provided for Prometheus "
+                "exporter");
         throw dds::core::InvalidArgumentError(
                 "Prometheus scrape URL is mandatory (property name: "
                 + keys::ToStr[keys::PROMETHEUS_SCRAPE_URL]);
         return;
     }
-    
-    auto prometheus_exporter = metrics_exporter::PrometheusExporterFactory::Create(options);
-    
+
+    auto prometheus_exporter =
+            metrics_exporter::PrometheusExporterFactory::Create(options);
+
     // Initialize and set the global MeterProvider
     auto u_provider = metrics_sdk::MeterProviderFactory::Create();
     auto *p = static_cast<metrics_sdk::MeterProvider *>(u_provider.get());
     p->AddMetricReader(std::move(prometheus_exporter));
 
     // Set the global Meter Provider
-    std::shared_ptr<opentelemetry::metrics::MeterProvider> provider(std::move(u_provider));
+    std::shared_ptr<opentelemetry::metrics::MeterProvider> provider(
+            std::move(u_provider));
     metrics_api::Provider::SetMeterProvider(provider);
 }
 
@@ -72,8 +79,8 @@ OpenTelemetryConnection::~OpenTelemetryConnection()
 /// Adapter Interface
 StreamWriter *OpenTelemetryConnection::create_stream_writer(
         Session *,
-        const StreamInfo &stream_info,
-        const PropertySet &properties)
+        const StreamInfo& stream_info,
+        const PropertySet& properties)
 {
     return new OpenTelemetryStreamWriter(*this, stream_info, properties);
 };
