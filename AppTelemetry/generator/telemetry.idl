@@ -1,0 +1,100 @@
+/*
+ * (c) 2025 Copyright, Real-Time Innovations, Inc.  All rights reserved.
+ *
+ * RTI grants Licensee a license to use, modify, compile, and create derivative
+ * works of the Software.  Licensee has the right to distribute object form
+ * only for use with RTI products.  The Software is provided "as is", with no
+ * warranty of any type, including any warranty for fitness for any purpose.
+ * RTI is under no obligation to maintain or support the Software.  RTI shall
+ * not be liable for any incidental or consequential damages arising out of the
+ * use or inability to use the software.
+ */
+
+module Metrics {
+
+    typedef string<256> MetricName;
+    typedef string<512> MetricDescription;
+    typedef string<64> MetricUnit; 
+    typedef string<256> LabelKey;
+    typedef string<256> LabelValue;
+
+    @appendable
+    struct UInt64Counter {
+        uint64 value;
+    };
+
+    @appendable
+    struct DoubleCounter {
+        double value;
+    };    
+
+    struct Label {
+        LabelKey key;
+        LabelValue value;
+    };
+
+    @appendable
+    struct UInt64Histogram {
+        sequence<Label> labels;
+        sequence<uint64> buckets;
+    };
+
+    @appendable
+    struct DoubleHistogram {
+        sequence<Label> labels;
+        sequence<double> buckets;
+    };
+
+    @appendable
+    struct UInt64UpDownCounter {
+        uint64 value;
+    };
+
+    @appendable
+    struct DoubleUpDownCounter {
+        double value;
+    };   
+
+    @appendable
+    struct Int64Gauge {
+        int64 value;
+    };
+
+    @appendable
+    struct DoubleGauge {
+        double value;
+    };  
+
+    @appendable
+    enum MetricType {
+        UInt64CounterMetric = 0,
+        DoubleCounterMetric = 1,
+        UInt64HistogramMetric = 2,
+        DoubleHistogramMetric = 3,
+        UInt64UpDownCounterMetric = 4,
+        DoubleUpDownCounterMetric = 5,
+        Int64GaugeMetric = 6,
+        DoubleGaugeMetric = 7 
+    };
+
+    @appendable
+    union MetricUnion switch (MetricType) {
+        case UInt64CounterMetric: UInt64Counter uint64_counter;
+        case DoubleCounterMetric: DoubleCounter double_counter;
+        case UInt64HistogramMetric: UInt64Histogram uint64_histogram;
+        case DoubleHistogramMetric: DoubleHistogram double_histogram;
+        case UInt64UpDownCounterMetric: UInt64UpDownCounter uint64_updown_counter;
+        case DoubleUpDownCounterMetric: DoubleUpDownCounter double_updown_counter;
+        case Int64GaugeMetric: Int64Gauge int64_gauge;
+        case DoubleGaugeMetric: DoubleGauge double_gauge; 
+    };
+
+    @appendable
+    struct Metric {
+        @key MetricName name; // No spaces, no special characters
+        MetricDescription description;
+        @key MetricUnit unit; // https://unitsofmeasure.org/ucum
+        MetricUnion data;
+        @optional sequence<Label> labels; // Additional labels for the metric
+    };
+};

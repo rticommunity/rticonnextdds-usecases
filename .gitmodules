@@ -1,3 +1,6 @@
 [submodule "VideoData/resource/cmake/rticonnextdds-cmake-utils"]
 	path = VideoData/resource/cmake/rticonnextdds-cmake-utils
 	url = https://github.com/rticommunity/rticonnextdds-cmake-utils.git
+[submodule "AppTelemetry/resource/cmake/rticonnextdds-cmake-utils"]
+	path = AppTelemetry/resource/cmake/rticonnextdds-cmake-utils
+	url = https://github.com/rticommunity/rticonnextdds-cmake-utils.git
